@@ -1,0 +1,3 @@
+[console_scripts]
+cmdc = cmdc.run:run_package
+
