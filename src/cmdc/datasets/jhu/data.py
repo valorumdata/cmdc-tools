@@ -74,5 +74,6 @@ class DailyReportsUS(OnConflictNothingBase):
         })
         df["date_updated"] = pd.to_datetime(df["date_updated"]).dt.tz_localize("UTC")
         df["date"] = _date
+        df = df.dropna(subset=["fips"])
         self.df = df
         return df
