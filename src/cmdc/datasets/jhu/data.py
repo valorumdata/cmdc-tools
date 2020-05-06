@@ -27,17 +27,29 @@ class DailyReports(OnConflictNothingBase):
     def get(self, date):
         dt = pd.to_datetime(date)
         url = f"{BASE_URL}/csse_covid_19_data/csse_covid_19_daily_reports/{dt:%m-%d-%Y}.csv"
-        df = pd.read_csv(url, parse_dates=["Last_Update"])
+        df = pd.read_csv(url)
         df.columns = [x.lower() for x in list(df)]
-        df = df.rename(columns=dict(long_="lon", last_update="date_updated"))
-        cols = [
-            "active",
-            "confirmed",
-            "deaths",
-            "last_update",
-            "recovered",
-            "combined_key"
-        ]
-        df["date_updated"] = df["date_updated"].dt.tz_localize("UTC")
+        df = df.rename(columns={
+            "long_": "lon",
+            "province/state": "province_state",
+            "country/region": "country_region",
+        })
+        for c in ["last update", "last_update"]:
+            if c in df.columns:
+                df = df.rename(columns={c: "date_updated"})
+                df["date_updated"] = (
+                    pd.to_datetime(df["date_updated"]).dt.tz_localize("UTC")
+                )
+                break
+        else:
+            df["date_updated"] = None
+
+        if "combined_key" not in df.columns:
+            df["combined_key"] = (
+                df["province_state"].fillna("") + ", " +
+                df["country_region"].fillna("")
+            )
+
+
         self.df = df
         return df
