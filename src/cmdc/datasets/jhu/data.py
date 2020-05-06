@@ -33,6 +33,8 @@ class DailyReports(OnConflictNothingBase):
             "long_": "lon",
             "province/state": "province_state",
             "country/region": "country_region",
+            "latitude": "lat",
+            "longitude": "lon",
         })
         for c in ["last update", "last_update"]:
             if c in df.columns:
