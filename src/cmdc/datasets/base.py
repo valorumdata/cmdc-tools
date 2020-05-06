@@ -1,3 +1,4 @@
+import random
 from cmdc.datasets.db_util import TempTable
 import sqlalchemy as sa
 
@@ -41,7 +42,7 @@ class OnConflictNothingBase(DatasetBase):
             msg = "field `pk` must be set on subclass of OnConflictNothingBase"
             raise ValueError(msg)
 
-        temp_name = "__" + self.table_name
+        temp_name = "__" + self.table_name + str(random.randint(1000, 9999))
         with sa.create_engine(connstr).connect() as conn:
             kw = dict(temp=False, if_exists="replace", destroy=True)
             with TempTable(df, temp_name, conn, **kw):
