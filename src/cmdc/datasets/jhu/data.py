@@ -22,10 +22,11 @@ class Locations(OnConflictNothingBase):
 
 class DailyReports(OnConflictNothingBase):
     table_name = "jhu_daily_reports"
-    pk = "(combined_key, date_updated)"
+    pk = "(combined_key, date)"
 
     def get(self, date):
         dt = pd.to_datetime(date)
+        _date = pd.to_datetime(dt.strftime("%Y-%m-%d"))
         url = f"{BASE_URL}/csse_covid_19_data/csse_covid_19_daily_reports/{dt:%m-%d-%Y}.csv"
         df = pd.read_csv(url)
         df.columns = [x.lower() for x in list(df)]
@@ -52,6 +53,27 @@ class DailyReports(OnConflictNothingBase):
                 df["country_region"].fillna("")
             )
 
+        df["date"] = _date
+        self.df = df
+        return df
 
+
+class DailyReportsUS(OnConflictNothingBase):
+    table_name = "jhu_daily_reports_us"
+    pk = "(fips, date)"
+
+    def get(self, date):
+        dt = pd.to_datetime(date)
+        _date = pd.to_datetime(dt.strftime("%Y-%m-%d"))
+        url = f"{BASE_URL}/csse_covid_19_data/csse_covid_19_daily_reports_us/{dt:%m-%d-%Y}.csv"
+        df = pd.read_csv(url)
+        df.columns = [x.lower() for x in list(df)]
+        df = df.rename(columns={
+            "last_update": "date_updated",
+            "long_": "lon",
+        })
+        df["date_updated"] = pd.to_datetime(df["date_updated"]).dt.tz_localize("UTC")
+        df["date"] = _date
+        df = df.dropna(subset=["fips"])
         self.df = df
         return df

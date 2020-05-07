@@ -48,6 +48,7 @@ CREATE TABLE data.jhu_daily_reports (
     "admin2" text,
     "province_state" text,
     "country_region" text,
+    "date" timestamptz,
     "date_updated" timestamptz,
     "lat" numeric(12, 6),
     "lon" numeric(12, 6),
@@ -56,7 +57,7 @@ CREATE TABLE data.jhu_daily_reports (
     "recovered" int,
     "active" int,
     "combined_key" text,
-    PRIMARY KEY (combined_key, date_updated)
+    PRIMARY KEY (combined_key, date)
 );
 
 COMMENT ON TABLE data.jhu_daily_reports IS E'Daily case reports. https://github.com/CSSEGISandData/COVID-19/tree/dce1b48f54bd7551295c27a2878701cf2c58a1c8/csse_covid_19_data/csse_covid_19_daily_reports';
@@ -69,7 +70,9 @@ COMMENT ON COLUMN data.jhu_daily_reports.province_state IS E'Province, state or 
 
 COMMENT ON COLUMN data.jhu_daily_reports.country_region IS E'Country, region or sovereignty name. The names of locations included on the Website correspond with the official designations used by the U.S. Department of State.';
 
-COMMENT ON COLUMN data.jhu_daily_reports.date_updated IS E'MM/DD/YYYY HH:mm:ss (24 hour format, in UTC).';
+COMMENT ON COLUMN data.jhu_daily_reports.date IS E'Date for which data applies. This is the file name on github';
+
+COMMENT ON COLUMN data.jhu_daily_reports.date_updated IS E'MM/DD/YYYY HH:mm:ss (24 hour format, in UTC). This is the field in the dataset itself.';
 
 COMMENT ON COLUMN data.jhu_daily_reports.lat IS E'Dot locations on the dashboard. All points (except for Australia) shown on the map are based on geographic centroids, and are not representative of a specific address, building or any location at a spatial scale finer than a province/state. Australian dots are located at the centroid of the largest city in each state.';
 
@@ -84,4 +87,69 @@ COMMENT ON COLUMN data.jhu_daily_reports.recovered IS E'Recovered cases outside 
 COMMENT ON COLUMN data.jhu_daily_reports.active IS E'Active cases = total confirmed - total recovered - total deaths.';
 
 COMMENT ON COLUMN data.jhu_daily_reports.combined_key IS E'';
+
+DROP TABLE IF EXISTS data.jhu_daily_reports_us;
+
+CREATE TABLE data.jhu_daily_reports_us (
+    "province_state" text,
+    "country_region" text,
+    "date_updated" timestamptz,
+    "lat" numeric(12, 6),
+    "lon" numeric(12, 6),
+    "confirmed" int,
+    "deaths" int,
+    "recovered" numeric(12, 6),
+    "active" numeric(12, 6),
+    "fips" int,
+    "incident_rate" numeric(12, 6),
+    "people_tested" numeric(12, 6),
+    "people_hospitalized" numeric(12, 6),
+    "mortality_rate" numeric(12, 6),
+    "uid" int,
+    "iso3" text,
+    "testing_rate" numeric(12, 6),
+    "hospitalization_rate" numeric(12, 6),
+    "date" timestamp WITHOUT time zone,
+    PRIMARY KEY (fips, date)
+);
+
+COMMENT ON TABLE data.jhu_daily_reports_us IS E'This table contains an aggregation of each US State level data.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.province_state IS E'The name of the State within the USA.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.country_region IS E'The name of the Country (US).';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.date_updated IS E'The most recent date the file was pushed.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.lat IS E'Latitude.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.lon IS E'Longitude.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.confirmed IS E'Aggregated confirmed case count for the state.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.deaths IS E'Aggregated Death case count for the state.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.recovered IS E'Aggregated Recovered case count for the state.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.active IS E'Aggregated confirmed cases that have not been resolved (Active = Confirmed - Recovered - Deaths).';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.fips IS E'Federal Information Processing Standards code that uniquely identifies counties within the USA.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.incident_rate IS E'confirmed cases per 100,000 persons.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.people_tested IS E'Total number of people who have been tested.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.people_hospitalized IS E'Total number of people hospitalized.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.mortality_rate IS E'Number recorded deaths * 100/ Number confirmed cases.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.uid IS E'Unique Identifier for each row entry.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.iso3 IS E'Officialy assigned country code identifiers.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.testing_rate IS E'Total number of people tested per 100,000 persons.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.hospitalization_rate IS E'Total number of people hospitalized * 100/ Number of confirmed cases.';
+
+COMMENT ON COLUMN data.jhu_daily_reports_us.date IS E'The data corresponding to the data (the date of the filename in GitHub).';
 
