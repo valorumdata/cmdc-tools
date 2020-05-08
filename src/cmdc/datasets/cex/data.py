@@ -55,6 +55,25 @@ class DailyCountyLex(DailyStateLex):
         return super()._url(date) + ".gz"
 
 
-class DailyStateDex(DailyStateLex):
-    ds = "dex"
+class StateDex(OnConflictNothingBase):
+    __url = "{BASE}/dex_data/{geo}_dex.csv"
+    geo_name = "state"
+    pk = '("date", state)'
 
+    def _url(self):
+        return self.__url.format(BASE=BASE_URL, geo=self.geo_name)
+
+    def get(self):
+        df = pd.read_csv(self._url(), parse_dates=["date"])
+        return df
+
+
+class CountyDex(StateDex):
+    table_name = "cex_county_dex"
+    pk = '("date", county)'
+    geo_name = "county"
+
+    def get(self):
+        df = super().get()
+        df["county"] = df["county"].astype(str).str.zfill(5)
+        return df
