@@ -2,8 +2,8 @@ DROP TABLE IF EXISTS data.cex_state_lex;
 
 CREATE TABLE data.cex_state_lex (
     "date" date,
-    "s_prev" char(2),
-    "s_today" char(2),
+    "s_prev" smallint references data.us_states(fips),
+    "s_today" smallint references data.us_states(fips),
     "lex" numeric(10, 8),
     PRIMARY KEY ("date", "s_prev", "s_today")
 );
@@ -27,9 +27,9 @@ COMMENT ON COLUMN data.cex_state_lex. "date" IS E'The date for which the data ap
 DROP TABLE IF EXISTS data.cex_county_lex;
 
 CREATE TABLE data.cex_county_lex (
-    "date" timestamp WITHOUT time zone,
-    "c_prev" char(5),
-    "c_today" char(5),
+    "date" DATE,
+    "c_prev" INT references data.us_fips(fips),
+    "c_today" INT references data.us_fips(fips),
     "lex" numeric(10, 8),
     PRIMARY KEY ("date", "c_prev", "c_today")
 );
@@ -48,5 +48,5 @@ COMMENT ON COLUMN data.cex_county_lex.c_today IS E'The county for which a device
 
 COMMENT ON COLUMN data.cex_county_lex.lex IS E'The LEX number';
 
-COMMENT ON COLUMN data.cex_county_lex. "date" IS E'The date for which the data applies';
+COMMENT ON COLUMN data.cex_county_lex."date" IS E'The date for which the data applies';
 

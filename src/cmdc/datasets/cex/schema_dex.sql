@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS data.cex_state_dex;
 CREATE TABLE data.cex_state_dex (
-    "state" TEXT,
-    "date" TIMESTAMP WITHOUT TIME ZONE,
+    "state" SMALLINT references data.us_states (fips),
+    "date" DATE,
     "dex" numeric(12, 6),
     "num_devices" INT,
     "dex_a" numeric(12, 6),
@@ -65,7 +65,7 @@ This index is produced by Victor Couture, Jonathan Dingel, Allison Green, Jessie
 
 If you use this dataset, we recommend seeing the [notes for users of the DEX dataset](https://github.com/COVIDExposureIndices/COVIDExposureIndices/blob/master/documentation/DEX_notes.md) and [DEX documentation](https://github.com/COVIDExposureIndices/COVIDExposureIndices/blob/master/documentation/DEX.pdf) produced by the original authors.
 
-Source: https://github.com/COVIDExposureIndices/COVIDExposureIndices'
+Source: https://github.com/COVIDExposureIndices/COVIDExposureIndices';
 
 COMMENT ON COLUMN data.cex_state_dex.state is E'The state for which the DEX is reported.';
 COMMENT ON COLUMN data.cex_state_dex."date" is E'The date on which the DEX value was reported';
@@ -124,8 +124,8 @@ COMMENT ON COLUMN data.cex_state_dex.num_devices_race_white_a is E'Adjusted num_
 
 DROP TABLE IF EXISTS data.cex_county_dex;
 CREATE TABLE data.cex_county_dex (
-    "county" char(5),
-    "date" TIMESTAMP WITHOUT TIME ZONE,
+    "county" INT references data.us_fips(fips),
+    "date" DATE,
     "dex" numeric(12, 6),
     "num_devices" INT,
     "dex_a" numeric(12, 6),
