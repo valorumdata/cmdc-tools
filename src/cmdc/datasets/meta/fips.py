@@ -9,7 +9,7 @@ def main():
             state=lambda x: x["fips"].astype(str).str.zfill(5).str[:2].astype(int),
             county=lambda x: x["fips"].astype(str).str.zfill(5).str[3:].astype(int)
         )
-        .fillna(dict(state_abbr="NA"))
+        # .fillna(dict(state_abbr="NA"))
     )
 
     return df
