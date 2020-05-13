@@ -31,6 +31,11 @@ def _build_on_conflict_do_nothing_query(df, t_home, t_temp, pkey):
 
 
 class OnConflictNothingBase(DatasetBase):
+
+    def _insert_query(self, df, table_name, temp_name, pk):
+        out = _build_on_conflict_do_nothing_query(df, table_name, temp_name, pk)
+        return out
+
     def put(self, connstr, df=None):
         if df is None:
             if hasattr(self, "df"):
@@ -46,7 +51,5 @@ class OnConflictNothingBase(DatasetBase):
         with sa.create_engine(connstr).connect() as conn:
             kw = dict(temp=False, if_exists="replace", destroy=True)
             with TempTable(df, temp_name, conn, **kw):
-                sql = _build_on_conflict_do_nothing_query(
-                    df, self.table_name, temp_name, self.pk
-                )
+                sql = self._insert_query(df, self.table_name, temp_name, self.pk)
                 conn.execute(sql)
