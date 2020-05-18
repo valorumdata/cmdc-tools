@@ -15,31 +15,31 @@ CREATE TABLE data.jhu_locations (
     population int
 );
 
-COMMENT ON TABLE data.jhu_locations IS 'Metadata table provided by JHU with details about geographic coordinates and population of regions that appear in COVID data';
+COMMENT ON TABLE data.jhu_locations IS E'Metadata table provided by JHU with details about geographic coordinates and population of regions that appear in COVID data';
 
-COMMENT ON COLUMN data.jhu_locations.uid IS 'Unique identifier for the region';
+COMMENT ON COLUMN data.jhu_locations.uid IS E'Unique identifier for the region';
 
-COMMENT ON COLUMN data.jhu_locations.iso2 IS 'Two character ISO name for country';
+COMMENT ON COLUMN data.jhu_locations.iso2 IS E'Two character ISO name for country';
 
-COMMENT ON COLUMN data.jhu_locations.iso3 IS 'Three character ISO name for country';
+COMMENT ON COLUMN data.jhu_locations.iso3 IS E'Three character ISO name for country';
 
-COMMENT ON COLUMN data.jhu_locations.code3 IS 'Country Code';
+COMMENT ON COLUMN data.jhu_locations.code3 IS E'Country Code';
 
-COMMENT ON COLUMN data.jhu_locations.fips IS 'FIPS code identifying county in USA';
+COMMENT ON COLUMN data.jhu_locations.fips IS E'FIPS code identifying county in USA';
 
-COMMENT ON COLUMN data.jhu_locations.admin2 IS 'Additional name about region. For US counties it is the county name. For countries it is the country name';
+COMMENT ON COLUMN data.jhu_locations.admin2 IS E'Additional name about region. For US counties it is the county name. For countries it is the country name';
 
-COMMENT ON COLUMN data.jhu_locations.province_state IS 'Name of US state or Canadian province';
+COMMENT ON COLUMN data.jhu_locations.province_state IS E'Name of US state or Canadian province';
 
-COMMENT ON COLUMN data.jhu_locations.country_region IS '';
+COMMENT ON COLUMN data.jhu_locations.country_region IS E'';
 
-COMMENT ON COLUMN data.jhu_locations.lat IS 'Latitude coordinate for region.';
+COMMENT ON COLUMN data.jhu_locations.lat IS E'Latitude coordinate for region.';
 
-COMMENT ON COLUMN data.jhu_locations.lon IS 'Longitude coordinate for region.';
+COMMENT ON COLUMN data.jhu_locations.lon IS E'Longitude coordinate for region.';
 
-COMMENT ON COLUMN data.jhu_locations.combined_key IS 'Textual representation of the region name';
+COMMENT ON COLUMN data.jhu_locations.combined_key IS E'Textual representation of the region name';
 
-COMMENT ON COLUMN data.jhu_locations.population IS 'Population of the region';
+COMMENT ON COLUMN data.jhu_locations.population IS E'Population of the region';
 
 DROP TABLE IF EXISTS data.jhu_daily_reports;
 

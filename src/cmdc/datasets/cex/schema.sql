@@ -28,8 +28,8 @@ DROP TABLE IF EXISTS data.cex_county_lex;
 
 CREATE TABLE data.cex_county_lex (
     "date" DATE,
-    "c_prev" INT references data.us_fips(fips),
-    "c_today" INT references data.us_fips(fips),
+    "c_prev" INT references data.us_counties(fips),
+    "c_today" INT references data.us_counties(fips),
     "lex" numeric(10, 8),
     PRIMARY KEY ("date", "c_prev", "c_today")
 );
