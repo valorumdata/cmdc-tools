@@ -133,7 +133,9 @@ CREATE TABLE data.actnow_county_actuals (
     PRIMARY KEY ("vintage", "date", "fips")
 );
 
-COMMENT ON TABLE data.actnow_county_actuals is E'';
+COMMENT ON TABLE data.actnow_county_actuals is E'This table contains actual data that is used by the Covid Act Now modeling team. The data is used either as an input to the model or against the model outputs to test the accuracy of predictions.
+
+For more information see the Covid ActNow website at https://covidactnow.org/';
 
 COMMENT ON COLUMN data.actnow_county_actuals.intervention_id is E'A setting of parameters for different intervention types.
 
@@ -182,7 +184,9 @@ CREATE TABLE data.actnow_state_actuals (
     PRIMARY KEY ("vintage", "date", "fips")
 );
 
-COMMENT ON TABLE data.actnow_state_actuals is E'';
+COMMENT ON TABLE data.actnow_state_actuals is E'This table contains actual data that is used by the Covid Act Now modeling team. The data is used either as an input to the model or against the model outputs to test the accuracy of predictions.
+
+For more information see the Covid ActNow website at https://covidactnow.org/';
 
 COMMENT ON COLUMN data.actnow_state_actuals.intervention_id is E'A setting of parameters for different intervention types.
 
