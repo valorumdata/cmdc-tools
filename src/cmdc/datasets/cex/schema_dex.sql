@@ -124,7 +124,7 @@ COMMENT ON COLUMN data.cex_state_dex.num_devices_race_white_a is E'Adjusted num_
 
 DROP TABLE IF EXISTS data.cex_county_dex;
 CREATE TABLE data.cex_county_dex (
-    "county" INT references data.us_fips(fips),
+    "county" INT references data.us_counties(fips),
     "date" DATE,
     "dex" numeric(12, 6),
     "num_devices" INT,

@@ -64,8 +64,8 @@ class DailyCountyLex(DailyStateLex):
         INSERT INTO data.{table_name} (date, c_prev, c_today, lex)
         SELECT csl.date, fp.fips as c_prev, ft.fips as c_today, csl.lex
         FROM {temp_name} csl
-        LEFT JOIN data.us_fips fp ON fp.fips = csl.c_prev
-        LEFT JOIN data.us_fips ft ON ft.fips = csl.c_today
+        LEFT JOIN data.us_counties fp ON fp.fips = csl.c_prev
+        LEFT JOIN data.us_counties ft ON ft.fips = csl.c_today
         ON CONFLICT ("date", c_prev, c_today) DO UPDATE SET lex = excluded.lex
         """
         return textwrap.dedent(out)
@@ -115,7 +115,7 @@ class CountyDex(StateDex):
         out = f"""
         INSERT INTO data.{table_name} {final_cols}
         SELECT {temp_cols} from {temp_name} tt
-        LEFT JOIN data.us_fips f on {self.join_on}
+        LEFT JOIN data.us_counties f on {self.join_on}
         ON CONFLICT {pk} DO NOTHING;
         """
         return textwrap.dedent(out)
