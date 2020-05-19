@@ -1,7 +1,58 @@
+import io
+import json
 import pandas as pd
+import requests
 
-from .bfs import CensusBFS
-from .census import ACS1, ACS5
+from .census import ACS
+from ..base import OnConflictNothingBase
+
+
+class ACS_CMDC(ACS, OnConflictNothingBase):
+    """
+    Used to insert data and variable names into the database specified
+    by schema.sql
+    """
+    def __init__(self, product, table, year, key):
+        super(ACS_CMDC, self).__init__(
+            product=product, table=table, year=year, key=key
+        )
+        self.data_table = self.product + ""
+        self.variable_table = self.product + "_variable"
+
+    def data_put(self, connstr, columns, geography):
+
+        return None
+
+    def variable_get(self):
+        # Fetch variables json
+        variable_json = json.loads(
+            requests.get(self.dataset["c_variablesLink"]).text
+        )
+
+        # Load into DataFrame
+        all_variables = pd.DataFrame.from_dict(
+            variable_json["variables"]
+        ).T
+
+        # Only keep 'Estimate' variables
+        is_variable = all_variables["label"].str.contains("Estimate")
+        all_variables = all_variables.loc[is_variable, ["label"]].reset_index()
+
+        all_variables["year"] = self.dataset["c_vintage"]
+        all_variables["product"] = self.product
+        all_variables = all_variables.rename(columns={"index": "census_id"})
+
+        return all_variables
+
+    def variable_put(self, connstr, df=None):
+        if df == None:
+            df = self.variable_get()
+
+        # What do I do about the pk here? I want to make sure there
+        # are no duplicates of (year, product, census_id)
+        self._put(connstr, df, self.variable_table, self.variable_pk)
+
+        return None
 
 
 #
@@ -63,4 +114,5 @@ other_statistics = {
     "S0501_C01_101E": "MedianHHIncome",
     "S0501_C01_104E": "PercentPoverty",
 }
+
 

@@ -52,13 +52,14 @@ class USCensusBaseAPI(object):
         #       rather than impose this small subset of geographies
         VALID_GEOGRAPHIES = {
             "us": "us:*",
-            "region": "region:*",
-            "division": "division:*",
+            # "region": "region:*",
+            # "division": "division:*",
             "state": "state:*",
             "county": "county:*",
-            "msa": "metropolitan%20statistical%20area/micropolitan%20statistical%20area:*",
-            "csa": "combined%20statistical%20area:*",
-            "puma": "public%20use%20microdata%20area:*"
+            "tract": "tract:*"
+            # "msa": "metropolitan%20statistical%20area/micropolitan%20statistical%20area:*",
+            # "csa": "combined%20statistical%20area:*",
+            # "puma": "public%20use%20microdata%20area:*"
         }
 
         return VALID_GEOGRAPHIES
@@ -113,15 +114,17 @@ class USCensusBaseAPI(object):
             out = "&for=" + VALID_GEOGRAPHIES[geography]
 
         elif isinstance(geography, dict):
-            is_valid = ("for" in geography.keys() and "in" in geography.keys())
+            is_valid = "for" in geography.keys()
             if not is_valid:
                 msg = "If you pass a dict, you must have keys 'for' and 'in'"
                 raise ValueError(msg)
 
             out = "&for=" + geography["for"][0]
             out += ":" + ",".join(map(str, geography["for"][1]))
-            out += "&in=" + geography["in"][0]
-            out += ":" + ",".join(map(str, geography["in"][1]))
+
+            if "in" in geography.keys():
+                out += "&in=" + geography["in"][0]
+                out += ":" + ",".join(map(str, geography["in"][1]))
 
         elif isinstance(geography, tuple):
             is_valid = geography[0] in VALID_GEOGRAPHIES.keys()
@@ -176,12 +179,14 @@ class USCensusBaseAPI(object):
 
         # Store in a DataFrame
         df = pd.DataFrame(data=req_json[1:], columns=req_json[0])
-        df[columns] = df[columns].apply(pd.to_numeric)
+        df[columns] = df[columns].apply(
+            lambda x: pd.to_numeric(x, errors="ignore")
+        )
 
         return df
 
 
-class ACS1(USCensusBaseAPI):
+class ACS(USCensusBaseAPI):
     """
     The American Community Survey (ACS) is an ongoing survey that
     provides data every year -- giving communities the current
@@ -195,76 +200,40 @@ class ACS1(USCensusBaseAPI):
     collection and provides detailed information for areas with a
     population of more than 65,000.
 
-    For more information, please refer to:
-        * https://www.census.gov/data/developers/data-sets/acs-1year.html
-
-    Parameters
-    ----------
-    table : string
-        Which ACS1 table that will be queried for data
-    year : int
-        Which year of data will be queried
-    key : string
-        The US Census API key.
-    """
-    def __init__(self, table, year, key):
-        # Store table and vintage
-        self.table = table
-        self.year = year
-
-        # Search for the dataset with the right properties
-        dataset = [
-            x for x in AVAIL_DATASETS if (
-                ("acs1" in x["c_dataset"]) and (table.title() in x["title"])
-                and (x["c_vintage"] == year)
-            )
-        ]
-        if len(dataset) > 1:
-            raise ValueError("Data set cannot be determined with table/year info")
-
-        super(ACS1, self).__init__(dataset=dataset[0], key=key)
-
-
-class ACS5(USCensusBaseAPI):
-    """
-    The American Community Survey (ACS) is an ongoing survey that
-    provides data every year -- giving communities the current
-    information they need to plan investments and services. The ACS
-    covers a broad range of topics about social, economic, demographic,
-    and housing characteristics of the U.S. population. Much of the ACS
-    data provided on the Census Bureau's Web site are available
-    separately by age group, race, Hispanic origin, and sex.
-
     The 5 year files incorporates five year's worth of data into it's
     estimates and provides detailed information for all census areas
     down to the census block level.
 
     For more information, please refer to:
+        * https://www.census.gov/data/developers/data-sets/acs-1year.html
         * https://www.census.gov/data/developers/data-sets/acs-5year.html
 
     Parameters
     ----------
+    product : string
+        Which ACS product to use. Can either be `acs1` or `acs5`
     table : string
-        Which ACS1 table that will be queried for data
+        Which ACS table that will be queried for data
     year : int
         Which year of data will be queried
     key : string
         The US Census API key.
     """
-    def __init__(self, table, year, key):
+    def __init__(self, product, table, year, key):
         # Store table and vintage
+        self.product = "acs1" if "1" in str(product) else "acs5"
         self.table = table
         self.year = year
 
         # Search for the dataset with the right properties
         dataset = [
             x for x in AVAIL_DATASETS if (
-                ("acs5" in x["c_dataset"]) and (table.title() in x["title"])
+                (self.product in x["c_dataset"]) and (table.title() in x["title"])
                 and (x["c_vintage"] == year)
             )
         ]
         if len(dataset) > 1:
             raise ValueError("Data set cannot be determined with table/year info")
 
-        super(ACS5, self).__init__(dataset=dataset[0], key=key)
+        super(ACS, self).__init__(dataset=dataset[0], key=key)
 
