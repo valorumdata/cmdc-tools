@@ -29,9 +29,17 @@ class CensusBFS(OnConflictNothingBase):
         either be "us", "region", or "state"
 
     """
+    pks = {
+        "us": ("year", "week"),
+        "region": ("region", "year", "week"),
+        "state": ("state", "year", "week")
+    }
+
     def __init__(self, geo):
         self.geo = geo.lower()
         self.url = BASEURL + f"/econ/bfs/csv/bfs_{self.geo}_apps_weekly_nsa.csv"
+        self.pk = self.pks[self.geo]
+        self.table_name = f"bfs_{self.geo}"
 
     def get(self):
         # Download the data and the corresponding dates
