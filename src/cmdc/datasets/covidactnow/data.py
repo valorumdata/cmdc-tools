@@ -5,9 +5,10 @@ import pandas as pd
 from cmdc.datasets import OnConflictNothingBase
 
 
+_CANURL = "https://data.covidactnow.org/latest/us"
 
 class CANTimeseries(OnConflictNothingBase):
-    URL = "https://data.covidactnow.org/latest/us/{geo}.{intervention}_INTERVENTION.timeseries.json"
+    URL = _CANURL + "/{geo}.{intervention}_INTERVENTION.timeseries.json"
     pk = '("date", "vintage", "intervention_id", "fips")'
     table_name = "actnow_county_timeseries"
 
