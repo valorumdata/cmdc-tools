@@ -36,6 +36,14 @@ class OnConflictNothingBase(DatasetBase):
         out = _build_on_conflict_do_nothing_query(df, table_name, temp_name, pk)
         return out
 
+    def _put(self, connstr, df, table_name, pk):
+        temp_name = "__" + table_name + str(random.randint(1000, 9999))
+        with sa.create_engine(connstr).connect() as conn:
+            kw = dict(temp=False, if_exists="replace", destroy=True)
+            with TempTable(df, temp_name, conn, **kw):
+                sql = self._insert_query(df, table_name, temp_name, pk)
+                conn.execute(sql)
+
     def put(self, connstr, df=None):
         if df is None:
             if hasattr(self, "df"):
@@ -47,9 +55,5 @@ class OnConflictNothingBase(DatasetBase):
             msg = "field `pk` must be set on subclass of OnConflictNothingBase"
             raise ValueError(msg)
 
-        temp_name = "__" + self.table_name + str(random.randint(1000, 9999))
-        with sa.create_engine(connstr).connect() as conn:
-            kw = dict(temp=False, if_exists="replace", destroy=True)
-            with TempTable(df, temp_name, conn, **kw):
-                sql = self._insert_query(df, self.table_name, temp_name, self.pk)
-                conn.execute(sql)
+        self._put(connstr, df, self.table_name, self.pk)
+
