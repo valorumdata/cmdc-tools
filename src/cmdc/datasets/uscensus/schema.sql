@@ -34,7 +34,7 @@ COMMENT ON COLUMN uscensus.acs_variables.label IS E'A short label that describes
 /* Create and define data tables */
 CREATE TABLE uscensus.acs_data (
     "id" INTEGER REFERENCES uscensus.acs_variables(id),
-    "fips" INTEGER,
+    "fips" INTEGER REFERENCES data.us_counties(fips),
     "value" FLOAT,
     PRIMARY KEY ("id", "fips")
 );
