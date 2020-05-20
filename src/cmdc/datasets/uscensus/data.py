@@ -15,10 +15,8 @@ class ACS(ACSAPI, OnConflictNothingBase):
     Used to insert data and variable names into the database specified
     by schema.sql
     """
-    data_table = "acs_data"
-    data_pk = '("id", "fips")'
-    variable_table = "acs_variables"
-    variable_pk = '("id")'
+    table_name = "acs_data"
+    pk = '("id", "fips")'
 
     def __init__(self, cols, geo, product, table, year, key):
         super(ACS, self).__init__(
@@ -61,11 +59,11 @@ class ACS(ACSAPI, OnConflictNothingBase):
 
         return df
 
-    def _data_insert_query(self, df, table_name, temp_name, pk):
+    def _insert_query(self, df, table_name, temp_name, pk):
         _sql_data_insert = f"""
         INSERT INTO uscensus.{table_name} (id, fips, value)
         SELECT vt.id, tt.fips, tt.value FROM {temp_name} tt
-        LEFT JOIN uscensus.{self.variable_table} vt
+        LEFT JOIN uscensus.acs_variables vt
           ON vt.census_id=tt.census_id AND
             vt.year={self.year} AND
             vt.product='{self.product}'
@@ -74,7 +72,7 @@ class ACS(ACSAPI, OnConflictNothingBase):
 
         return _sql_data_insert
 
-    def data_get(self):
+    def get(self):
         """
         Fetches the data for the variables provided in the `__init__`
         method from the specified ACS dataset
@@ -96,7 +94,12 @@ class ACS(ACSAPI, OnConflictNothingBase):
 
         return df
 
-    def _var_insert_query(self, df, table_name, temp_name, pk):
+
+class ACSVariables(ACS):
+    table_name = "acs_variables"
+    pk = '("id")'
+
+    def _insert_query(self, df, table_name, temp_name, pk):
         _sql_var_insert = f"""
         INSERT INTO uscensus.{table_name} (year, product, census_id, label)
         SELECT year, product, census_id, label FROM {temp_name}
@@ -105,7 +108,7 @@ class ACS(ACSAPI, OnConflictNothingBase):
 
         return _sql_var_insert
 
-    def variable_get(self):
+    def get(self):
         """
         Fetches the variables for the specified ACS dataset
 
@@ -135,62 +138,4 @@ class ACS(ACSAPI, OnConflictNothingBase):
         all_variables = all_variables.rename(columns={"index": "census_id"})
 
         return all_variables
-
-    def _put(self, connstr, table="variable", df=None):
-        """
-        Inserts the variable data into the `uscensus.acs_variables`
-        table
-
-        Parameters
-        ----------
-        connstr : string
-            A postgres connection string that can be used by sqlalchemy
-        d_or_v : string
-            A string that denotes whether we're putting data or
-            variables into the database
-        df : pd.DataFrame
-            The DataFrame with all of the variables contained in a
-            particular data product
-        """
-        if df is None:
-            if table == "data":
-                df = self.data_get()
-            elif table == "variable":
-                df = self.variable_get()
-
-        if table == "data":
-            tablename = self.data_table
-            pk = self.data_pk
-            _insert_cmd = self._data_insert_query
-        else:
-            tablename = self.variable_table
-            pk = self.variable_pk
-            _insert_cmd = self._var_insert_query
-
-        # Create temporary
-        temp_name = "__" + tablename + str(random.randint(1000, 9999))
-        with sa.create_engine(connstr).connect() as conn:
-            kw = dict(temp=False, if_exists="replace", destroy=True)
-            with TempTable(df, temp_name, conn, **kw):
-                sql = _insert_cmd(df, tablename, temp_name, pk)
-                conn.execute(sql)
-
-        return None
-
-    def get(self):
-        "Convenience method to get a both DataFrames"
-        v_df = self.variable_get()
-        d_df = self.data_get()
-        return [d_df, v_df]
-
-    def put(self, connstr, dfs=None):
-        "Convenience method to put both data and variables into table"
-        if dfs is None:
-            dfs = self.get()
-        d_df, v_df = dfs
-
-        self._put(connstr, "variable", v_df)
-        self._put(connstr, "data", d_df)
-
-        return None
 
