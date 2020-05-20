@@ -1,15 +1,16 @@
-DROP SCHEMA IF EXISTS uscensus CASCADE
+DROP SCHEMA IF EXISTS uscensus CASCADE;
 
+CREATE SCHEMA uscensus;
 
 /* Create and define metadata tables */
 CREATE TABLE uscensus.acs_variables (
-    "id" SERIAL,
+    "id" SERIAL UNIQUE,
     "year" INTEGER,
-    "product" SMALLINT,
-    "census_id" VARCHAR(14),
-    "label" VARCHAR(350)
-    PRIMARY KEY "id"
-)
+    "product" CHAR(4),
+    "census_id" VARCHAR(20),
+    "label" VARCHAR(350),
+    PRIMARY KEY ("year", "product", "census_id")
+);
 COMMENT ON TABLE uscensus.acs_variables IS E'
 Table Description:
 
@@ -22,7 +23,7 @@ Words of caution:
 Source: US Census';
 
 COMMENT ON COLUMN uscensus.acs_variables.id IS E'An internal identifier for referencing different variables.';
-COMMENT ON COLUMN uscensus.acs_variables.year IS E'The year this product was collected/published'
+COMMENT ON COLUMN uscensus.acs_variables.year IS E'The year this product was collected/published';
 COMMENT ON COLUMN uscensus.acs_variables.product IS E'Which ACS product this variables comes from. Can take the values `acs1` or `acs5`';
 COMMENT ON COLUMN uscensus.acs_variables.census_id IS E'The variable name according to the Census documentation.';
 COMMENT ON COLUMN uscensus.acs_variables.label IS E'A short label that describes what the variable includes.';
@@ -31,7 +32,7 @@ COMMENT ON COLUMN uscensus.acs_variables.label IS E'A short label that describes
 CREATE TABLE uscensus.bfs_variables (
     "id" INTEGER,
     "census_id" VARCHAR(10)
-)
+);
 COMMENT ON TABLE uscensus.bfs_variables IS E'
 Table Description:
 
@@ -46,11 +47,11 @@ Source: US Census';
 
 /* Create and define data tables */
 CREATE TABLE uscensus.acs_data (
-    "id" INTEGER REFERENCES uscensus.acs_variables.id,
+    "id" INTEGER REFERENCES uscensus.acs_variables(id),
     "fips" INTEGER,
     "value" FLOAT,
     PRIMARY KEY ("id", "fips")
-)
+);
 COMMENT ON TABLE uscensus.acs_data IS E'
 **Table Description:**
 
@@ -64,7 +65,7 @@ Words of caution:
 
 Source: US Census';
 
-COMMENT ON COLUMN uscensus.acs_data.id IS E'This id maps to the `uscensus.acs_variables` table'
-COMMENT ON COLUMN uscensus.acs_data.fips IS E'The state fips code'
-COMMENT ON COLUMN uscensus.acs_data.value IS E'The value of the variable associated with `id` for state `fips` in year `year`'
+COMMENT ON COLUMN uscensus.acs_data.id IS E'This id maps to the `uscensus.acs_variables` table';
+COMMENT ON COLUMN uscensus.acs_data.fips IS E'The county/state/tract fips code';
+COMMENT ON COLUMN uscensus.acs_data.value IS E'The value of the variable associated with `id` for geography `fips` in year `year`';
 

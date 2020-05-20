@@ -4,6 +4,16 @@ import pandas as pd
 import requests
 
 
+STATE_FIPS = [
+    "01", "02", "04", "05", "06", "08", "09", "10", "12",
+    "13", "15", "16", "17", "18", "19", "20", "21", "22",
+    "23", "24", "25", "26", "27", "28", "29", "30", "31",
+    "32", "33", "34", "35", "36", "37", "38", "39", "40",
+    "41", "42", "44", "45", "46", "47", "48", "49", "50",
+    "51", "53", "54", "55", "56"
+]
+
+
 def _update_data_file(filename):
     "Saves the available datasets into a file called `filename`"
     url = "https://api.census.gov/data.json"
@@ -153,12 +163,40 @@ class USCensusBaseAPI(object):
 
         req = requests.get(req_url)
 
+        if req.status_code != 200:
+            print(req.status_code)
+            print(req.text)
+            msg = "API request failed... See printout above for more info"
+            raise ValueError(msg)
+
         return req
+
+    def _process_get_json(self, columns, req_json):
+        """
+        Converts a particular request into a DataFrame
+
+        Parameters
+        ----------
+        columns : list
+            A list of the numeric columns (variables) of the table
+        req_json : dict
+            The json of the request from `self._get`
+
+        Returns
+        -------
+        df : pd.DataFrame
+            A DataFrame representation of the data in req_json
+        """
+        df = pd.DataFrame(data=req_json[1:], columns=req_json[0])
+        df[columns] = df[columns].apply(
+            lambda x: pd.to_numeric(x, errors="ignore")
+        )
+
+        return df
 
     def get(self, columns, geography):
         """
-        This method should not be called on the Parent class
-        `CensusBaseAPI`.
+        Retrieves the data from a particular US Census data source
 
         Parameters
         ----------
@@ -167,21 +205,23 @@ class USCensusBaseAPI(object):
         geography : str, dict, or tuple
             See documentation for `self.process_geography_args`
         """
-        # Perform actual request
-        req = self._get(columns, geography)
-
-        if req.status_code != 200:
-            print(req.status_code)
-            print(req.text)
-            msg = "API request failed... See printout above for more info"
-            raise ValueError(msg)
-        req_json = req.json()
-
-        # Store in a DataFrame
-        df = pd.DataFrame(data=req_json[1:], columns=req_json[0])
-        df[columns] = df[columns].apply(
-            lambda x: pd.to_numeric(x, errors="ignore")
-        )
+        # Perform actual request... If it is a tract then we have to
+        # do the requests state by state...
+        if geography == "tract":
+            dfs = []
+            for state_fips in STATE_FIPS:
+                req = self._get(
+                    columns,
+                    {"for": ("tract", "*"), "in": ("state", [state_fips])}
+                )
+                req_json = req.json()
+                _df = self._process_get_json(columns, req_json)
+                dfs.append(_df)
+            df = pd.concat(dfs, axis="index")
+        else:
+            req = self._get(columns, geography)
+            req_json = req.json()
+            df = self._process_get_json(columns, req_json)
 
         return df
 
