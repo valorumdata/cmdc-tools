@@ -5,14 +5,12 @@ import random
 import requests
 import sqlalchemy as sa
 
-from .census import ACS
-from ..base import OnConflictNothingBase
-from ..db_util import TempTable
+from cmdc.datasets.uscensus.census import ACSAPI
+from cmdc.datasets.base import OnConflictNothingBase
+from cmdc.datasets.db_util import TempTable
 
-uscensus_variable_insert = """
-"""
 
-class ACS_CMDC(ACS, OnConflictNothingBase):
+class ACS(ACSAPI, OnConflictNothingBase):
     """
     Used to insert data and variable names into the database specified
     by schema.sql
@@ -20,10 +18,10 @@ class ACS_CMDC(ACS, OnConflictNothingBase):
     data_table = "acs_data"
     data_pk = '("id", "fips")'
     variable_table = "acs_variables"
-    variable_pk = '("year", "product", "census_id")'
+    variable_pk = '("id")'
 
     def __init__(self, cols, geo, product, table, year, key):
-        super(ACS_CMDC, self).__init__(
+        super(ACS, self).__init__(
             product=product, table=table, year=year, key=key
         )
         self.cols = cols
@@ -88,7 +86,7 @@ class ACS_CMDC(ACS, OnConflictNothingBase):
             a column, `fips` which specifies the geographic information
         """
         # Fetch data
-        df = super(ACS_CMDC, self).get(self.cols, self.geo)
+        df = super(ACS, self).get(self.cols, self.geo)
 
         # Convert to fips representation
         df = self._create_fips(df)
@@ -102,7 +100,7 @@ class ACS_CMDC(ACS, OnConflictNothingBase):
         _sql_var_insert = f"""
         INSERT INTO uscensus.{table_name} (year, product, census_id, label)
         SELECT year, product, census_id, label FROM {temp_name}
-        ON CONFLICT {pk} DO NOTHING;
+        ON CONFLICT (year, product, census_id) DO NOTHING;
         """
 
         return _sql_var_insert
@@ -156,7 +154,7 @@ class ACS_CMDC(ACS, OnConflictNothingBase):
         """
         if df is None:
             if table == "data":
-                df = self.variable_get()
+                df = self.data_get()
             elif table == "variable":
                 df = self.variable_get()
 

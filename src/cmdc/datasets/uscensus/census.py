@@ -226,7 +226,7 @@ class USCensusBaseAPI(object):
         return df
 
 
-class ACS(USCensusBaseAPI):
+class ACSAPI(USCensusBaseAPI):
     """
     The American Community Survey (ACS) is an ongoing survey that
     provides data every year -- giving communities the current
@@ -275,5 +275,5 @@ class ACS(USCensusBaseAPI):
         if len(dataset) > 1:
             raise ValueError("Data set cannot be determined with table/year info")
 
-        super(ACS, self).__init__(dataset=dataset[0], key=key)
+        super(ACSAPI, self).__init__(dataset=dataset[0], key=key)
 

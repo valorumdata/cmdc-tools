@@ -4,13 +4,15 @@ CREATE SCHEMA uscensus;
 
 /* Create and define metadata tables */
 CREATE TABLE uscensus.acs_variables (
-    "id" SERIAL UNIQUE,
+    "id" SERIAL PRIMARY KEY,
     "year" INTEGER,
     "product" CHAR(4),
     "census_id" VARCHAR(20),
-    "label" VARCHAR(350),
-    PRIMARY KEY ("year", "product", "census_id")
+    "label" VARCHAR(350)
 );
+
+CREATE UNIQUE INDEX acs_var_ref ON uscensus.acs_variables ("year", "product", "census_id");
+
 COMMENT ON TABLE uscensus.acs_variables IS E'
 Table Description:
 
@@ -27,22 +29,6 @@ COMMENT ON COLUMN uscensus.acs_variables.year IS E'The year this product was col
 COMMENT ON COLUMN uscensus.acs_variables.product IS E'Which ACS product this variables comes from. Can take the values `acs1` or `acs5`';
 COMMENT ON COLUMN uscensus.acs_variables.census_id IS E'The variable name according to the Census documentation.';
 COMMENT ON COLUMN uscensus.acs_variables.label IS E'A short label that describes what the variable includes.';
-
-
-CREATE TABLE uscensus.bfs_variables (
-    "id" INTEGER,
-    "census_id" VARCHAR(10)
-);
-COMMENT ON TABLE uscensus.bfs_variables IS E'
-Table Description:
-
-This table contains information on the variables that are listed for the weekly Business Formation Statistics product
-
-The Business Formation Statistics (BFS) are an experimental data product of the U.S. Census Bureau developed in research collaboration with economists affiliated with Board of Governors of the Federal Reserve System, Federal Reserve Bank of Atlanta, University of Maryland, and University of Notre Dame. The BFS provide timely and high frequency information on new business applications and formations in the United States. More information on Census Bureau Experimental Data products can be found [here](https://www.census.gov/data/experimental-data-products.html)
-
-Words of caution: This data product is experimental! The US Census has back-filled it to 2006 but there is no guarantee that they continue to publish it.
-
-Source: US Census';
 
 
 /* Create and define data tables */
