@@ -1,9 +1,7 @@
-DROP SCHEMA IF EXISTS uscensus CASCADE;
-
-CREATE SCHEMA uscensus;
+DROP TABLE IF EXISTS meta.acs_variables;
 
 /* Create and define metadata tables */
-CREATE TABLE uscensus.acs_variables (
+CREATE TABLE meta.acs_variables (
     "id" SERIAL PRIMARY KEY,
     "year" INTEGER,
     "product" CHAR(4),
@@ -11,9 +9,9 @@ CREATE TABLE uscensus.acs_variables (
     "label" VARCHAR(350)
 );
 
-CREATE UNIQUE INDEX acs_var_ref ON uscensus.acs_variables ("year", "product", "census_id");
+CREATE UNIQUE INDEX acs_var_ref ON meta.acs_variables ("year", "product", "census_id");
 
-COMMENT ON TABLE uscensus.acs_variables IS E'
+COMMENT ON TABLE meta.acs_variables IS E'
 Table Description:
 
 This table contains information on the variables that are listed for one of the ACS products (1 and 5 year estimates):
@@ -24,21 +22,21 @@ Words of caution:
 
 Source: US Census';
 
-COMMENT ON COLUMN uscensus.acs_variables.id IS E'An internal identifier for referencing different variables.';
-COMMENT ON COLUMN uscensus.acs_variables.year IS E'The year this product was collected/published';
-COMMENT ON COLUMN uscensus.acs_variables.product IS E'Which ACS product this variables comes from. Can take the values `acs1` or `acs5`';
-COMMENT ON COLUMN uscensus.acs_variables.census_id IS E'The variable name according to the Census documentation.';
-COMMENT ON COLUMN uscensus.acs_variables.label IS E'A short label that describes what the variable includes.';
+COMMENT ON COLUMN meta.acs_variables.id IS E'An internal identifier for referencing different variables.';
+COMMENT ON COLUMN meta.acs_variables.year IS E'The year this product was collected/published';
+COMMENT ON COLUMN meta.acs_variables.product IS E'Which ACS product this variables comes from. Can take the values `acs1` or `acs5`';
+COMMENT ON COLUMN meta.acs_variables.census_id IS E'The variable name according to the Census documentation.';
+COMMENT ON COLUMN meta.acs_variables.label IS E'A short label that describes what the variable includes.';
 
 
 /* Create and define data tables */
-CREATE TABLE uscensus.acs_data (
-    "id" INTEGER REFERENCES uscensus.acs_variables(id),
+CREATE TABLE data.acs_data (
+    "id" INTEGER REFERENCES meta.acs_variables(id),
     "fips" INTEGER REFERENCES data.us_counties(fips),
     "value" FLOAT,
     PRIMARY KEY ("id", "fips")
 );
-COMMENT ON TABLE uscensus.acs_data IS E'
+COMMENT ON TABLE data.acs_data IS E'
 **Table Description:**
 
 The American Community Survey (ACS) is an ongoing survey that provides data every year -- giving communities the current information they need to plan investments and services. The ACS covers a broad range of topics about social, economic, demographic, and housing characteristics of the U.S. population. Much of the ACS data provided on the Census web site are available separately by age group, race, Hispanic origin, and sex.
@@ -51,7 +49,7 @@ Words of caution:
 
 Source: US Census';
 
-COMMENT ON COLUMN uscensus.acs_data.id IS E'This id maps to the `uscensus.acs_variables` table';
-COMMENT ON COLUMN uscensus.acs_data.fips IS E'The county/state/tract fips code';
-COMMENT ON COLUMN uscensus.acs_data.value IS E'The value of the variable associated with `id` for geography `fips` in year `year`';
+COMMENT ON COLUMN data.acs_data.id IS E'This id maps to the `meta.acs_variables` table';
+COMMENT ON COLUMN data.acs_data.fips IS E'The county/state/tract fips code';
+COMMENT ON COLUMN data.acs_data.value IS E'The value of the variable associated with `id` for geography `fips` in year `year`';
 

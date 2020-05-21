@@ -1,4 +1,5 @@
 DROP TABLE IF EXISTS data.cex_state_dex;
+
 CREATE TABLE data.cex_state_dex (
     "state" SMALLINT references data.us_states (fips),
     "date" DATE,

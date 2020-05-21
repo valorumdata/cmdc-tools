@@ -1,3 +1,5 @@
+
+DROP TABLE IF EXISTS meta.actnow_intervention_types;
 CREATE TABLE meta.actnow_intervention_types (
     id smallint primary key,
     name text
