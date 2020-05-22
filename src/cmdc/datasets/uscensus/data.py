@@ -6,6 +6,7 @@ import requests
 import sqlalchemy as sa
 
 from cmdc.datasets.uscensus.census import ACSAPI
+from cmdc.datasets.uscensus.geo import _create_fips
 from cmdc.datasets.base import OnConflictNothingBase
 from cmdc.datasets.db_util import TempTable
 
@@ -41,29 +42,15 @@ class ACS(ACSAPI, OnConflictNothingBase):
             A DataFrame with the fips code values included and the
             other geographic columns dropped
         """
-        if self.geo == "state":
-            df["fips"] = df["state"].astype(int)
-            df = df.drop(columns=["state"])
-        elif self.geo == "county":
-            df["fips"] = df["state"].astype(int)*1_000 + df["county"].astype(int)
-            df = df.drop(columns=["state", "county"])
-        elif self.geo == "tract":
-            df["fips"] = (
-                df["state"].astype(int)*1_000_000_000 +
-                df["county"].astype(int)*1_000_000 +
-                df["tract"].astype(int)
-            )
-            df = df.drop(columns=["state", "county", "tract"])
-        else:
-            raise ValueError("Only state/county/tract are supported")
+        df = _create_fips(self.geo, df)
 
         return df
 
     def _insert_query(self, df, table_name, temp_name, pk):
         _sql_data_insert = f"""
-        INSERT INTO uscensus.{table_name} (id, fips, value)
+        INSERT INTO data.{table_name} (id, fips, value)
         SELECT vt.id, tt.fips, tt.value FROM {temp_name} tt
-        LEFT JOIN uscensus.acs_variables vt
+        LEFT JOIN meta.acs_variables vt
           ON vt.census_id=tt.census_id AND
             vt.year={self.year} AND
             vt.product='{self.product}'
@@ -88,6 +75,7 @@ class ACS(ACSAPI, OnConflictNothingBase):
 
         # Convert to fips representation
         df = self._create_fips(df)
+        df = df.query("fips < 60")
 
         # Reshape into desired format
         df = df.melt(id_vars="fips", var_name="census_id", value_name="value")
@@ -101,7 +89,7 @@ class ACSVariables(ACS):
 
     def _insert_query(self, df, table_name, temp_name, pk):
         _sql_var_insert = f"""
-        INSERT INTO uscensus.{table_name} (year, product, census_id, label)
+        INSERT INTO meta.{table_name} (year, product, census_id, label)
         SELECT year, product, census_id, label FROM {temp_name}
         ON CONFLICT (year, product, census_id) DO NOTHING;
         """
