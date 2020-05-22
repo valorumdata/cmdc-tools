@@ -32,7 +32,7 @@ COMMENT ON COLUMN meta.acs_variables.label IS E'A short label that describes wha
 /* Create and define data tables */
 CREATE TABLE data.acs_data (
     "id" INTEGER REFERENCES meta.acs_variables(id),
-    "fips" INTEGER REFERENCES data.us_counties(fips),
+    "fips" INTEGER REFERENCES meta.us_fips(fips),
     "value" FLOAT,
     PRIMARY KEY ("id", "fips")
 );
