@@ -10,6 +10,10 @@ from cmdc.datasets.uscensus.census import STATE_FIPS
 
 BASE_GEO_URL = "https://www2.census.gov/geo/tiger/"
 
+FIPS_RESTRICT_QUERY = "(fips < 60) | "
+FIPS_RESTRICT_QUERY += "((fips >= 1000) & (fips < 60_000)) | "
+FIPS_RESTRICT_QUERY += "((fips >= 1_000_000_000) & (fips < 60_000_000_000))"
+
 
 def _create_fips(geo, df):
     """
@@ -54,12 +58,12 @@ def _download_shape_file(apiurl, filename):
     # Read shapefile
     gdf = gpd.read_file(rq_str)
 
+    gdf = gdf.rename(
+        columns={"STATEFP": "STATE", "COUNTYFP": "COUNTY", "TRACTCE": "TRACT"}
+    )
     gdf["INTPTLAT"] = pd.to_numeric(gdf["INTPTLAT"])
     gdf["INTPTLON"] = pd.to_numeric(gdf["INTPTLON"])
-    gdf.columns = [
-        c.replace("FP", "").lower() if "FP" in c else c.lower()
-        for c in gdf.columns
-    ]
+    gdf.columns = [c.lower() for c in gdf.columns]
 
     return gdf
 
@@ -89,22 +93,19 @@ def download_shape_files(geo, year):
     if geo == "tract":
         dfs = []
 
-        for state_fips in STATE_FIPS:
-            datafile = f"tl_{year}_us_county"
-            url += datafile + ".zip"
-            req = self._get(
-                columns,
-                {"for": ("tract", "*"), "in": ("state", [state_fips])}
-            )
-            req_json = req.json()
-            _df = self._process_get_json(columns, req_json)
+        for state_fips in STATE_FIPS[:3]:
+            datafile = f"tl_2019_{state_fips}_tract"
+            _df = _download_shape_file(url, datafile)
             dfs.append(_df)
-        df = pd.concat(dfs, axis="index")
+        gdf = pd.concat(dfs, axis="index")
+        gdf = _create_fips(geo, gdf)
+        gdf["name"] = gdf["fips"].map(lambda x: "tract_" + str(x))
+
     elif (geo == "state") or (geo == "county"):
         datafile = f"tl_{year}_us_{geo}"
         gdf = _download_shape_file(url, datafile)
+        gdf = _create_fips(geo, gdf)
 
-    gdf = _create_fips(geo, gdf)
     gdf = gdf.loc[:, ["fips", "name", "aland", "intptlat", "intptlon"]]
 
     # Convert land area to square miles (m^2 -> km^2 -> mi^2
@@ -135,5 +136,5 @@ class USGeoBaseAPI(OnConflictNothingBase):
         return _sql_geo_insert
 
     def get(self):
-        return download_shape_files(self.geo, 2019).query("fips < 60")
+        return download_shape_files(self.geo, 2019).query(FIPS_RESTRICT_QUERY)
 

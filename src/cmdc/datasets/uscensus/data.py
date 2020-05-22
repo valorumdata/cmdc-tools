@@ -6,7 +6,7 @@ import requests
 import sqlalchemy as sa
 
 from cmdc.datasets.uscensus.census import ACSAPI
-from cmdc.datasets.uscensus.geo import _create_fips
+from cmdc.datasets.uscensus.geo import _create_fips, FIPS_RESTRICT_QUERY
 from cmdc.datasets.base import OnConflictNothingBase
 from cmdc.datasets.db_util import TempTable
 
@@ -75,7 +75,7 @@ class ACS(ACSAPI, OnConflictNothingBase):
 
         # Convert to fips representation
         df = self._create_fips(df)
-        df = df.query("fips < 60")
+        df = df.query(FIPS_RESTRICT_QUERY)
 
         # Reshape into desired format
         df = df.melt(id_vars="fips", var_name="census_id", value_name="value")
