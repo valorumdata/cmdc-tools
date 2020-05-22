@@ -22,8 +22,8 @@ COMMENT ON COLUMN meta.bea_variables.description is E'A verbal description of th
 CREATE TABLE data.bea_gdp (
     "id" int references meta.bea_variables(id),
     "year" INT,
-    "fips" INT references data.us_counties(fips),
-    "value" FLOAT,
+    "fips" BIGINT references data.us_fips(fips),
+    "value" DOUBLE PRECISION,
     PRIMARY KEY (id, year, fips)
 );
 
@@ -37,3 +37,4 @@ COMMENT ON COLUMN data.bea_gdp.id is E'An internal ID used to identify the varia
 COMMENT ON COLUMN data.bea_gdp.year is E'The year of the observation';
 COMMENT ON COLUMN data.bea_gdp.fips is E'The 5 digit fips code for identifying a US county.';
 COMMENT ON COLUMN data.bea_gdp.value is E'The value of the variable in the given year and county.';
+

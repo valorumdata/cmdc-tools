@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS data.weeklyeconomicindex;
 
 CREATE TABLE data.weeklyeconomicindex (
     "date" DATE PRIMARY KEY,
-    wei FLOAT
+    wei DOUBLE PRECISION
 );
 
 COMMENT ON TABLE data.weeklyeconomicindex IS

@@ -2,11 +2,11 @@ DROP TABLE IF EXISTS meta.us_fips CASCADE;
 
 CREATE TABLE meta.us_fips (
     "id" SERIAL PRIMARY KEY,
-    "fips" INTEGER,
+    "fips" BIGINT,
     "name" VARCHAR(30),
-    "area" FLOAT,
-    "latitude" FLOAT,
-    "longitude" FLOAT
+    "area" DOUBLE PRECISION,
+    "latitude" DOUBLE PRECISION,
+    "longitude" DOUBLE PRECISION
 );
 
 CREATE UNIQUE INDEX fips_ind ON meta.us_fips("fips");

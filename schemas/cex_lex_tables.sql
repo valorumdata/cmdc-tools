@@ -2,8 +2,8 @@ DROP TABLE IF EXISTS data.cex_state_lex;
 
 CREATE TABLE data.cex_state_lex (
     "date" date,
-    "s_prev" smallint references data.us_states(fips),
-    "s_today" smallint references data.us_states(fips),
+    "s_prev" smallint references meta.us_fips(fips),
+    "s_today" smallint references meta.us_fips(fips),
     "lex" numeric(10, 8),
     PRIMARY KEY ("date", "s_prev", "s_today")
 );
@@ -28,8 +28,8 @@ DROP TABLE IF EXISTS data.cex_county_lex;
 
 CREATE TABLE data.cex_county_lex (
     "date" DATE,
-    "c_prev" INT references data.us_counties(fips),
-    "c_today" INT references data.us_counties(fips),
+    "c_prev" INT references meta.us_fips(fips),
+    "c_today" INT references meta.us_fips(fips),
     "lex" numeric(10, 8),
     PRIMARY KEY ("date", "c_prev", "c_today")
 );

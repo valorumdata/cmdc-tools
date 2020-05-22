@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS data.cex_state_dex;
 
 CREATE TABLE data.cex_state_dex (
-    "state" SMALLINT references data.us_states (fips),
+    "state" SMALLINT references meta.us_fips (fips),
     "date" DATE,
     "dex" numeric(12, 6),
     "num_devices" INT,
@@ -125,7 +125,7 @@ COMMENT ON COLUMN data.cex_state_dex.num_devices_race_white_a is E'Adjusted num_
 
 DROP TABLE IF EXISTS data.cex_county_dex;
 CREATE TABLE data.cex_county_dex (
-    "county" INT references data.us_counties(fips),
+    "county" INT references meta.us_fips(fips),
     "date" DATE,
     "dex" numeric(12, 6),
     "num_devices" INT,

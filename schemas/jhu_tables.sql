@@ -71,7 +71,7 @@ COMMENT ON COLUMN data.jhu_daily_reports.active IS E'Active cases = total confir
 DROP TABLE IF EXISTS data.jhu_daily_reports_us;
 
 CREATE TABLE data.jhu_daily_reports_us (
-    "fips" int references data.us_states(fips),
+    "fips" int references meta.us_fips(fips),
     "date" DATE,
     "date_updated" timestamptz,
     "confirmed" int,
