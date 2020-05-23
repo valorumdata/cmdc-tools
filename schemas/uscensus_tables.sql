@@ -33,7 +33,7 @@ COMMENT ON COLUMN meta.acs_variables.label IS E'A short label that describes wha
 CREATE TABLE data.acs_data (
     "id" INTEGER REFERENCES meta.acs_variables(id),
     "fips" BIGINT REFERENCES meta.us_fips(fips),
-    "value" DOUBLE PRECISION,
+    "value" REAL,
     PRIMARY KEY ("id", "fips")
 );
 COMMENT ON TABLE data.acs_data IS E'

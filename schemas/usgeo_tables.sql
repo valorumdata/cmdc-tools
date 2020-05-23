@@ -4,9 +4,9 @@ CREATE TABLE meta.us_fips (
     "id" SERIAL PRIMARY KEY,
     "fips" BIGINT,
     "name" VARCHAR(30),
-    "area" DOUBLE PRECISION,
-    "latitude" DOUBLE PRECISION,
-    "longitude" DOUBLE PRECISION
+    "area" REAL,
+    "latitude" REAL,
+    "longitude" REAL
 );
 
 CREATE UNIQUE INDEX fips_ind ON meta.us_fips("fips");

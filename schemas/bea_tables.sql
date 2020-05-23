@@ -1,4 +1,5 @@
-DROP TABLE IF EXISTS META.bea_variables CASCADE;
+DROP TABLE IF EXISTS meta.bea_variables CASCADE;
+
 CREATE TABLE meta.bea_variables (
     "id" serial primary key,
     "line_code" INT,
@@ -22,7 +23,7 @@ COMMENT ON COLUMN meta.bea_variables.description is E'A verbal description of th
 CREATE TABLE data.bea_gdp (
     "id" int references meta.bea_variables(id),
     "year" INT,
-    "fips" BIGINT references data.us_fips(fips),
+    "fips" BIGINT references meta.us_fips(fips),
     "value" DOUBLE PRECISION,
     PRIMARY KEY (id, year, fips)
 );

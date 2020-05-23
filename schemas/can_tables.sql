@@ -6,7 +6,8 @@ CREATE TABLE meta.actnow_intervention_types (
 );
 
 INSERT INTO meta.actnow_intervention_types (id, name) VALUES
-(1, 'NO_INTERVENTION'), (2, 'WEAK_INTERVENTION'), (3, 'STRONG_INTERVENTION'), (4, 'OBSERVED_INTERVENTION');
+  (1, 'NO_INTERVENTION'), (2, 'WEAK_INTERVENTION'),
+  (3, 'STRONG_INTERVENTION'), (4, 'OBSERVED_INTERVENTION');
 
 DROP TABLE IF EXISTS data.actnow_county_timeseries;
 CREATE TABLE data.actnow_county_timeseries (
