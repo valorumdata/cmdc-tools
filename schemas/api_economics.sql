@@ -4,7 +4,7 @@ CREATE OR REPLACE VIEW api.economics AS
     LEFT JOIN meta.bea_variables bv
     on bv.id=bg.id
     UNION
-    SELECT dt, 0::BIGINT, 'wei'::TEXT, wei
+    SELECT dt, 0::INT, 'wei'::TEXT, wei
     FROM data.weeklyeconomicindex
 ;
 
