@@ -56,7 +56,7 @@ CREATE TABLE data.actnow_timeseries (
     "intervention_id" smallint references meta.actnow_intervention_types(id),
     "fips" int references meta.us_fips(fips),
     "variable_id" smallint references meta.actnow_timeseries_variables,
-    "value" real,
+    "value" INT,
     PRIMARY KEY (vintage, intervention_id, date, fips, variable_id)
 );
 
@@ -105,7 +105,7 @@ CREATE TABLE data.actnow_actual (
     "fips" int references meta.us_fips(fips),
     "variable_id" smallint references meta.actnow_timeseries_variables,
     "value" real,
-    PRIMARY KEY (vintage, intervention_id, date, fips, variable_id)
+    PRIMARY KEY (vintage, date, fips, variable_id)
 );
 
 COMMENT ON TABLE data.actnow_actual is E'This table includes the output of the COVID ActNow model for COVID-19. The model is built by a cross-disciplinary team of experts and provides projected values for the number of cases, deaths, hopsital load, and transmission rate at state and county levels.
