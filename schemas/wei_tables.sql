@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS data.weeklyeconomicindex;
 
 CREATE TABLE data.weeklyeconomicindex (
     "date" DATE PRIMARY KEY,
-    wei DOUBLE PRECISION
+    wei REAL
 );
 
 COMMENT ON TABLE data.weeklyeconomicindex IS
@@ -10,5 +10,5 @@ COMMENT ON TABLE data.weeklyeconomicindex IS
 
 COMMENT ON COLUMN data.weeklyeconomicindex.date IS 'The date for the weekly economic index. The date is recorded as the Saturday of each week.';
 
-COMMENT ON COLUMN data.weeklyeconomicindex.wei IS 'The weekly economic index. This index is computed using a combination of weekly economic series such as steel production, retail purchases, and unemployment claims...';
+COMMENT ON COLUMN data.weeklyeconomicindex.wei IS 'The weekly economic index. This index is computed using a combination of weekly economic series such as steel production, retail purchases, and unemployment claims.';
 

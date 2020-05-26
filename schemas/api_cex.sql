@@ -60,3 +60,4 @@ CREATE OR REPLACE VIEW api.cex_county_lex AS
     SELECT ccl.date, ccl.c_prev as prev_county, ccl.c_today as today_county, ccl.lex
     FROM data.cex_county_lex ccl
 ;
+
