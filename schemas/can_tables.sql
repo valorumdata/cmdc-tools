@@ -11,7 +11,7 @@ INSERT INTO meta.actnow_intervention_types (id, name) VALUES
 
 DROP TABLE IF EXISTS data.actnow_county_timeseries;
 CREATE TABLE data.actnow_county_timeseries (
-    "date" DATE,
+    "dt" DATE,
     "vintage" DATE,
     "intervention_id" smallint references meta.actnow_intervention_types(id),
     "fips" BIGINT references meta.us_fips(fips),
@@ -27,7 +27,7 @@ CREATE TABLE data.actnow_county_timeseries (
     "cumulative_infected" INT,
     "cumulative_positive_tests" INT,
     "cumulative_negative_tests" INT,
-    PRIMARY KEY (date, vintage, intervention_id, fips)
+    PRIMARY KEY (dt, vintage, intervention_id, fips)
 );
 
 COMMENT ON TABLE data.actnow_county_timeseries is E'This table includes the output of the COVID ActNow model for COVID-19. The model is built by a cross-disciplinary team of experts and provides projected values for the number of cases, deaths, hopsital load, and transmission rate at the county level.
@@ -39,7 +39,7 @@ NOTE that all data in this table is the output of a model. Even for rows where d
 To see actual values as an input to the model please see the actnow_county_actual table.
 ';
 
-COMMENT ON COLUMN data.actnow_county_timeseries.date is E'The projection date.';
+COMMENT ON COLUMN data.actnow_county_timeseries.dt is E'The projection date.';
 COMMENT ON COLUMN data.actnow_county_timeseries.vintage is E'The date on which all projections were made.';
 COMMENT ON COLUMN data.actnow_county_timeseries.intervention_id is E'A setting of parameters for different intervention types.
 
@@ -64,7 +64,7 @@ COMMENT ON COLUMN data.actnow_county_timeseries.cumulative_negative_tests is E'T
 
 DROP TABLE IF EXISTS data.actnow_state_timeseries;
 CREATE TABLE data.actnow_state_timeseries (
-    "date" DATE,
+    "dt" DATE,
     "vintage" DATE,
     "intervention_id" smallint references meta.actnow_intervention_types(id),
     "fips" BIGINT references meta.us_fips(fips),
@@ -80,7 +80,7 @@ CREATE TABLE data.actnow_state_timeseries (
     "cumulative_infected" INT,
     "cumulative_positive_tests" INT,
     "cumulative_negative_tests" INT,
-    PRIMARY KEY (date, vintage, intervention_id, fips)
+    PRIMARY KEY (dt, vintage, intervention_id, fips)
 );
 
 COMMENT ON TABLE data.actnow_state_timeseries is E'This table includes the output of the COVID ActNow model for COVID-19. The model is built by a cross-disciplinary team of experts and provides projected values for the number of cases, deaths, hopsital load, and transmission rate at the state level.
@@ -91,7 +91,7 @@ NOTE that all data in this table is the output of a model. Even for rows where d
 
 To see actual values as an input to the model please see the actnow_state_actual table.';
 
-COMMENT ON COLUMN data.actnow_state_timeseries.date is E'The projection date.';
+COMMENT ON COLUMN data.actnow_state_timeseries.dt is E'The projection date.';
 COMMENT ON COLUMN data.actnow_state_timeseries.vintage is E'The date on which all projections were made.';
 COMMENT ON COLUMN data.actnow_state_timeseries.intervention_id is E'A setting of parameters for different intervention types.
 
@@ -116,7 +116,7 @@ COMMENT ON COLUMN data.actnow_state_timeseries.cumulative_negative_tests is E'Th
 DROP TABLE IF EXISTS data.actnow_county_actuals;
 CREATE TABLE data.actnow_county_actuals (
     "vintage" DATE,
-    "date" DATE,
+    "dt" DATE,
     "fips" BIGINT references meta.us_fips(fips),
     "intervention_id" smallint references meta.actnow_intervention_types(id),
     "cumulative_confirmed_cases" INT,
@@ -133,7 +133,7 @@ CREATE TABLE data.actnow_county_actuals (
     "icu_beds_current_usage_covid" INT,
     "icu_beds_current_usage_total" INT,
     "icu_beds_typical_usage_rate" INT,
-    PRIMARY KEY ("vintage", "date", "fips")
+    PRIMARY KEY ("vintage", "dt", "fips")
 );
 
 COMMENT ON TABLE data.actnow_county_actuals is E'This table contains actual data that is used by the Covid Act Now modeling team. The data is used either as an input to the model or against the model outputs to test the accuracy of predictions.
@@ -150,7 +150,7 @@ COMMENT ON COLUMN data.actnow_county_actuals.cumulative_confirmed_cases is E'Cum
 COMMENT ON COLUMN data.actnow_county_actuals.cumulative_positive_tests is E'Cumulative number of positive test cases.';
 COMMENT ON COLUMN data.actnow_county_actuals.cumulative_negative_tests is E'Cumulative number of negative test cases.';
 COMMENT ON COLUMN data.actnow_county_actuals.cumulative_deaths is E'Cumulative number of COVID-19 related deaths.';
-COMMENT ON COLUMN data.actnow_county_actuals."date" is E'The date for which the data applies';
+COMMENT ON COLUMN data.actnow_county_actuals.dt is E'The date for which the data applies';
 COMMENT ON COLUMN data.actnow_county_actuals.fips is E'The 5 digit FIPS code for the US county.';
 COMMENT ON COLUMN data.actnow_county_actuals.vintage is E'The date on which the data was reported.';
 COMMENT ON COLUMN data.actnow_county_actuals.hospital_beds_capacity is E'The known capacity of hospital beds';
@@ -167,7 +167,7 @@ COMMENT ON COLUMN data.actnow_county_actuals.icu_beds_typical_usage_rate is E'Th
 DROP TABLE IF EXISTS data.actnow_state_actuals;
 CREATE TABLE data.actnow_state_actuals (
     "vintage" DATE,
-    "date" DATE,
+    "dt" DATE,
     "fips" BIGINT references meta.us_fips(fips),
     "intervention_id" smallint references meta.actnow_intervention_types(id),
     "cumulative_confirmed_cases" INT,
@@ -184,7 +184,7 @@ CREATE TABLE data.actnow_state_actuals (
     "icu_beds_current_usage_covid" INT,
     "icu_beds_current_usage_total" INT,
     "icu_beds_typical_usage_rate" INT,
-    PRIMARY KEY ("vintage", "date", "fips")
+    PRIMARY KEY ("vintage", "dt", "fips")
 );
 
 COMMENT ON TABLE data.actnow_state_actuals is E'This table contains actual data that is used by the Covid Act Now modeling team. The data is used either as an input to the model or against the model outputs to test the accuracy of predictions.
@@ -201,7 +201,7 @@ COMMENT ON COLUMN data.actnow_state_actuals.cumulative_confirmed_cases is E'Cumu
 COMMENT ON COLUMN data.actnow_state_actuals.cumulative_positive_tests is E'Cumulative number of positive test cases.';
 COMMENT ON COLUMN data.actnow_state_actuals.cumulative_negative_tests is E'Cumulative number of negative test cases.';
 COMMENT ON COLUMN data.actnow_state_actuals.cumulative_deaths is E'Cumulative number of COVID-19 related deaths.';
-COMMENT ON COLUMN data.actnow_state_actuals."date" is E'The date for which the data applies';
+COMMENT ON COLUMN data.actnow_state_actuals.dt is E'The date for which the data applies';
 COMMENT ON COLUMN data.actnow_state_actuals.fips is E'The 2 digit FIPS code for the US state.';
 COMMENT ON COLUMN data.actnow_state_actuals.vintage is E'The date on which the data was reported.';
 COMMENT ON COLUMN data.actnow_state_actuals.hospital_beds_capacity is E'The known capacity of hospital beds';

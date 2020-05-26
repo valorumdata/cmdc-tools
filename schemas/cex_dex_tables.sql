@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS data.cex_state_dex;
 
 CREATE TABLE data.cex_state_dex (
     "state" SMALLINT references meta.us_fips (fips),
-    "date" DATE,
+    "dt" DATE,
     "dex" numeric(12, 6),
     "num_devices" INT,
     "dex_a" numeric(12, 6),
@@ -55,7 +55,7 @@ CREATE TABLE data.cex_state_dex (
     "num_devices_race_white" INT,
     "dex_race_white_a" numeric(12, 6),
     "num_devices_race_white_a" INT,
-    PRIMARY KEY ("date", "state")
+    PRIMARY KEY ("dt", "state")
 );
 
 COMMENT ON TABLE data.cex_state_dex is E'For a smartphone residing in a given state, how many distinct devices also visited any of the commercial venues that this device visited today? The state-level DEX reports the state-level average of this number across all devices residing in the state that day. The DEX values are necessarily only a fraction of the number of distinct individuals that also visited any of the commercial venues visited by a device, since only a fraction of individuals, venues, and visits are in the device sample.
@@ -69,7 +69,7 @@ If you use this dataset, we recommend seeing the [notes for users of the DEX dat
 Source: https://github.com/COVIDExposureIndices/COVIDExposureIndices';
 
 COMMENT ON COLUMN data.cex_state_dex.state is E'The state for which the DEX is reported.';
-COMMENT ON COLUMN data.cex_state_dex."date" is E'The date on which the DEX value was reported';
+COMMENT ON COLUMN data.cex_state_dex."dt" is E'The date on which the DEX value was reported';
 COMMENT ON COLUMN data.cex_state_dex.dex is E'the DEX value';
 COMMENT ON COLUMN data.cex_state_dex.num_devices is E'The number of devices in this state that are part of the sample.';
 COMMENT ON COLUMN data.cex_state_dex.dex_a is E'Adjusted dex in state on that date';
@@ -126,12 +126,12 @@ COMMENT ON COLUMN data.cex_state_dex.num_devices_race_white_a is E'Adjusted num_
 DROP TABLE IF EXISTS data.cex_county_dex;
 CREATE TABLE data.cex_county_dex (
     "county" INT references meta.us_fips(fips),
-    "date" DATE,
+    "dt" DATE,
     "dex" numeric(12, 6),
     "num_devices" INT,
     "dex_a" numeric(12, 6),
     "num_devices_a" INT,
-    PRIMARY KEY ("date", county)
+    PRIMARY KEY ("dt", county)
 );
 
 COMMENT ON TABLE data.cex_county_dex is E'For a smartphone residing in a given county, how many distinct devices also visited any of the commercial venues that this device visited today? The county-level DEX reports the county-level average of this number across all devices residing in the county that day. The DEX values are necessarily only a fraction of the number of distinct individuals that also visited any of the commercial venues visited by a device, since only a fraction of individuals, venues, and visits are in the device sample.
@@ -145,7 +145,7 @@ If you use this dataset, we recommend seeing the [notes for users of the DEX dat
 Source: https://github.com/COVIDExposureIndices/COVIDExposureIndices';
 
 COMMENT ON COLUMN data.cex_county_dex.county is E'County code (5-digit FIPS)';
-COMMENT ON COLUMN data.cex_county_dex.date is E'The date on which the DEX value was reported';
+COMMENT ON COLUMN data.cex_county_dex.dt is E'The date on which the DEX value was reported';
 COMMENT ON COLUMN data.cex_county_dex.dex is E'The DEX value in county on that date';
 COMMENT ON COLUMN data.cex_county_dex.num_devices is E'Number of devices residing in county on that date';
 COMMENT ON COLUMN data.cex_county_dex.dex_a is E'Adjusted dex in county on that date';

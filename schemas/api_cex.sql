@@ -1,6 +1,6 @@
 /* DEX view */
 CREATE OR REPLACE VIEW api.cex_state_dex AS
-  SELECT csd.date, csd.state as fips,
+  SELECT csd.dt, csd.state as fips,
     csd.dex as dex_baseline, csd.num_devices as n_devices_baseline,
     csd.dex_a as dex_adjusted, csd.num_devices_a as n_devices_adjusted
   FROM data.cex_state_dex csd
@@ -30,7 +30,7 @@ CREATE OR REPLACE VIEW api.cex_state_dex_demographics AS
 
 
 CREATE OR REPLACE VIEW api.cex_county_dex AS
-  SELECT ccd.date, ccd.county as fips,
+  SELECT ccd.dt, ccd.county as fips,
     ccd.dex as dex_baseline, ccd.num_devices as num_devices_baseline,
     ccd.dex_a as dex_adjusted, ccd.num_devices_a as num_devices_adjusted
   FROM data.cex_county_dex ccd
@@ -51,13 +51,13 @@ Source: https://github.com/COVIDExposureIndices/COVIDExposureIndices
 
 
 CREATE OR REPLACE VIEW api.cex_state_lex AS
-    SELECT csl.date, csl.s_prev as prev_state, csl.s_today as today_state, csl.lex
+    SELECT csl.dt, csl.s_prev as prev_state, csl.s_today as today_state, csl.lex
     FROM data.cex_state_lex csl
 ;
 
 
 CREATE OR REPLACE VIEW api.cex_county_lex AS
-    SELECT ccl.date, ccl.c_prev as prev_county, ccl.c_today as today_county, ccl.lex
+    SELECT ccl.dt, ccl.c_prev as prev_county, ccl.c_today as today_county, ccl.lex
     FROM data.cex_county_lex ccl
 ;
 

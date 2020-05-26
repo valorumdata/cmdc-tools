@@ -1,11 +1,11 @@
 DROP TABLE IF EXISTS data.cex_state_lex;
 
 CREATE TABLE data.cex_state_lex (
-    "date" date,
+    "dt" date,
     "s_prev" smallint references meta.us_fips(fips),
     "s_today" smallint references meta.us_fips(fips),
     "lex" numeric(10, 8),
-    PRIMARY KEY ("date", "s_prev", "s_today")
+    PRIMARY KEY ("dt", "s_prev", "s_today")
 );
 
 COMMENT ON TABLE data.cex_state_lex IS E'Among smartphones that pinged in a given state today, what share of those devices pinged in each state at least once during the previous 14 days? The daily state-level LEX is a 51-by-51 matrix in which each cell reports, among devices that pinged today in the column state, the share of devices that pinged in the row state at least once during the previous 14 days. It is important to note that a cell phone can ping in more than a single state which means that these shares will not necessarily sum to 1.
@@ -22,16 +22,16 @@ COMMENT ON COLUMN data.cex_state_lex.s_today IS E'The state for which a device w
 
 COMMENT ON COLUMN data.cex_state_lex.lex IS E'The LEX number';
 
-COMMENT ON COLUMN data.cex_state_lex. "date" IS E'The date for which the data applies';
+COMMENT ON COLUMN data.cex_state_lex.dt IS E'The date for which the data applies';
 
 DROP TABLE IF EXISTS data.cex_county_lex;
 
 CREATE TABLE data.cex_county_lex (
-    "date" DATE,
+    "dt" DATE,
     "c_prev" INT references meta.us_fips(fips),
     "c_today" INT references meta.us_fips(fips),
     "lex" numeric(10, 8),
-    PRIMARY KEY ("date", "c_prev", "c_today")
+    PRIMARY KEY ("dt", "c_prev", "c_today")
 );
 
 COMMENT ON TABLE data.cex_county_lex IS E'Among smartphones that pinged in a given county today, what share of those devices pinged in each county at least once during the previous 14 days? The daily county-level LEX is an approximately 2000-by-2000 matrix in which each cell reports, among devices that pinged today in the column county, the share of devices that pinged in the row county at least once during the previous 14 days. It is important to note that a cell phone can ping in more than a single county which means that these shares will not necessarily sum to 1.
@@ -48,5 +48,5 @@ COMMENT ON COLUMN data.cex_county_lex.c_today IS E'The county for which a device
 
 COMMENT ON COLUMN data.cex_county_lex.lex IS E'The LEX number';
 
-COMMENT ON COLUMN data.cex_county_lex."date" IS E'The date for which the data applies';
+COMMENT ON COLUMN data.cex_county_lex.dt IS E'The date for which the data applies';
 
