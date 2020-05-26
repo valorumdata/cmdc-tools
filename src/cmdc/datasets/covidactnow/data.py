@@ -9,7 +9,8 @@ _CANURL = "https://data.covidactnow.org/latest/us"
 
 class CANTimeseries(OnConflictNothingBase):
     URL = _CANURL + "/{geo}.{intervention}_INTERVENTION.timeseries.json"
-    pk = '("date", "vintage", "intervention_id", "fips")'
+    idx = ["vintage", "intervention", "date", "fips"]
+    pk = '('"vintage", "intervention", "date", "fips")'
     table_name = "actnow_county_timeseries"
 
     def __init__(self, intervention="OBSERVED"):
@@ -65,8 +66,7 @@ class CANTimeseries(OnConflictNothingBase):
             df[c] = pd.to_datetime(df[c])
 
         df["fips"] = df["fips"].astype(int)
-
-        return df
+        return df.melt(id_vars=self.idx)
 
     def _insert_query(self, df, table_name, temp_name, pk):
         cols = list(df)
@@ -96,6 +96,7 @@ class CANStateTimeseries(CANTimeseries):
 
 
 class CANActuals(CANTimeseries):
+    # intentionally keeping intervention as a column so `value` can remain numeric
     pk = '("vintage", "date", "fips")'
     def _unpack(self, js):
         colmap = dict(
