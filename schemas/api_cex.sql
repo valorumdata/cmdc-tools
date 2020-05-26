@@ -51,13 +51,13 @@ Source: https://github.com/COVIDExposureIndices/COVIDExposureIndices
 
 
 CREATE OR REPLACE VIEW api.cex_state_lex AS
-    SELECT csl.dt, csl.s_prev as prev_state, csl.s_today as today_state, csl.lex
+    SELECT csl.dt, csl.s_prev as state_previous, csl.s_today as state_today, csl.lex
     FROM data.cex_state_lex csl
 ;
 
 
 CREATE OR REPLACE VIEW api.cex_county_lex AS
-    SELECT ccl.dt, ccl.c_prev as prev_county, ccl.c_today as today_county, ccl.lex
+    SELECT ccl.dt, ccl.c_prev as county_previous, ccl.c_today as county_today, ccl.lex
     FROM data.cex_county_lex ccl
 ;
 

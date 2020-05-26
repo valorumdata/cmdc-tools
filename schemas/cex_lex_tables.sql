@@ -4,7 +4,7 @@ CREATE TABLE data.cex_state_lex (
     "dt" date,
     "s_prev" smallint references meta.us_fips(fips),
     "s_today" smallint references meta.us_fips(fips),
-    "lex" numeric(10, 8),
+    "lex" REAL,
     PRIMARY KEY ("dt", "s_prev", "s_today")
 );
 
@@ -30,7 +30,7 @@ CREATE TABLE data.cex_county_lex (
     "dt" DATE,
     "c_prev" INT references meta.us_fips(fips),
     "c_today" INT references meta.us_fips(fips),
-    "lex" numeric(10, 8),
+    "lex" REAL,
     PRIMARY KEY ("dt", "c_prev", "c_today")
 );
 
