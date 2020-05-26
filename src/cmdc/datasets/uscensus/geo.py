@@ -123,8 +123,9 @@ class USGeoBaseAPI(OnConflictNothingBase):
     table_name = "us_fips"
     pk = '("id")'
 
-    def __init__(self, geo):
+    def __init__(self, geo, year=2019):
         self.geo = geo
+        self.year = year
 
     def _insert_query(self, df, table_name, temp_name, pk):
         _sql_geo_insert = f"""
@@ -136,5 +137,7 @@ class USGeoBaseAPI(OnConflictNothingBase):
         return _sql_geo_insert
 
     def get(self):
-        return download_shape_files(self.geo, 2019).query(FIPS_RESTRICT_QUERY)
+        return download_shape_files(
+            self.geo, self.year
+        ).query(FIPS_RESTRICT_QUERY)
 
