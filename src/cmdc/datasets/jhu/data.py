@@ -76,6 +76,14 @@ class DailyReports(OnConflictNothingBase):
             )
 
         df["date"] = _date
+        if "active" not in list(df):
+            df["active"] = (
+                df["confirmed"].fillna(0) - 
+                df["deaths"].fillna(0) -
+                df["recovered"].fillna(0)
+            )
+        count_cols = ["confirmed", "deaths", "recovered", "active"]
+        df[count_cols] = df[count_cols].fillna(0).astype(int)
         self.df = df[self.raw_cols]
         return self.df
 

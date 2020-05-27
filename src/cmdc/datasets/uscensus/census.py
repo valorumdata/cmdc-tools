@@ -14,13 +14,19 @@ STATE_FIPS = [
 ]
 
 
-def _update_data_file(filename):
-    "Saves the available datasets into a file called `filename`"
+def _download_data_file():
     url = "https://api.census.gov/data.json"
     available_data = requests.get(url)
 
+    return available_data.json()
+
+
+def _update_data_file(filename):
+    "Saves the available datasets into a file called `filename`"
+    data = _download_data_file()
+
     with open(filename, "w") as f:
-        f.write(json.dumps(available_data.json()))
+        json.dump(data, f)
 
 
 def _load_metadata(filename):
@@ -34,7 +40,7 @@ def _load_metadata(filename):
     return available_data["dataset"]
 
 
-AVAIL_DATASETS = _load_metadata("./available_data.json")
+# AVAIL_DATASETS = _load_metadata("./available_data.json")
 
 
 class USCensusBaseAPI(object):
@@ -265,9 +271,11 @@ class ACSAPI(USCensusBaseAPI):
         self.table = table
         self.year = year
 
+
         # Search for the dataset with the right properties
+        _avail_datasets = _download_data_file()["dataset"]
         dataset = [
-            x for x in AVAIL_DATASETS if (
+            x for x in _avail_datasets if (
                 (self.product in x["c_dataset"]) and (table.title() in x["title"])
                 and (x["c_vintage"] == year)
             )

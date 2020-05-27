@@ -35,12 +35,12 @@ class DailyStateLex(OnConflictNothingBase):
 
     def _insert_query(self, df, table_name, temp_name, pk):
         out = f"""
-        INSERT INTO data.{table_name} (date, s_prev, s_today, lex)
+        INSERT INTO data.{table_name} (dt, s_prev, s_today, lex)
         SELECT csl.date, sp.fips as s_prev, st.fips as s_today, csl.lex
         FROM {temp_name} csl
-        LEFT JOIN data.us_states sp ON sp.abbreviation = csl.s_prev
-        LEFT JOIN data.us_states st ON st.abbreviation = csl.s_today
-        ON CONFLICT ("date", s_prev, s_today) DO UPDATE SET lex = excluded.lex;
+        LEFT JOIN meta.us_states sp ON sp.abbreviation = csl.s_prev
+        LEFT JOIN meta.us_states st ON st.abbreviation = csl.s_today
+        ON CONFLICT ("dt", s_prev, s_today) DO UPDATE SET lex = excluded.lex;
         """
         return textwrap.dedent(out)
 
@@ -61,12 +61,12 @@ class DailyCountyLex(DailyStateLex):
 
     def _insert_query(self, df, table_name, temp_name, pk):
         out = f"""
-        INSERT INTO data.{table_name} (date, c_prev, c_today, lex)
+        INSERT INTO data.{table_name} (dt, c_prev, c_today, lex)
         SELECT csl.date, fp.fips as c_prev, ft.fips as c_today, csl.lex
         FROM {temp_name} csl
-        LEFT JOIN data.us_counties fp ON fp.fips = csl.c_prev
-        LEFT JOIN data.us_counties ft ON ft.fips = csl.c_today
-        ON CONFLICT ("date", c_prev, c_today) DO UPDATE SET lex = excluded.lex
+        LEFT JOIN meta.us_fips fp ON fp.fips = csl.c_prev
+        LEFT JOIN meta.us_fips ft ON ft.fips = csl.c_today
+        ON CONFLICT ("dt", c_prev, c_today) DO UPDATE SET lex = excluded.lex
         """
         return textwrap.dedent(out)
 
@@ -75,7 +75,7 @@ class StateDex(OnConflictNothingBase):
     __url = "{BASE}/dex_data/{geo}_dex.csv"
     table_name = "cex_state_dex"
     geo_name = "state"
-    pk = '("date", state)'
+    pk = '("dt", state)'
     first_select_col = "f.fips"
     join_on = "f.abbreviation = tt.state"
 
@@ -87,14 +87,16 @@ class StateDex(OnConflictNothingBase):
         return df
 
     def _insert_query(self, df, table_name, temp_name, pk):
-        final_cols = "(" + ", ".join(list(df)) + ")"
+        cols = list(df)
+        cols[cols.index("date")] = "dt"
+        final_cols = "(" + ", ".join(cols) + ")"
         temp_cols = ", ".join([self.first_select_col] + list(df)[1:])
         if not pk.startswith("("):
             pk = f"({pk})"
         out = f"""
         INSERT INTO data.{table_name} {final_cols}
         SELECT {temp_cols} from {temp_name} tt
-        LEFT JOIN data.us_states f on {self.join_on}
+        LEFT JOIN meta.us_states f on {self.join_on}
         ON CONFLICT {pk} DO NOTHING;
         """
         return textwrap.dedent(out)
@@ -102,20 +104,22 @@ class StateDex(OnConflictNothingBase):
 
 class CountyDex(StateDex):
     table_name = "cex_county_dex"
-    pk = '("date", county)'
+    pk = '("dt", county)'
     geo_name = "county"
     first_select_col = "f.fips"
     join_on = "tt.county = f.fips"
 
     def _insert_query(self, df, table_name, temp_name, pk):
-        final_cols = "(" + ", ".join(list(df)) + ")"
+        cols = list(df)
+        cols[cols.index("date")] = "dt"
+        final_cols = "(" + ", ".join(cols) + ")"
         temp_cols = ", ".join([self.first_select_col] + list(df)[1:])
         if not pk.startswith("("):
             pk = f"({pk})"
         out = f"""
         INSERT INTO data.{table_name} {final_cols}
         SELECT {temp_cols} from {temp_name} tt
-        LEFT JOIN data.us_counties f on {self.join_on}
+        LEFT JOIN meta.us_fips f on {self.join_on}
         ON CONFLICT {pk} DO NOTHING;
         """
         return textwrap.dedent(out)
