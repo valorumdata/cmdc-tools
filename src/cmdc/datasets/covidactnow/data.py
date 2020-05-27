@@ -9,8 +9,9 @@ _CANURL = "https://data.covidactnow.org/latest/us"
 
 class CANTimeseries(OnConflictNothingBase):
     URL = _CANURL + "/{geo}.{intervention}_INTERVENTION.timeseries.json"
-    pk = '("date", "vintage", "intervention_id", "fips")'
-    table_name = "actnow_county_timeseries"
+    idx = ["vintage", "intervention", "date", "fips"]
+    pk = '("vintage", "intervention_id", "date", "fips", "variable_id")'
+    table_name = "actnow_timeseries"
 
     def __init__(self, intervention="OBSERVED"):
         super().__init__()
@@ -65,23 +66,26 @@ class CANTimeseries(OnConflictNothingBase):
             df[c] = pd.to_datetime(df[c])
 
         df["fips"] = df["fips"].astype(int)
-
-        return df
+        return df.melt(id_vars=self.idx)
 
     def _insert_query(self, df, table_name, temp_name, pk):
         cols = list(df)
         intervention_ix = cols.index("intervention")
         final_cols = cols.copy()
         final_cols[intervention_ix] = "intervention_id"
+        variable_ix = cols.index("variable")
+        final_cols[variable_ix] = "variable_id"
 
         temp_cols = list(df)
         temp_cols[intervention_ix] = "it.id as intervention_id"
+        temp_cols[variable_ix] = "vt.id as variable_id"
 
         out = f"""
         INSERT INTO data.{table_name} ({", ".join(final_cols)})
         SELECT {", ".join(temp_cols)}
         from {temp_name} tt
         LEFT JOIN meta.actnow_intervention_types it on it.name = tt.intervention
+        LEFT JOIN meta.{self.table_name + "_variables"} vt on vt.name = tt.variable
         ON CONFLICT {pk} DO NOTHING
         """
         return textwrap.dedent(out)
@@ -91,12 +95,13 @@ class CANCountyTimeseries(CANTimeseries):
     geo = "counties"
 
 class CANStateTimeseries(CANTimeseries):
-    table_name = "actnow_state_timeseries"
     geo = "states"
 
 
 class CANActuals(CANTimeseries):
-    pk = '("vintage", "date", "fips")'
+    # intentionally keeping intervention as a column so `value` can remain numeric
+    pk = '("vintage", "date", "fips", "variable_id")'
+    table_name = "actnow_actual"
     def _unpack(self, js):
         colmap = dict(
             lastUpdatedDate="vintage",
@@ -151,11 +156,9 @@ class CANActuals(CANTimeseries):
 
 
 class CANCountyActuals(CANActuals):
-    table_name = "actnow_county_actuals"
     geo = "counties"
 
 class CANStateActuals(CANActuals):
-    table_name = "actnow_state_actuals"
     geo = "states"
 
 # %%
