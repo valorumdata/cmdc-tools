@@ -38,7 +38,11 @@ COMMENT ON COLUMN data.us_covid.id is E'The variable id used in `data.us_covid`'
 COMMENT ON COLUMN data.us_covid.name is E'The variable name as described in the table description';
 
 INSERT INTO meta.covid_variables (name) VALUES
+  ('cases_suspected'),
+  ('cases_confirmed'),
   ('cases_total'),
+  ('deaths_suspected'),
+  ('deaths_confirmed'),
   ('deaths_total'),
   ('positive_tests_total'),
   ('negative_tests_total'),
