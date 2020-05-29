@@ -365,4 +365,6 @@ class Client(object):
 # %%
 if __name__ == "__main__":
     c = Client()
-    c.covid(fips=12)
+    c.economics(
+        meta_date="2018-01-01", variable="GDP_All industry total"
+    ).demographics()
