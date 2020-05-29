@@ -10,6 +10,7 @@ CREATE SCHEMA api;
 \i usgeo_tables.sql;
 \i cex_dex_tables.sql;
 \i cex_lex_tables.sql;
+\i covid_data.sql;
 \i uscensus_tables.sql;
 \i bea_tables.sql;
 \i wei_tables.sql;
