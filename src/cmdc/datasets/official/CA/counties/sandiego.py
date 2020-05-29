@@ -33,16 +33,6 @@ class SanDiego(ArcGIS):
 
         return None
 
-    def _insert_query(self, df, table_name, temp_name, pk):
-        out = f"""
-        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
-        FROM {temp_name} tt
-        LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        ON CONFLICT {pk} DO NOTHING
-        """
-        return out
-
     def get(self):
 
         _url = self.arcgis_query_url("CovidDashUpdate", 1)
