@@ -1,4 +1,6 @@
 {
-    "python.pythonPath": "/home/sglyon/anaconda3/envs/covid-airflow/bin/python",
-    "python.formatting.provider": "black"
+    "python.pythonPath": "/home/sglyon/anaconda3/envs/cmdc/bin/python",
+    "python.formatting.provider": "black",
+    "python.testing.pytestEnabled": true,
+    "editor.formatOnSave": true
 }
