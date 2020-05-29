@@ -1,35 +1,24 @@
 import pandas as pd
 import textwrap
 
-from cmdc.datasets.official.base import CountyData
+from cmdc.datasets import OnConflictNothingBase
 
 
-CA_COUNTY_URL = "https://data.chhs.ca.gov/"
-CA_COUNTY_URL += "dataset/6882c390-b2d7-4b9a-aefa-2068cee63e47/resource/"
-CA_COUNTY_URL += "6cd8d424-dfaa-4bdd-9410-a3d656e1176e/download/covid19data.csv"
+class CountyData(OnConflictNothingBase):
+    table_name = "us_covid"
+    pk = '("vintage", "dt", "fips", "variable_id")'
 
-C_RENAMER = {
-    "County Name": "name",
-    "Most Recent Date": "dt",
-    "Total Count Confirmed": "cases_total",
-    "Total Count Deaths": "deaths_total",
-    "COVID-19 Positive Patients": "hospital_beds_in_use_covid_confirmed",
-    "Suspected COVID-19 Positive Patients": "hospital_beds_in_use_covid_suspected",
-    "ICU COVID-19 Positive Patients": "icu_beds_in_use_covid_confirmed",
-    "ICU COVID-19 Suspected Patients": "icu_beds_in_use_covid_suspected",
-}
+    def __init__(self):
+        super(CountyData, self).__init__()
 
-
-class CACountyData(CountyData):
+        return None
 
     def _insert_query(self, df, table_name, temp_name, pk):
         out = f"""
         INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value
+        SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
         FROM {temp_name} tt
-        LEFT JOIN meta.us_fips us ON tt.name=us.name
         LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        WHERE us.fips > 6000 AND us.fips < 7000
         ON CONFLICT {pk} DO NOTHING
         """
 
@@ -56,4 +45,36 @@ class CACountyData(CountyData):
         )
 
         return df
+
+
+class ArcGIS(CountyData):
+    """
+    Must define class variables:
+
+    * `ARCGIS_ID`
+    * `FIPS`
+
+    in order to use this class
+    """
+
+    def __init__(self, params=None):
+        super(ArcGIS, self).__init__()
+
+        # Default parameter values
+        if params is None:
+            params = {
+                "where": "0=0",
+                "outFields": "*",
+                "returnGeometry": "false",
+                "f": "pjson"
+            }
+        self.params = params
+
+        return None
+
+    def arcgis_query_url(self, service, sheet):
+        out = f"http://services1.arcgis.com/{self.ARCGIS_ID}/"
+        out += f"ArcGIS/rest/services/{service}/FeatureServer/{sheet}/query"
+
+        return out
 
