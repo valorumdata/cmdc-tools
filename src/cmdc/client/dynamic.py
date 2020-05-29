@@ -272,7 +272,7 @@ class Client(object):
         "Make GET request to `url` and parse resulting JSON as DataFrame"
         res = self.sess.get(url)
         if not res.ok:
-            raise ValueError(f"Error fetching {url}: {res.conten}t")
+            raise ValueError(f"Error fetching {url}: {res.content}")
         return pd.DataFrame(res.json())
 
     def _reshape_df(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -328,7 +328,7 @@ class Client(object):
         query_strings = {k: self._create_query_string(k, v) for k, v in filters.items()}
         dfs = self._run_queries(query_strings)
         wide_dfs = [self._reshape_df(v) for v in dfs.values()]
-        output = self._combine_dfs(dfs)
+        output = self._combine_dfs(wide_dfs)
 
         self._current_request = {}
         self._current_request_headers = {}
@@ -365,6 +365,4 @@ class Client(object):
 # %%
 if __name__ == "__main__":
     c = Client()
-    c.economics(
-        meta_date="2018-01-01", variable="GDP_All industry total"
-    ).demographics()
+    c.covid(fips=12)
