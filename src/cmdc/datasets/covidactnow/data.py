@@ -9,8 +9,8 @@ _CANURL = "https://data.covidactnow.org/latest/us"
 
 class CANTimeseries(OnConflictNothingBase):
     URL = _CANURL + "/{geo}.{intervention}_INTERVENTION.timeseries.json"
-    idx = ["vintage", "intervention", "date", "fips"]
-    pk = '("vintage", "intervention_id", "date", "fips", "variable_id")'
+    idx = ["vintage", "intervention", "dt", "fips"]
+    pk = '("vintage", "intervention_id", "dt", "fips", "variable_id")'
     table_name = "actnow_timeseries"
 
     def __init__(self, intervention="OBSERVED"):
@@ -23,7 +23,7 @@ class CANTimeseries(OnConflictNothingBase):
 
     def _unpack(self, js):
         colmap = dict(
-            date="date",
+            date="dt",
             lastUpdatedDate="vintage",
             intervention="intervention",
             fips="fips",
@@ -62,7 +62,7 @@ class CANTimeseries(OnConflictNothingBase):
 
         js = res.json()
         df = self._unpack(js)
-        for c in ["date", "vintage"]:
+        for c in ["dt", "vintage"]:
             df[c] = pd.to_datetime(df[c])
 
         df["fips"] = df["fips"].astype(int)
@@ -94,13 +94,20 @@ class CANTimeseries(OnConflictNothingBase):
 class CANCountyTimeseries(CANTimeseries):
     geo = "counties"
 
+    def get(self):
+        df = super().get()
+        df["value"] = pd.to_numeric(df["value"])
+        df = df.dropna()
+        df["value"] = df["value"].astype(int)
+        return df
+
 class CANStateTimeseries(CANTimeseries):
     geo = "states"
 
 
 class CANActuals(CANTimeseries):
     # intentionally keeping intervention as a column so `value` can remain numeric
-    pk = '("vintage", "date", "fips", "variable_id")'
+    pk = '("vintage", "dt", "fips", "variable_id")'
     table_name = "actnow_actual"
     def _unpack(self, js):
         colmap = dict(
@@ -112,7 +119,7 @@ class CANActuals(CANTimeseries):
             cumulativeNegativeTests="cumulative_negative_tests",
             cumulativeDeaths="cumulative_deaths",
             contactTracers="contact_tracers",
-            date="date",
+            date="dt",
             hospital_beds_capacity="hospital_beds_capacity",
             hospital_beds_totalCapacity="hospital_beds_total_capacity",
             hospital_beds_currentUsageCovid="hospital_beds_current_usage_covid",
@@ -144,10 +151,10 @@ class CANActuals(CANTimeseries):
             idf.columns = [f"icu_beds_{n}" for n in list(idf)]
 
             new_df = pd.concat([base, hdf, idf], axis=1).rename(columns=colmap)
-            for c in ["date", "vintage"]:
+            for c in ["dt", "vintage"]:
                 new_df[c] = pd.to_datetime(new_df[c])
 
-            for c in set(list(new_df)) - set(["date", "vintage", "intervention"]):
+            for c in set(list(new_df)) - set(["dt", "vintage", "intervention"]):
                 new_df[c] = pd.to_numeric(new_df[c])
 
             dfs.append(new_df)

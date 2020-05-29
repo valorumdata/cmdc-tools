@@ -24,10 +24,10 @@ class Locations(OnConflictNothingBase):
 
 class DailyReports(OnConflictNothingBase):
     table_name = "jhu_daily_reports"
-    pk = "(uid, date)"
+    pk = "(uid, dt)"
     raw_cols = [
         "combined_key",
-        "date",
+        "dt",
         "date_updated",
         "confirmed",
         "deaths",
@@ -75,7 +75,7 @@ class DailyReports(OnConflictNothingBase):
                 df["country_region"].fillna("")
             )
 
-        df["date"] = _date
+        df["dt"] = _date
         if "active" not in list(df):
             df["active"] = (
                 df["confirmed"].fillna(0) - 
@@ -101,10 +101,10 @@ class DailyReports(OnConflictNothingBase):
 
 class DailyReportsUS(DailyReports):
     table_name = "jhu_daily_reports_us"
-    pk = "(fips, date)"
+    pk = "(fips, dt)"
     raw_cols = [
         "fips",
-        "date",
+        "dt",
         "date_updated",
         "confirmed",
         "deaths",
@@ -117,7 +117,7 @@ class DailyReportsUS(DailyReports):
         "testing_rate",
         "hospitalization_rate"
     ]
-    join_clause = "WHERE fips in (SELECT fips FROM data.us_states)"
+    join_clause = "WHERE fips in (SELECT fips FROM meta.us_fips)"
 
     @property
     def final_cols(self):
@@ -136,7 +136,7 @@ class DailyReportsUS(DailyReports):
         )
         df["date_updated"] = pd.to_datetime(df["date_updated"]
                                             ).dt.tz_localize("UTC")
-        df["date"] = _date
+        df["dt"] = _date
         df = df.dropna(subset=["fips"])
         self._df_full = df
         self.df = df[self.raw_cols]
