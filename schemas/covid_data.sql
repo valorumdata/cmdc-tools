@@ -1,7 +1,7 @@
 DROP TABLE IF EXISTS meta.covid_variables;
 CREATE TABLE meta.covid_variables (
     id serial primary key,
-    name text
+    name text UNIQUE
 );
 
 COMMENT ON TABLE meta.covid_variables IS E'This table contains a list of variables and their corresponding identifiers used in `data.us_covid`. The variables include:
@@ -34,8 +34,8 @@ COMMENT ON TABLE meta.covid_variables IS E'This table contains a list of variabl
 * ventilators_in_use_covid_new: The number of new patients who have been put on a ventilator
 ';
 
-COMMENT ON COLUMN data.us_covid.id is E'The variable id used in `data.us_covid`';
-COMMENT ON COLUMN data.us_covid.name is E'The variable name as described in the table description';
+COMMENT ON COLUMN meta.covid_variables.id is E'The variable id used in `data.us_covid`';
+COMMENT ON COLUMN meta.covid_variables.name is E'The variable name as described in the table description';
 
 INSERT INTO meta.covid_variables (name) VALUES
   ('cases_suspected'),
