@@ -36,7 +36,8 @@ class Alaska(CountyData):
     pk = '("vintage", "dt", "fips", "variable_id")'
 
     def get_cases(self):
-        url = "https://www.arcgis.com/sharing/rest/content/items/867f802ce1624b46b40d2bd281490078/data"
+        url = "https://www.arcgis.com/sharing/rest/content/items/"
+        url += "867f802ce1624b46b40d2bd281490078/data"
         cases_df = pd.read_excel(url, sheet_name="Table 2", skiprows=2)
 
         bor_col = _find_col_by_prefix(cases_df, "borough")
@@ -66,7 +67,8 @@ class Alaska(CountyData):
                 finding = None
 
         if len(need_to_find) > 0:
-            raise ValueError(f"Could not locate data for {', '.join(need_to_find)}")
+            errmsg = f"Could not locate data for {', '.join(need_to_find)}"
+            raise ValueError(errmsg)
 
         # find date
         info = cases_df.iloc[-1, 0].lower().replace("\n", " ")
@@ -86,7 +88,8 @@ class Alaska(CountyData):
         return cases
 
     def get_tests(self):
-        url = "https://opendata.arcgis.com/datasets/af9c1ec2528b468f81b6d7c840a3775c_0.csv"
+        url = "https://opendata.arcgis.com/datasets/"
+        url += "af9c1ec2528b468f81b6d7c840a3775c_0.csv"
         df = pd.read_csv(url, parse_dates=["CompletedDate"])
         df["CompletedDate"] = df["CompletedDate"].dt.normalize()
         tot = (
@@ -103,12 +106,17 @@ class Alaska(CountyData):
             [["Negative", "Positive"]]
             .reset_index()
             .rename(columns=dict(
-                Negative="negative_tests_total", Positive="positive_tests_total", CompletedDate="dt", CountyFIPS="fips"
+                Negative="negative_tests_total",
+                Positive="positive_tests_total",
+                CompletedDate="dt",
+                CountyFIPS="fips"
             ))
             .melt(id_vars=["dt", "fips"])
             .assign(
                 vintage=pd.Timestamp.today().normalize(),
-                fips=lambda x: ("2" + x["fips"].astype(str).str.zfill(3)).astype(int)
+                fips=lambda x: (
+                    "2" + x["fips"].astype(str).str.zfill(3)
+                ).astype(int)
             )
         )
 
@@ -123,7 +131,3 @@ class Alaska(CountyData):
             .query("fips not in (2300, 2400, 2998, 2999)")
         )
         return out
-
-
-
-
