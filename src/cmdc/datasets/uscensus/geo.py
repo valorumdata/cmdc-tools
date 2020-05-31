@@ -94,7 +94,7 @@ def download_shape_files(geo, year):
         dfs = []
 
         for state_fips in STATE_FIPS[:3]:
-            datafile = f"tl_2019_{state_fips}_tract"
+            datafile = f"tl_{year}_{state_fips}_tract"
             _df = _download_shape_file(url, datafile)
             dfs.append(_df)
         gdf = pd.concat(dfs, axis="index")
