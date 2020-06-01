@@ -1,5 +1,7 @@
-import textwrap
 import pandas as pd
+import textwrap
+import us
+
 from cmdc.datasets import OnConflictNothingBase
 
 BASE_URL = "https://raw.githubusercontent.com/COVIDExposureIndices/COVIDExposureIndices/master"
@@ -21,6 +23,7 @@ class DailyStateLex(OnConflictNothingBase):
 
     def _url(self, date):
         ymd = pd.to_datetime(date).strftime("%Y-%m-%d")
+
         return self.__url.format(
             BASE_URL=BASE_URL, ymd=ymd, ds=self.ds, geo=self.geo_name
         )
@@ -31,6 +34,7 @@ class DailyStateLex(OnConflictNothingBase):
         df = pd.read_csv(self._url(date), index_col=[0])
         df.index.names = [f"{self.geo_prefix}_prev"]
         df.columns.names = [f"{self.geo_prefix}_today"]
+
         return df.stack().rename(self.ds).reset_index().assign(date=_date)
 
     def _insert_query(self, df, table_name, temp_name, pk):
@@ -73,53 +77,53 @@ class DailyCountyLex(DailyStateLex):
 
 class StateDex(OnConflictNothingBase):
     __url = "{BASE}/dex_data/{geo}_dex.csv"
-    table_name = "cex_state_dex"
+    table_name = "mobility_dex"
     geo_name = "state"
-    pk = '("dt", state)'
-    first_select_col = "f.fips"
-    join_on = "f.abbreviation = tt.state"
+    pk = '(dt, fips, variable)'
 
     def _url(self):
         return self.__url.format(BASE=BASE_URL, geo=self.geo_name)
 
     def get(self):
         df = pd.read_csv(self._url(), parse_dates=["date"])
-        return df
+
+        df = df.melt(
+            id_vars=["date", "state"],
+            var_name="variable",
+            value_name="value"
+        ).rename(columns={"date": "dt"})
+
+        df["fips"] = df["state"].map(
+            lambda x: us.states.mapping("abbr", "fips")[x]
+        ).astype(int)
+        df = df.drop("state", axis="columns")
+
+        return df[["dt", "fips", "variable", "value"]]
 
     def _insert_query(self, df, table_name, temp_name, pk):
-        cols = list(df)
-        cols[cols.index("date")] = "dt"
-        final_cols = "(" + ", ".join(cols) + ")"
-        temp_cols = ", ".join([self.first_select_col] + list(df)[1:])
         if not pk.startswith("("):
             pk = f"({pk})"
+
         out = f"""
-        INSERT INTO data.{table_name} {final_cols}
-        SELECT {temp_cols} from {temp_name} tt
-        LEFT JOIN meta.us_states f on {self.join_on}
+        INSERT INTO data.{table_name} (dt, fips, variable, value)
+        SELECT tt.dt, tt.fips, tt.variable, tt.value
+        FROM {temp_name} tt
         ON CONFLICT {pk} DO NOTHING;
         """
         return textwrap.dedent(out)
 
 
 class CountyDex(StateDex):
-    table_name = "cex_county_dex"
-    pk = '("dt", county)'
+    pk = '(dt, fips, variable)'
     geo_name = "county"
-    first_select_col = "f.fips"
-    join_on = "tt.county = f.fips"
 
-    def _insert_query(self, df, table_name, temp_name, pk):
-        cols = list(df)
-        cols[cols.index("date")] = "dt"
-        final_cols = "(" + ", ".join(cols) + ")"
-        temp_cols = ", ".join([self.first_select_col] + list(df)[1:])
-        if not pk.startswith("("):
-            pk = f"({pk})"
-        out = f"""
-        INSERT INTO data.{table_name} {final_cols}
-        SELECT {temp_cols} from {temp_name} tt
-        LEFT JOIN meta.us_fips f on {self.join_on}
-        ON CONFLICT {pk} DO NOTHING;
-        """
-        return textwrap.dedent(out)
+    def get(self):
+        df = pd.read_csv(self._url(), parse_dates=["date"])
+
+        df = df.melt(
+            id_vars=["date", "county"],
+            var_name="variable",
+            value_name="value"
+        ).rename(columns={"date": "dt", "county": "fips"})
+
+        return df[["dt", "fips", "variable", "value"]]
