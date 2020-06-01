@@ -32,6 +32,8 @@ COMMENT ON TABLE meta.covid_variables IS E'This table contains a list of variabl
 * ventilators_in_use_covid_confirmed: The number of patients that are confirmed to have COVID that are being supported by a ventilator
 * ventilators_in_use_covid_total: The total number of patients being supported by a ventilator who are confirmed or suspected of having COVID
 * ventilators_in_use_covid_new: The number of new patients who have been put on a ventilator
+* recovered_total: The total number of individuals who have recovered from COVID, to date
+* active_total: The number of currently active COVID cases
 ';
 
 COMMENT ON COLUMN meta.covid_variables.id is E'The variable id used in `data.us_covid`';
@@ -63,7 +65,9 @@ INSERT INTO meta.covid_variables (name) VALUES
   ('ventilators_in_use_covid_suspected'),
   ('ventilators_in_use_covid_confirmed'),
   ('ventilators_in_use_covid_total'),
-  ('ventilators_in_use_covid_new');
+  ('ventilators_in_use_covid_new'),
+  ('recovered_total'),
+  ('active_total');
 
 DROP TABLE IF EXISTS data.covid;
 
