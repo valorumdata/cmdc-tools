@@ -6,8 +6,6 @@ CREATE TABLE data.dol_ui (
     dt DATE,
     fips INTEGER references meta.us_fips(fips),
     variable_name TEXT,
-    value REAL
-
+    value REAL,
+    PRIMARY KEY (vintage, dt, fips, variable_name)
 );
-
-CREATE UNIQUE INDEX dol_ui_key ON data.dol_ui (vintage, dt, fips, variable_name);
