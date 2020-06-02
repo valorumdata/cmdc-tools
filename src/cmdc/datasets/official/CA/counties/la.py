@@ -53,7 +53,6 @@ async def test_data():
         # move to testing page
         await (await page.waitForXPath(r"//a[@data-value='testing']")).click()
 
-        # TODO: figure out how to click this...
         # wait for chart to appear -- now we know we can change to Daily
         await page.waitForXPath("//div[@id='test_plot']/div")
         test = await find_chart_data(page, "test_plot", "tests", "tested")
