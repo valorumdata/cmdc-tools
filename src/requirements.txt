@@ -19,3 +19,4 @@ werkzeug<1.0.0
 google-api-python-client
 geopandas
 us
+pyppeteer
