@@ -77,7 +77,7 @@ CREATE TABLE data.us_covid (
     fips INT references meta.us_fips(fips),
     variable_id SMALLINT REFERENCES meta.covid_variables(id),
     value INT,
-    PRIMARY KEY (vintage, dt, fips, variable_id)
+    PRIMARY KEY (fips, dt, vintage, variable_id)
 );
 
 COMMENT ON TABLE data.us_covid IS E'Contains key count data for tracking COVID-19 cases across regions in the US.';
