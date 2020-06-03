@@ -1,13 +1,20 @@
-DROP TABLE IF EXISTS data.cex_state_dex CASCADE;
+DROP TABLE IF EXISTS meta.mobility_dex_variables;
+CREATE TABLE meta.mobility_dex_variables (
+    id SERIAL PRIMARY KEY,
+    variable_name TEXT
+);
+INSERT INTO meta.mobility_dex_variables (variable_name) VALUES
+('dex'), ('num_devices'), ('dex_a'), ('num_devices_a');
+
+DROP TABLE IF EXISTS data.mobility_dex CASCADE;
 
 CREATE TABLE data.mobility_dex (
     "dt" DATE,
-    "fips" SMALLINT references meta.us_fips (fips),
-    "variable" TEXT,
+    "fips" INT references meta.us_fips (fips),
+    "variable_id" INT references meta.mobility_dex_variables(id),
     "value" REAL,
-    PRIMARY KEY ("dt", "fips", "variable")
+    PRIMARY KEY ("dt", "fips", "variable_id")
 );
-
 COMMENT ON TABLE data.mobility_dex is E'For a smartphone residing in a given geography, how many distinct devices also visited any of the commercial venues that this device visited today?
 The county-level DEX reports the county-level average of this number across all devices residing in the county that day. The DEX values are necessarily only a fraction of the number of distinct individuals that also visited any of the commercial venues visited by a device, since only a fraction of individuals, venues, and visits are in the device sample.
 
@@ -23,9 +30,8 @@ Source: https://github.com/COVIDExposureIndices/COVIDExposureIndices';
 
 COMMENT ON COLUMN data.mobility_dex.dt is E'The date on which the DEX value was reported';
 COMMENT ON COLUMN data.mobility_dex.fips is E'The state for which the DEX is reported.';
-COMMENT ON COLUMN data.mobility_dex.variable is E'The variable for which you are retrieving data. More information on availble data can be found in the table documentation and on the dataset home page.';
+COMMENT ON COLUMN data.mobility_dex.variable_id is E'The id of variable for which you are retrieving data. More information on availble data can be found in the table documentation and on the dataset home page.';
 COMMENT ON COLUMN data.mobility_dex.value is E'The value for the (dt, fips, variable) combination.';
-
 /*
 COMMENT ON COLUMN data.cex_state_dex.dex is E'the DEX value';
 COMMENT ON COLUMN data.cex_state_dex.num_devices is E'The number of devices in this state that are part of the sample.';
