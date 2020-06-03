@@ -1,2 +1,1 @@
-from cmdc.datasets.official.CA.data import CACountyData
-
+from .data import CACountyData

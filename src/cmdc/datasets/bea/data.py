@@ -5,12 +5,12 @@ import os
 import requests
 import pandas as pd
 
-from cmdc.datasets.base import OnConflictNothingBase
+from ..base import InsertWithTempTable, DatasetBaseNoDate
 
 KEY = os.environ.get("BEA_KEY", None)
 
 
-def _make_bea_request(key=KEY, **kw):
+def _make_bea_request(key: str = KEY, **kw):
     if key is None:
         raise ValueError(
             "Must provide `key` argument or set BEA_KEY environment variable"
@@ -48,21 +48,21 @@ def _build_variable_dataframe():
     return df
 
 
-class CountyGDP(OnConflictNothingBase):
+class CountyGDP(InsertWithTempTable, DatasetBaseNoDate):
     pk = '("id", "year", "fips")'
     table_name = "bea_gdp"
 
-    def __init__(self, year):
+    def __init__(self, year=2018):
         super().__init__()
         self.year = year
 
     def _insert_query(self, df, table_name, temp_name, pk):
         out = f"""
-        INSERT INTO data.{table_name} (id, year, fips, value)
+        INSERT INTO data.bea_gdp (id, year, fips, value)
         SELECT bv.id, year, fips, value
         from {temp_name} tt
         LEFT JOIN meta.bea_variables bv using (dataset, tablename, line_code)
-        INNER JOIN data.us_counties using(fips)
+        INNER JOIN meta.us_fips using(fips)
         ON CONFLICT {pk} DO UPDATE set value = excluded.value;
         """
         return textwrap.dedent(out)

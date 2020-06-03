@@ -1,10 +1,10 @@
 import pandas as pd
 import textwrap
 
-from cmdc.datasets import OnConflictNothingBase
+from .. import InsertWithTempTable
 
 
-class CountyData(OnConflictNothingBase):
+class CountyData(InsertWithTempTable):
     table_name = "us_covid"
     pk = '("vintage", "dt", "fips", "variable_id")'
 
@@ -13,7 +13,7 @@ class CountyData(OnConflictNothingBase):
 
         return None
 
-    def _insert_query(self, df, table_name, temp_name, pk):
+    def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         out = f"""
         INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
         SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
@@ -44,7 +44,7 @@ class ArcGIS(CountyData):
                 "where": "0=0",
                 "outFields": "*",
                 "returnGeometry": "false",
-                "f": "pjson"
+                "f": "pjson",
             }
         self.params = params
 
@@ -55,4 +55,3 @@ class ArcGIS(CountyData):
         out += f"ArcGIS/rest/services/{service}/FeatureServer/{sheet}/query"
 
         return out
-

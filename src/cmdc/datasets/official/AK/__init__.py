@@ -1,8 +1,10 @@
 import pandas as pd
-import requests
 import re
 
-from cmdc.datasets.official.base import CountyData
+from .. import CountyData
+from ... import DatasetBaseNoDate
+
+__all__ = ["Alaska"]
 
 county_map = {
     "Anchorage Municipality": 2020,
@@ -23,7 +25,8 @@ county_map = {
     "Bethel Census Area": 2050,
 }
 
-DATE_RE = re.compile(r'.+last updated on (\d{2}/\d{2}/\d{4}).*')
+DATE_RE = re.compile(r".+last updated on (\d{2}/\d{2}/\d{4}).*")
+
 
 def _find_col_by_prefix(df, col_prefix):
     cols = [x for x in list(df) if x.lower().startswith(col_prefix.lower())]
@@ -31,7 +34,7 @@ def _find_col_by_prefix(df, col_prefix):
     return cols[0]
 
 
-class Alaska(CountyData):
+class Alaska(CountyData, DatasetBaseNoDate):
     table_name = "us_covid"
     pk = '("vintage", "dt", "fips", "variable_id")'
 
@@ -53,16 +56,18 @@ class Alaska(CountyData):
                 finding = row[bor_col]
                 continue
 
-            if finding is not None and row[comm_col].lower() == 'total':
+            if finding is not None and row[comm_col].lower() == "total":
                 # this is the row
-                out.append(dict(
-                    fips=county_map[finding],
-                    cases_total=row["All Cases"],
-                    hospital_beds_in_use_covid_total=row["Hospitalizations"],
-                    deaths_total=row["Deaths"],
-                    recovered_total=row["Recovered"],
-                    active_total=row["Active"]
-                ))
+                out.append(
+                    dict(
+                        fips=county_map[finding],
+                        cases_total=row["All Cases"],
+                        hospital_beds_in_use_covid_total=row["Hospitalizations"],
+                        deaths_total=row["Deaths"],
+                        recovered_total=row["Recovered"],
+                        active_total=row["Active"],
+                    )
+                )
                 need_to_find.remove(finding)
                 finding = None
 
@@ -82,7 +87,7 @@ class Alaska(CountyData):
             .melt(id_vars=["fips"])
             .assign(
                 dt=pd.to_datetime(date_match[1]),
-                vintage=pd.Timestamp.today().normalize()
+                vintage=pd.Timestamp.today().normalize(),
             )
         )
         return cases
@@ -93,30 +98,28 @@ class Alaska(CountyData):
         df = pd.read_csv(url, parse_dates=["CompletedDate"])
         df["CompletedDate"] = df["CompletedDate"].dt.normalize()
         tot = (
-            df.groupby(["CompletedDate", "CountyFIPS"])
-            ["Results"]
+            df.groupby(["CompletedDate", "CountyFIPS"])["Results"]
             .value_counts()
             .rename_axis(index={"Results": "variable"})
-            .unstack(level=[1,2])
+            .unstack(level=[1, 2])
             .fillna(0)
             .cumsum()
             .stack(level=0)
             .fillna(0)
-            .astype(int)
-            [["Negative", "Positive"]]
+            .astype(int)[["Negative", "Positive"]]
             .reset_index()
-            .rename(columns=dict(
-                Negative="negative_tests_total",
-                Positive="positive_tests_total",
-                CompletedDate="dt",
-                CountyFIPS="fips"
-            ))
+            .rename(
+                columns=dict(
+                    Negative="negative_tests_total",
+                    Positive="positive_tests_total",
+                    CompletedDate="dt",
+                    CountyFIPS="fips",
+                )
+            )
             .melt(id_vars=["dt", "fips"])
             .assign(
                 vintage=pd.Timestamp.today().normalize(),
-                fips=lambda x: (
-                    "2" + x["fips"].astype(str).str.zfill(3)
-                ).astype(int)
+                fips=lambda x: ("2" + x["fips"].astype(str).str.zfill(3)).astype(int),
             )
         )
 

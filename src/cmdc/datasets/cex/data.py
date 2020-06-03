@@ -2,35 +2,35 @@ import pandas as pd
 import textwrap
 import us
 
-from cmdc.datasets import OnConflictNothingBase
+from .. import InsertWithTempTable, DatasetBaseNeedsDate, DatasetBaseNoDate
 
 BASE_URL = (
     "https://raw.githubusercontent.com/COVIDExposureIndices/COVIDExposureIndices/master"
 )
 
 
-class DailyStateLex(OnConflictNothingBase):
+class DailyStateLex(InsertWithTempTable, DatasetBaseNeedsDate):
     ds = "lex"
     geo_name = "state"
     __url = "{BASE_URL}/{ds}_data/{geo}_{ds}_{ymd}.csv"
     table_name = "mobility_lex"
     pk = '("dt", "fips_prev", "fips_today")'
 
-    def _url(self, date):
+    def _url(self, date: str):
         ymd = pd.to_datetime(date).strftime("%Y-%m-%d")
 
         return self.__url.format(
             BASE_URL=BASE_URL, ymd=ymd, ds=self.ds, geo=self.geo_name
         )
 
-    def _make_fips(self, df):
+    def _make_fips(self, df: pd.DataFrame):
         states = us.states.mapping("abbr", "fips")
         out = df.copy()
         for col in ["fips_prev", "fips_today"]:
             out[col] = out[col].replace(states).astype(int)
         return out
 
-    def get(self, date):
+    def get(self, date: str):
         dt = pd.to_datetime(date)
         _date = pd.to_datetime(dt.strftime("%Y-%m-%d"))
         df = pd.read_csv(self._url(date), index_col=[0])
@@ -43,7 +43,7 @@ class DailyStateLex(OnConflictNothingBase):
             out[c] = out[c].astype(int)
         return out
 
-    def _insert_query(self, df, table_name, temp_name, pk):
+    def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         out = f"""
         INSERT INTO data.{table_name} (dt, fips_prev, fips_today, lex)
         SELECT date, fips_prev, fips_today, lex
@@ -53,18 +53,18 @@ class DailyStateLex(OnConflictNothingBase):
         return textwrap.dedent(out)
 
 
-class DailyCountyLex(DailyStateLex):
+class DailyCountyLex(DailyStateLex, DatasetBaseNeedsDate):
     geo_name = "county"
     geo_prefix = "c"
 
-    def _url(self, date):
+    def _url(self, date: str):
         return super()._url(date) + ".gz"
 
-    def _make_fips(self, df):
+    def _make_fips(self, df: pd.DataFrame):
         return df
 
 
-class StateDex(OnConflictNothingBase):
+class StateDex(InsertWithTempTable, DatasetBaseNoDate):
     __url = "{BASE}/dex_data/{geo}_dex.csv"
     table_name = "mobility_dex"
     geo_name = "state"
@@ -74,7 +74,7 @@ class StateDex(OnConflictNothingBase):
     def _url(self):
         return self.__url.format(BASE=BASE_URL, geo=self.geo_name)
 
-    def _make_fips(self, df):
+    def _make_fips(self, df: pd.DataFrame):
         df["fips"] = df["state"].replace(us.states.mapping("abbr", "fips")).astype(int)
         return df.drop("state", axis="columns")
 
@@ -92,7 +92,7 @@ class StateDex(OnConflictNothingBase):
 
         return df[["dt", "fips", "variable_name", "value"]]
 
-    def _insert_query(self, df, table_name, temp_name, pk):
+    def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         if not pk.startswith("("):
             pk = f"({pk})"
 
@@ -109,5 +109,5 @@ class StateDex(OnConflictNothingBase):
 class CountyDex(StateDex):
     geo_name = "county"
 
-    def _make_fips(self, df):
+    def _make_fips(self, df: pd.DataFrame):
         return df.rename(columns=dict(county="fips"))

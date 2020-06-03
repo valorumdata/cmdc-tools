@@ -1,8 +1,9 @@
 import asyncio
 import pandas as pd
 
-from cmdc.datasets.official.base import CountyData
-from cmdc.datasets.puppet import with_page
+from ... import CountyData
+from ....puppet import with_page
+from .... import DatasetBaseNoDate
 
 
 def _class_check(cls):
@@ -72,7 +73,7 @@ async def test_data():
     ]
 
 
-class LA(CountyData):
+class LA(CountyData, DatasetBaseNoDate):
     def get(self):
         df = asyncio.run(test_data())
         return (

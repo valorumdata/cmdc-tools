@@ -1,12 +1,12 @@
 import pandas as pd
 
-from cmdc.datasets import OnConflictNothingBase
+from .. import InsertWithTempTable, DatasetBaseNoDate
 
 BASEURL = "https://www.census.gov"
 DATEURL = "https://www.census.gov/econ/bfs/csv/date_table.csv"
 
 
-class CensusBFS(OnConflictNothingBase):
+class CensusBFS(InsertWithTempTable, DatasetBaseNoDate):
     """
     The Business Formation Statistics (BFS) are an experimental data
     product of the U.S. Census Bureau developed in research collaboration
@@ -29,13 +29,14 @@ class CensusBFS(OnConflictNothingBase):
         either be "us", "region", or "state"
 
     """
+
     pks = {
         "us": ("year", "week"),
         "region": ("region", "year", "week"),
-        "state": ("state", "year", "week")
+        "state": ("state", "year", "week"),
     }
 
-    def __init__(self, geo):
+    def __init__(self, geo: str):
         self.geo = geo.lower()
         self.url = BASEURL + f"/econ/bfs/csv/bfs_{self.geo}_apps_weekly_nsa.csv"
         self.pk = self.pks[self.geo]
@@ -48,10 +49,7 @@ class CensusBFS(OnConflictNothingBase):
 
         # Merge the data and dates and rename columns
         out = df.merge(dates, on=["Year", "Week"], how="left")
-        out = out.rename(columns={
-            "Start date": "week_start", "End date": "week_end",
-        })
+        out = out.rename(columns={"Start date": "week_start", "End date": "week_end",})
         out.columns = [c.lower() for c in out.columns]
 
         return out
-

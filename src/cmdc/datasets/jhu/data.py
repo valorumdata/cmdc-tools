@@ -1,18 +1,18 @@
 import textwrap
 
 import pandas as pd
-from cmdc.datasets import OnConflictNothingBase
+from .. import InsertWithTempTable, DatasetBaseNeedsDate, DatasetBaseNoDate
 
 BASE_URL = "https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master"
 
 
-class Locations(OnConflictNothingBase):
+class Locations(InsertWithTempTable, DatasetBaseNoDate):
     table_name = "jhu_locations"
     pk = "uid"
 
     def __init__(self):
+        super().__init__()
         self.url = f"{BASE_URL}/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv"
-        pass
 
     def get(self):
         df = pd.read_csv(self.url)
@@ -22,7 +22,7 @@ class Locations(OnConflictNothingBase):
         return df
 
 
-class DailyReports(OnConflictNothingBase):
+class DailyReports(InsertWithTempTable, DatasetBaseNeedsDate):
     table_name = "jhu_daily_reports"
     pk = "(uid, dt)"
     raw_cols = [
@@ -62,8 +62,8 @@ class DailyReports(OnConflictNothingBase):
         for c in ["last update", "last_update"]:
             if c in df.columns:
                 df = df.rename(columns={c: "date_updated"})
-                df["date_updated"] = (
-                    pd.to_datetime(df["date_updated"]).dt.tz_localize("UTC")
+                df["date_updated"] = pd.to_datetime(df["date_updated"]).dt.tz_localize(
+                    "UTC"
                 )
                 break
         else:
@@ -71,16 +71,15 @@ class DailyReports(OnConflictNothingBase):
 
         if "combined_key" not in df.columns:
             df["combined_key"] = (
-                df["province_state"].fillna("") + ", " +
-                df["country_region"].fillna("")
+                df["province_state"].fillna("") + ", " + df["country_region"].fillna("")
             )
 
         df["dt"] = _date
         if "active" not in list(df):
             df["active"] = (
-                df["confirmed"].fillna(0) - 
-                df["deaths"].fillna(0) -
-                df["recovered"].fillna(0)
+                df["confirmed"].fillna(0)
+                - df["deaths"].fillna(0)
+                - df["recovered"].fillna(0)
             )
         count_cols = ["confirmed", "deaths", "recovered", "active"]
         df[count_cols] = df[count_cols].fillna(0).astype(int)
@@ -99,7 +98,7 @@ class DailyReports(OnConflictNothingBase):
         return textwrap.dedent(out)
 
 
-class DailyReportsUS(DailyReports):
+class DailyReportsUS(DailyReports, DatasetBaseNeedsDate):
     table_name = "jhu_daily_reports_us"
     pk = "(fips, dt)"
     raw_cols = [
@@ -115,7 +114,7 @@ class DailyReportsUS(DailyReports):
         "people_hospitalized",
         "mortality_rate",
         "testing_rate",
-        "hospitalization_rate"
+        "hospitalization_rate",
     ]
     join_clause = "WHERE fips in (SELECT fips FROM meta.us_fips)"
 
@@ -129,13 +128,8 @@ class DailyReportsUS(DailyReports):
         url = f"{BASE_URL}/csse_covid_19_data/csse_covid_19_daily_reports_us/{dt:%m-%d-%Y}.csv"
         df = pd.read_csv(url)
         df.columns = [x.lower() for x in list(df)]
-        df = df.rename(
-            columns={
-                "last_update": "date_updated",
-                "long_": "lon", }
-        )
-        df["date_updated"] = pd.to_datetime(df["date_updated"]
-                                            ).dt.tz_localize("UTC")
+        df = df.rename(columns={"last_update": "date_updated", "long_": "lon",})
+        df["date_updated"] = pd.to_datetime(df["date_updated"]).dt.tz_localize("UTC")
         df["dt"] = _date
         df = df.dropna(subset=["fips"])
         self._df_full = df

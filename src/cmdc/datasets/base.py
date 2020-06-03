@@ -1,23 +1,42 @@
 import random
-from cmdc.datasets.db_util import TempTable
+from abc import ABC, abstractmethod
+
+from .db_util import TempTable
 import sqlalchemy as sa
+import pandas as pd
 
 
 class DatasetBase:
     def __init__(self):
         pass
 
-    def get(self):
-        raise NotImplementedError("Must be implemented by subclass")
-
+    @abstractmethod
     def put(self, conn, df):
-        raise NotImplementedError("Must be implemented by subclass")
+        pass
 
     def put_prep(self, conn, df):
         pass
 
 
-def _build_on_conflict_do_nothing_query(df, t_home, t_temp, pkey):
+class DatasetBaseNoDate(DatasetBase, ABC):
+    get_needs_date = False
+
+    @abstractmethod
+    def get(self):
+        raise NotImplementedError("Must be implemented by subclass")
+
+
+class DatasetBaseNeedsDate(DatasetBase, ABC):
+    get_needs_date = True
+
+    @abstractmethod
+    def get(self, date: str):
+        raise NotImplementedError("Must be implemented by subclass")
+
+
+def _build_on_conflict_do_nothing_query(
+    df: pd.DataFrame, t_home: str, t_temp: str, pkey: str
+):
     colnames = ", ".join(list(df))
     cols = "(" + colnames + ")"
     if not pkey.startswith("("):
@@ -30,13 +49,15 @@ def _build_on_conflict_do_nothing_query(df, t_home, t_temp, pkey):
     """
 
 
-class OnConflictNothingBase(DatasetBase):
+class InsertWithTempTable(DatasetBase, ABC):
+    def _insert_query(
+        self, df: pd.DataFrame, table_name: str, temp_name: str, pkey: str
+    ):
 
-    def _insert_query(self, df, table_name, temp_name, pk):
         out = _build_on_conflict_do_nothing_query(df, table_name, temp_name, pk)
         return out
 
-    def _put(self, connstr, df, table_name, pk):
+    def _put(self, connstr: str, df: pd.DataFrame, table_name: str, pk: str):
         temp_name = "__" + table_name + str(random.randint(1000, 9999))
         with sa.create_engine(connstr).connect() as conn:
             kw = dict(temp=False, if_exists="replace", destroy=True)
@@ -44,7 +65,7 @@ class OnConflictNothingBase(DatasetBase):
                 sql = self._insert_query(df, table_name, temp_name, pk)
                 conn.execute(sql)
 
-    def put(self, connstr, df=None):
+    def put(self, connstr: str, df=None):
         if df is None:
             if hasattr(self, "df"):
                 df = self.df
@@ -56,4 +77,3 @@ class OnConflictNothingBase(DatasetBase):
             raise ValueError(msg)
 
         self._put(connstr, df, self.table_name, self.pk)
-

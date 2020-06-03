@@ -1,7 +1,7 @@
 import pandas as pd
 import textwrap
 
-from cmdc.datasets.official.base import CountyData
+from ..base import CountyData
 
 
 CA_COUNTY_URL = "https://data.chhs.ca.gov/"
@@ -21,7 +21,6 @@ C_RENAMER = {
 
 
 class CACountyData(CountyData):
-
     def _insert_query(self, df, table_name, temp_name, pk):
         out = f"""
         INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
@@ -52,8 +51,8 @@ class CACountyData(CountyData):
 
         df = df.melt(
             id_vars=["vintage", "dt", "name"],
-            var_name="variable_name", value_name="value"
+            var_name="variable_name",
+            value_name="value",
         )
 
         return df
-

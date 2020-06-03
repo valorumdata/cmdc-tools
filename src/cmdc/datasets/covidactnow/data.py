@@ -2,18 +2,18 @@
 import textwrap
 import requests
 import pandas as pd
-from cmdc.datasets import OnConflictNothingBase
-
+from .. import InsertWithTempTable, DatasetBaseNoDate
 
 _CANURL = "https://data.covidactnow.org/latest/us"
 
-class CANTimeseries(OnConflictNothingBase):
+
+class CANTimeseries(InsertWithTempTable):
     URL = _CANURL + "/{geo}.{intervention}_INTERVENTION.timeseries.json"
     idx = ["vintage", "intervention", "dt", "fips"]
     pk = '("vintage", "intervention_id", "dt", "fips", "variable_id")'
     table_name = "actnow_timeseries"
 
-    def __init__(self, intervention="OBSERVED"):
+    def __init__(self, intervention: str = "OBSERVED"):
         super().__init__()
         self.intervention = intervention
 
@@ -47,7 +47,7 @@ class CANTimeseries(OnConflictNothingBase):
                 .assign(
                     fips=county["fips"],
                     lastUpdatedDate=county["lastUpdatedDate"],
-                    intervention=self.intervention + "_INTERVENTION"
+                    intervention=self.intervention + "_INTERVENTION",
                 )
                 .rename(columns=colmap)
             )
@@ -58,7 +58,7 @@ class CANTimeseries(OnConflictNothingBase):
     def get(self):
         res = requests.get(self.url)
         if not res.ok:
-            raise ValueError("Could not fetch data from url: {}".format(url))
+            raise ValueError("Could not fetch data from url: {}".format(self.url))
 
         js = res.json()
         df = self._unpack(js)
@@ -68,7 +68,7 @@ class CANTimeseries(OnConflictNothingBase):
         df["fips"] = df["fips"].astype(int)
         return df.melt(id_vars=self.idx)
 
-    def _insert_query(self, df, table_name, temp_name, pk):
+    def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         cols = list(df)
         intervention_ix = cols.index("intervention")
         final_cols = cols.copy()
@@ -91,7 +91,7 @@ class CANTimeseries(OnConflictNothingBase):
         return textwrap.dedent(out)
 
 
-class CANCountyTimeseries(CANTimeseries):
+class CANCountyTimeseries(CANTimeseries, DatasetBaseNoDate):
     geo = "counties"
 
     def get(self):
@@ -101,7 +101,8 @@ class CANCountyTimeseries(CANTimeseries):
         df["value"] = df["value"].astype(int)
         return df
 
-class CANStateTimeseries(CANTimeseries):
+
+class CANStateTimeseries(CANTimeseries, DatasetBaseNoDate):
     geo = "states"
 
 
@@ -109,7 +110,8 @@ class CANActuals(CANTimeseries):
     # intentionally keeping intervention as a column so `value` can remain numeric
     pk = '("vintage", "dt", "fips", "variable_id")'
     table_name = "actnow_actual"
-    def _unpack(self, js):
+
+    def _unpack(self, js: dict):
         colmap = dict(
             lastUpdatedDate="vintage",
             population="population",
@@ -135,10 +137,7 @@ class CANActuals(CANTimeseries):
         for county in js:
             base = (
                 pd.DataFrame(county["actualsTimeseries"])
-                .assign(
-                    fips=county["fips"],
-                    lastUpdatedDate=county["lastUpdatedDate"],
-                )
+                .assign(fips=county["fips"], lastUpdatedDate=county["lastUpdatedDate"],)
                 .drop(["population", "contactTracers"], axis=1)
             )
 
@@ -162,10 +161,12 @@ class CANActuals(CANTimeseries):
         return pd.concat(dfs, ignore_index=True)
 
 
-class CANCountyActuals(CANActuals):
+class CANCountyActuals(CANActuals, DatasetBaseNoDate):
     geo = "counties"
 
-class CANStateActuals(CANActuals):
+
+class CANStateActuals(CANActuals, DatasetBaseNoDate):
     geo = "states"
+
 
 # %%

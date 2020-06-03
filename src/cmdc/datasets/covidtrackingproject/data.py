@@ -2,19 +2,20 @@ import pandas as pd
 import requests
 import textwrap
 
-from cmdc.datasets.base import OnConflictNothingBase
-from cmdc.datasets.uscensus.geo import FIPS_RESTRICT_QUERY
+from .. import InsertWithTempTable, DatasetBaseNoDate
+from ..uscensus.geo import FIPS_RESTRICT_QUERY
 
 
 CURRENT_URL = "https://covidtracking.com/api/v1/states/current.json"
 HISTORIC_URL = "https://covidtracking.com/api/v1/states/daily.json"
 
 
-class CTP(OnConflictNothingBase):
+class CTP(InsertWithTempTable, DatasetBaseNoDate):
     """
     Used to insert data and variable names into the database specified
     by schema.sql
     """
+
     table_name = "us_covid"
     pk = '("vintage", "dt", "fips", "variable_id")'
 
@@ -32,7 +33,7 @@ class CTP(OnConflictNothingBase):
             "onVentilatorCurrently": "ventilators_in_use_covid_total",
         }
 
-    def _insert_query(self, df, table_name, temp_name, pk):
+    def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         out = f"""
         INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
         SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
@@ -56,9 +57,11 @@ class CTP(OnConflictNothingBase):
         """
         # Download data and ingest into DataFrame
         req = requests.get(HISTORIC_URL)
-        df = pd.DataFrame.from_records(req.json()).rename(
-            columns=self.crenamer
-        ).loc[:, self.crenamer.values()]
+        df = (
+            pd.DataFrame.from_records(req.json())
+            .rename(columns=self.crenamer)
+            .loc[:, self.crenamer.values()]
+        )
 
         # Convert things to the type needed for database
         df["vintage"] = pd.datetime.today()
@@ -67,9 +70,9 @@ class CTP(OnConflictNothingBase):
 
         df = df.melt(
             id_vars=["vintage", "dt", "fips"],
-            var_name="variable_name", value_name="value"
+            var_name="variable_name",
+            value_name="value",
         ).dropna()
         df = df.query(FIPS_RESTRICT_QUERY)
 
         return df
-

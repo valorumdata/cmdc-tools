@@ -1,10 +1,11 @@
 import requests
 import pandas as pd
 
-from cmdc.datasets.official.base import ArcGIS
+from ... import ArcGIS
+from .... import DatasetBaseNoDate
 
 
-class SanDiego(ArcGIS):
+class SanDiego(ArcGIS, DatasetBaseNoDate):
     """
     San Diego publishes their county level data in a dashboard that can
     be found at:
@@ -17,6 +18,7 @@ class SanDiego(ArcGIS):
     `CovidDashUpdate` had all relevant data within it, so we can only use
     the one for now
     """
+
     ARCGIS_ID = "1vIhDJwtG5eNmiqX"
     FIPS = 6073
 
@@ -26,7 +28,7 @@ class SanDiego(ArcGIS):
             "where": "0=0",
             "outFields": "Date,Tests,Positives",
             "returnGeometry": "false",
-            "f": "pjson"
+            "f": "pjson",
         }
 
         super(SanDiego, self).__init__(params=params)
@@ -44,32 +46,27 @@ class SanDiego(ArcGIS):
         )
         # Divide by 1000 because arcgis spits time out in epoch milliseconds
         # rather than epoch seconds
-        df["Date"] = df["Date"].map(
-            lambda x: pd.datetime.fromtimestamp(x/1000)
-        )
+        df["Date"] = df["Date"].map(lambda x: pd.datetime.fromtimestamp(x / 1000))
         df["vintage"] = pd.datetime.today()
         df["fips"] = self.FIPS
 
         # Rename columns
-        df = df.rename(columns={
-            "Date": "dt",
-            "Tests": "tests_total",
-            "Positives": "positive_tests_total"
-        })
-        df["negative_tests_total"] = df.eval(
-            "tests_total - positive_tests_total"
+        df = df.rename(
+            columns={
+                "Date": "dt",
+                "Tests": "tests_total",
+                "Positives": "positive_tests_total",
+            }
         )
+        df["negative_tests_total"] = df.eval("tests_total - positive_tests_total")
         df = df[
-            [
-                "vintage", "dt", "fips", "positive_tests_total",
-                "negative_tests_total"
-            ]
+            ["vintage", "dt", "fips", "positive_tests_total", "negative_tests_total"]
         ]
 
         df = df.melt(
             id_vars=["vintage", "dt", "fips"],
-            var_name="variable_name", value_name="value"
+            var_name="variable_name",
+            value_name="value",
         )
 
         return df
-

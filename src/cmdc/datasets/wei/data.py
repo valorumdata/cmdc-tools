@@ -3,10 +3,12 @@ import os
 import pandas as pd
 import pickle
 
-from cmdc.datasets import OnConflictNothingBase
-from googleapiclient.discovery import build
+from .. import InsertWithTempTable, DatasetBaseNoDate
+from googleapiclient.discovery import build, Resource
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
+
+os.path.join(os.path.dirname(__file__))
 
 
 # Default values for credential and token files
@@ -14,7 +16,9 @@ CRED_FILE = "./conf/local/google_credentials.json"
 TOKEN_FILE = "./conf/local/google_token.pickle"
 
 
-def create_gdrive_service(cred_fn="credentials.json", token_fn="token.pickle"):
+def create_gdrive_service(
+    cred_fn: str = "credentials.json", token_fn: str = "token.pickle"
+):
     """
     Creates a google drive api service that can be used to query and
     download particular files
@@ -32,7 +36,7 @@ def create_gdrive_service(cred_fn="credentials.json", token_fn="token.pickle"):
         The google drive api resource
     """
     creds = None
-    SCOPES = ['https://www.googleapis.com/auth/drive.readonly']
+    SCOPES = ["https://www.googleapis.com/auth/drive.readonly"]
 
     # Check for whether we already have a token
     if os.path.exists(token_fn):
@@ -45,20 +49,18 @@ def create_gdrive_service(cred_fn="credentials.json", token_fn="token.pickle"):
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                cred_fn, SCOPES
-            )
+            flow = InstalledAppFlow.from_client_secrets_file(cred_fn, SCOPES)
             creds = flow.run_local_server(port=0)
 
             with open(token_fn, "wb") as token:
                 pickle.dump(creds, token)
 
-    service = build('drive', 'v3', credentials=creds)
+    service = build("drive", "v3", credentials=creds)
 
     return service
 
 
-def retrieve_spreadsheet(service, fileId):
+def retrieve_spreadsheet(service: Resource, fileId: str):
     """
     Helper function that can fetch a (bytes) file from Google Drive
 
@@ -85,7 +87,7 @@ def retrieve_spreadsheet(service, fileId):
     return out
 
 
-class WEI(OnConflictNothingBase):
+class WEI(InsertWithTempTable, DatasetBaseNoDate):
     """
     The weekly economic index (WEI) is an index developed and
     published by Jim Stock. It can be found online on his blog at
@@ -106,11 +108,12 @@ class WEI(OnConflictNothingBase):
     and quarterly GDP. Of these six series, five are available by
     Thursday morning for the week ending the previous Saturday.
     """
+
     fileId = "192MTTC1Tqol_LLgF-00R7-2c8jel-QmV"
     pk = '("date")'
     table_name = "wei"
 
-    def __init__(self, cred_fn=CRED_FILE, token_fn=TOKEN_FILE):
+    def __init__(self, cred_fn: str = CRED_FILE, token_fn: str = TOKEN_FILE):
         self.cred_fn = cred_fn
         self.token_fn = token_fn
 
@@ -128,10 +131,7 @@ class WEI(OnConflictNothingBase):
         """
 
         # Create google drive api service
-        service = create_gdrive_service(
-            cred_fn=self.cred_fn,
-            token_fn=self.token_fn
-        )
+        service = create_gdrive_service(cred_fn=self.cred_fn, token_fn=self.token_fn)
 
         # Fetch file as bytesIO and then read into pandas
         wei_file = retrieve_spreadsheet(service, self.fileId)
@@ -145,7 +145,4 @@ class WEI(OnConflictNothingBase):
         # Set index values so that we have primary key set
         wei = wei.set_index("date")
 
-        self.df = wei
-
         return wei
-

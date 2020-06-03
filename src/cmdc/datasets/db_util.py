@@ -6,17 +6,10 @@ import sqlalchemy as sa
 
 
 def fast_to_sql(
-    df,
-    conn,
-    name,
-    index=False,
-    if_exists="append",
-    cols=None,
-    schema=None,
-    temp=False
+    df, conn, name, index=False, if_exists="append", cols=None, schema=None, temp=False
 ):
     if cols is None:
-        cols = index.names + list(df) if index else list(df)
+        cols = df.index.names + list(df) if index else list(df)
 
     colnames = [f'"{x}"' for x in cols]
 
@@ -38,9 +31,9 @@ def fast_to_sql(
 
     create_want = "CREATE TEMP TABLE" if temp else "CREATE TABLE IF NOT EXISTS"
     create_query = (
-        pd.io.sql.get_schema(df, name, con=conn).replace(
-            "CREATE TABLE", create_want
-        ).replace(f'"{name}"', full_name)
+        pd.io.sql.get_schema(df, name, con=conn)
+        .replace("CREATE TABLE", create_want)
+        .replace(f'"{name}"', full_name)
     )
     conn.execute(create_query)  # make sure the table exists
 
@@ -50,9 +43,7 @@ def fast_to_sql(
     elif isinstance(conn, sa.engine.base.Connection):
         upload_via_conn(conn.connection)
     else:
-        raise ValueError(
-            "Don't know how to handle conn with type:", type(conn)
-        )
+        raise ValueError("Don't know how to handle conn with type:", type(conn))
 
 
 class TempTable:
@@ -78,9 +69,7 @@ class TempTable:
     def __exit__(self, exc_type, exc_val, exc_tb):
         self._try_empty_table()
         if self.destroy:
-            self.conn.execute(
-                "DROP TABLE IF EXISTS {};".format(self.table_name)
-            )
+            self.conn.execute("DROP TABLE IF EXISTS {};".format(self.table_name))
 
 
 _dtype_map = {

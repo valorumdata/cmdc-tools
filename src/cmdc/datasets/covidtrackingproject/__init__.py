@@ -1,2 +1,1 @@
-from cmdc.datasets.covidtrackingproject.data import CTP
-
+from .data import CTP

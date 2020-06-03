@@ -1,3 +1,2 @@
-from cmdc.datasets.uscensus.data import ACS, ACSVariables
-from cmdc.datasets.uscensus.geo import USGeoBaseAPI
-
+from .data import ACS, ACSVariables
+from .geo import USGeoBaseAPI

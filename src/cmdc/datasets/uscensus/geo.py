@@ -1,11 +1,8 @@
 import geopandas as gpd
-import json
-import os
 import pandas as pd
-import requests
 
-from cmdc.datasets.base import OnConflictNothingBase
-from cmdc.datasets.uscensus.census import STATE_FIPS
+from ..base import InsertWithTempTable, DatasetBaseNoDate
+from .census import STATE_FIPS
 
 
 BASE_GEO_URL = "https://www2.census.gov/geo/tiger/"
@@ -15,7 +12,7 @@ FIPS_RESTRICT_QUERY += "((fips >= 1000) & (fips < 60_000)) | "
 FIPS_RESTRICT_QUERY += "((fips >= 1_000_000_000) & (fips < 60_000_000_000))"
 
 
-def _create_fips(geo, df):
+def _create_fips(geo: str, df: pd.DataFrame):
     """
     Converts geographic columns into a fips code
 
@@ -35,13 +32,13 @@ def _create_fips(geo, df):
         df["fips"] = df["state"].astype(int)
         df = df.drop(columns=["state"])
     elif geo == "county":
-        df["fips"] = df["state"].astype(int)*1_000 + df["county"].astype(int)
+        df["fips"] = df["state"].astype(int) * 1_000 + df["county"].astype(int)
         df = df.drop(columns=["state", "county"])
     elif geo == "tract":
         df["fips"] = (
-            df["state"].astype(int)*1_000_000_000 +
-            df["county"].astype(int)*1_000_000 +
-            df["tract"].astype(int)
+            df["state"].astype(int) * 1_000_000_000
+            + df["county"].astype(int) * 1_000_000
+            + df["tract"].astype(int)
         )
         df = df.drop(columns=["state", "county", "tract"])
     else:
@@ -50,7 +47,7 @@ def _create_fips(geo, df):
     return df
 
 
-def _download_shape_file(apiurl, filename):
+def _download_shape_file(apiurl: str, filename: str):
     # Create the url string geopandas needs to know that
     # it is a zip file
     rq_str = f"{apiurl}{filename}.zip"
@@ -68,7 +65,7 @@ def _download_shape_file(apiurl, filename):
     return gdf
 
 
-def download_shape_files(geo, year):
+def download_shape_files(geo: str, year: int):
     """
     Downloads the shape files for a particular geography and year.
 
@@ -110,24 +107,22 @@ def download_shape_files(geo, year):
 
     # Convert land area to square miles (m^2 -> km^2 -> mi^2
     gdf["aland"] = (gdf["aland"] / 1_000_000) / 2.5899
-    gdf = gdf.rename(columns={
-        "aland": "area",
-        "intptlat": "latitude",
-        "intptlon": "longitude"
-    })
+    gdf = gdf.rename(
+        columns={"aland": "area", "intptlat": "latitude", "intptlon": "longitude"}
+    )
 
     return gdf
 
 
-class USGeoBaseAPI(OnConflictNothingBase):
+class USGeoBaseAPI(InsertWithTempTable, DatasetBaseNoDate):
     table_name = "us_fips"
     pk = '("id")'
 
-    def __init__(self, geo, year=2019):
+    def __init__(self, geo: str = "state", year: int = 2019):
         self.geo = geo
         self.year = year
 
-    def _insert_query(self, df, table_name, temp_name, pk):
+    def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         _sql_geo_insert = f"""
         INSERT INTO meta.{table_name} (fips, name, area, latitude, longitude)
         SELECT fips, name, area, latitude, longitude FROM {temp_name}
@@ -137,7 +132,4 @@ class USGeoBaseAPI(OnConflictNothingBase):
         return _sql_geo_insert
 
     def get(self):
-        return download_shape_files(
-            self.geo, self.year
-        ).query(FIPS_RESTRICT_QUERY)
-
+        return download_shape_files(self.geo, self.year).query(FIPS_RESTRICT_QUERY)

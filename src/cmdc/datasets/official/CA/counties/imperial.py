@@ -1,10 +1,11 @@
 import requests
 import pandas as pd
 
-from cmdc.datasets.official.base import ArcGIS
+from ... import ArcGIS
+from .... import DatasetBaseNoDate
 
 
-class Imperial(ArcGIS):
+class Imperial(ArcGIS, DatasetBaseNoDate):
     """
     Imperial publishes their county level data in a dashboard that can
     be found at:
@@ -21,6 +22,7 @@ class Imperial(ArcGIS):
 
     https://services7.arcgis.com/RomaVqqozKczDNgd/ArcGIS/rest/services
     """
+
     ARCGIS_ID = "RomaVqqozKczDNgd"
     FIPS = 6073
 
@@ -41,11 +43,7 @@ class Imperial(ArcGIS):
         }
 
         # Default parameter values
-        params = {
-            "where": "0=0",
-            "returnGeometry": "false",
-            "f": "pjson"
-        }
+        params = {"where": "0=0", "returnGeometry": "false", "f": "pjson"}
 
         super(Imperial, self).__init__(params=params)
 
@@ -61,9 +59,7 @@ class Imperial(ArcGIS):
             [x["attributes"] for x in req.json()["features"]]
         ).rename(columns=self.hospitaloutfields)
         df["vintage"] = pd.datetime.today()
-        df["dt"] = df["dt"].map(
-            lambda x: pd.datetime.fromtimestamp(x/1000)
-        )
+        df["dt"] = df["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000))
         df["fips"] = self.FIPS
 
         df["icu_beds_in_use_covid_total"] = df.eval(
@@ -76,7 +72,8 @@ class Imperial(ArcGIS):
 
         df = df.melt(
             id_vars=["vintage", "dt", "fips"],
-            var_name="variable_name", value_name="value"
+            var_name="variable_name",
+            value_name="value",
         )
 
         return df
@@ -87,4 +84,3 @@ class Imperial(ArcGIS):
         df = self.get_hospital_data()
 
         return df
-

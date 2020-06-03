@@ -3,10 +3,10 @@ import requests
 import us
 import xml.etree.ElementTree as ET
 
-from cmdc.datasets.base import OnConflictNothingBase
+from ..base import InsertWithTempTable, DatasetBaseNoDate
 
 
-class StateUIClaims(OnConflictNothingBase):
+class StateUIClaims(InsertWithTempTable, DatasetBaseNoDate):
     """
     Interfaces with the Department of Labor's unemployment claims
     data. It does this by downloading the ETA 539 report from:
@@ -17,6 +17,7 @@ class StateUIClaims(OnConflictNothingBase):
 
         https://oui.doleta.gov/unemploy/DataDownloads.asp.
     """
+
     table_name = "dol_ui"
     pk = "(vintage, dt, fips)"
 
@@ -26,7 +27,7 @@ class StateUIClaims(OnConflictNothingBase):
 
         return None
 
-    def _insert_query(self, df, table_name, temp_name, pk):
+    def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         _sql_var_insert = f"""
         INSERT INTO data.{table_name} (vintage, dt, fips, variable_name, value)
         SELECT * FROM {temp_name}
@@ -41,8 +42,11 @@ class StateUIClaims(OnConflictNothingBase):
             states = [s.abbr for s in us.STATES if not s.is_territory]
 
         post_dict = [
-            ("level", "state"), ("final_yr", 2021), ("strtdate", 2000),
-            ("enddate", 2021), ("filetype", "xml")
+            ("level", "state"),
+            ("final_yr", 2021),
+            ("strtdate", 2000),
+            ("enddate", 2021),
+            ("filetype", "xml"),
         ]
         post_dict.extend([("states[]", s) for s in states])
 
@@ -79,17 +83,23 @@ class StateUIClaims(OnConflictNothingBase):
                 "InitialClaims": "initial_claims",
                 "ContinuedClaims": "continued_claims",
                 "CoveredEmployment": "covered_employment",
-                "InsuredUnemploymentRate": "insured_unemployment_rate"
+                "InsuredUnemploymentRate": "insured_unemployment_rate",
             }
         )
 
         outcols = [
-            "vintage", "fips", "dt", "initial_claims", "continued_claims",
-            "covered_employment", "insured_unemployment_rate"
+            "vintage",
+            "fips",
+            "dt",
+            "initial_claims",
+            "continued_claims",
+            "covered_employment",
+            "insured_unemployment_rate",
         ]
         df = df[outcols].melt(
             id_vars=["vintage", "dt", "fips"],
-            var_name="variable_name", value_name="value"
+            var_name="variable_name",
+            value_name="value",
         )
         df["value"] = pd.to_numeric(df["value"].str.replace(",", ""))
 

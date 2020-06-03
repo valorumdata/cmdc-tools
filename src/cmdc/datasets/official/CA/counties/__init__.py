@@ -1,3 +1,3 @@
-from cmdc.datasets.official.CA.counties.imperial import Imperial
-from cmdc.datasets.official.CA.counties.sandiego import SanDiego
-
+from .imperial import Imperial
+from .sandiego import SanDiego
+from .la import LA
