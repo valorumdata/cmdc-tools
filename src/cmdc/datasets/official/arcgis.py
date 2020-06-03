@@ -4,7 +4,7 @@ import requests
 
 class Arcgis():
 
-    def __init__(self,resource_id, dashboard_name, server_id=None):
+    def __init__(self,resource_id, dashboard_name, server_id=""):
         super(Arcgis, self).__init__()
         self.url = f"https://services{server_id}.arcgis.com/{resource_id}/arcgis/rest/services/{dashboard_name}/FeatureServer/0?f=json"
     
