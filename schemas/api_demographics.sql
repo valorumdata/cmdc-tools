@@ -1,6 +1,13 @@
-CREATE OR REPLACE VIEW api.demographics AS
-  /* TODO: Add new definition here...*/
-;
+CREATE OR REPLACE VIEW api.demographics
+ AS
+ SELECT to_date(mvs.year::text, 'YYYY'::text) AS meta_date,
+    dd.fips,
+    mvs.name AS variable,
+    dd.value
+   FROM data.acs_data dd
+     LEFT JOIN meta.acs_variables mv ON dd.id = mv.id
+     LEFT JOIN meta.acs_variables_selected mvs ON mv.year = mvs.year AND mv.product = mvs.product AND mv.census_id::text = mvs.census_id::text;
+
 
 COMMENT ON VIEW api.demographics IS E'This table contains information on the demographics of a particular region and is based on the American Community Survey.
 
@@ -26,6 +33,7 @@ Source(s):
 US Census American Community Survey (https://www.census.gov/programs-surveys/acs)
 ';
 
+COMMENT ON COLUMN api.demographics.meta_date is E'The date for which the data applies';
 COMMENT ON COLUMN api.demographics.fips is E'The fips code';
 COMMENT ON COLUMN api.demographics.variable is E'A description of the variable';
 COMMENT ON COLUMN api.demographics.value is E'The value of the variable';

@@ -1,6 +1,12 @@
-CREATE OR REPLACE VIEW api.covid AS
-  /* TODO: Add new definition here...*/
-;
+CREATE OR REPLACE VIEW api.covid
+ AS
+ SELECT uc.vintage,
+    uc.dt,
+    uc.fips,
+    cv.name AS variable,
+    uc.value
+   FROM data.us_covid uc
+     LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
 
 
 COMMENT ON VIEW api.covid IS E'This table contains relevant information on COVID-19

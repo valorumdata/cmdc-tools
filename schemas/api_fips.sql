@@ -1,4 +1,3 @@
-/* DEX view */
 CREATE OR REPLACE VIEW api.states AS
   SELECT uf.fips, uf.name, uf.area, uf.latitude, uf.longitude
   FROM meta.us_fips uf

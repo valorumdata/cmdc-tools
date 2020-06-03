@@ -1,13 +1,17 @@
-CREATE OR REPLACE VIEW api.economics AS
-    /* TODO: Update this to latest version... */
-    SELECT to_date(bg.year::text, 'YYYY') as dt, bg.fips, 'GDP_' || bv.description, bg.value
-    FROM data.bea_gdp bg
-    LEFT JOIN meta.bea_variables bv
-    on bv.id=bg.id
-    UNION
-    SELECT dt, 0::INT, 'wei'::TEXT, wei
-    FROM data.weeklyeconomicindex
-;
+CREATE OR REPLACE VIEW api.economics
+ AS
+ SELECT to_date(bg.year::text, 'YYYY'::text) AS dt,
+    bg.fips,
+    'GDP_'::text || bv.description AS variable,
+    bg.value
+   FROM data.bea_gdp bg
+     LEFT JOIN meta.bea_variables bv ON bv.id = bg.id
+UNION ALL
+ SELECT weeklyeconomicindex.dt AS dt,
+    0 AS fips,
+    'wei'::text AS variable,
+    weeklyeconomicindex.wei AS value
+   FROM data.weeklyeconomicindex;
 
 COMMENT ON VIEW api.economics IS E'This table contains information on economic outcomes at different geographic levels.
 
