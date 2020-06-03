@@ -31,7 +31,7 @@ Source(s):
 * US Census
 ';
 
-COMMENT ON COLUMN api.economics.vintage is E'The date/time the data was collected and stored in our database';
+-- COMMENT ON COLUMN api.economics.vintage is E'The date/time the data was collected and stored in our database';
 COMMENT ON COLUMN api.economics.dt is E'The date of the observation';
 COMMENT ON COLUMN api.economics.fips is E'The fips code';
 COMMENT ON COLUMN api.economics.variable is E'A description of the variable';
