@@ -72,7 +72,6 @@ WITH last_vintage as (
    FROM last_vintage lv
    LEFT JOIN data.us_covid uc using (fips, dt, vintage)
    LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id
-   where fips = 6037
 
 
 COMMENT ON VIEW api.covid IS E'This table contains relevant information on COVID-19
@@ -119,4 +118,3 @@ COMMENT ON COLUMN api.covid.dt is E'The date that corresponds to the observed va
 COMMENT ON COLUMN api.covid.fips is E'The fips code';
 COMMENT ON COLUMN api.covid.variable is E'One of the variables described in the table description';
 COMMENT ON COLUMN api.covid.value is E'The value of the variable';
-
