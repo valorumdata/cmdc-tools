@@ -60,9 +60,9 @@ COMMENT ON COLUMN api.covid_historical.value is E'The value of the variable';
 
 CREATE OR REPLACE VIEW api.covid AS
 WITH last_vintage as (
-  SELECT dt, fips, variable_id, max(vintage) as vintage
+  SELECT fips, variable_id, max(vintage) as vintage
   from data.us_covid uc
-  group by (fips, dt, variable_id)
+  group by (fips, variable_id)
 )
  SELECT lv.vintage,
     uc.dt,
@@ -70,7 +70,7 @@ WITH last_vintage as (
     cv.name AS variable,
     uc.value
    FROM last_vintage lv
-   LEFT JOIN data.us_covid uc using (fips, dt, vintage)
+   LEFT JOIN data.us_covid uc using (fips, variable_id, vintage)
    LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
 
 
