@@ -1,4 +1,4 @@
-from cmdc import datasets
+from cmdc_tools import datasets
 import pytest
 import pandas as pd
 

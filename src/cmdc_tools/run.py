@@ -33,7 +33,7 @@ from typing import Dict
 from kedro.context import KedroContext, load_context
 from kedro.pipeline import Pipeline
 
-from cmdc.pipeline import create_pipelines
+from cmdc_tools.pipeline import create_pipelines
 
 
 class ProjectContext(KedroContext):
