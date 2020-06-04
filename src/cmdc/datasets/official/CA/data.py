@@ -2,6 +2,7 @@ import pandas as pd
 import textwrap
 
 from ..base import CountyData
+from ... import DatasetBaseNoDate
 
 
 CA_COUNTY_URL = "https://data.chhs.ca.gov/"
@@ -20,7 +21,7 @@ C_RENAMER = {
 }
 
 
-class CACountyData(CountyData):
+class CACountyData(CountyData, DatasetBaseNoDate):
     def _insert_query(self, df, table_name, temp_name, pk):
         out = f"""
         INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)

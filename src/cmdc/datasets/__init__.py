@@ -13,5 +13,5 @@ from .covidtrackingproject import CTP
 from .dol import StateUIClaims
 from .uscensus import ACS, ACSVariables
 from .wei import WEI
-from .official import Alaska, LA, SanDiego, Imperial
+from .official import Alaska, LA, SanDiego, Imperial, CACountyData
 from .jhu import Locations, DailyReports, DailyReportsUS

@@ -106,7 +106,7 @@ class StateDex(InsertWithTempTable, DatasetBaseNoDate):
         return textwrap.dedent(out)
 
 
-class CountyDex(StateDex):
+class CountyDex(StateDex, DatasetBaseNoDate):
     geo_name = "county"
 
     def _make_fips(self, df: pd.DataFrame):
