@@ -296,7 +296,7 @@ def lint(files):
     """Run flake8, isort and (on Python >=3.6) black."""
     # pylint: disable=unused-import
     if not files:
-        files = ("src/tests", "src/cmdc")
+        files = ("src/tests", "src/cmdc_tools")
 
     try:
         import flake8
@@ -362,7 +362,7 @@ def build_docs(open_docs):
     python_call("pip", ["install", "src/[docs]"])
     python_call("pip", ["install", "-r", "src/requirements.txt"])
     python_call(
-        "ipykernel", ["install", "--user", "--name=cmdc"]
+        "ipykernel", ["install", "--user", "--name=cmdc_tools"]
     )
     shutil.rmtree("docs/build", ignore_errors=True)
     call(
@@ -371,7 +371,7 @@ def build_docs(open_docs):
             "--module-first",
             "-o",
             "docs/source",
-            "src/cmdc",
+            "src/cmdc_tools",
         ]
     )
     call(["sphinx-build", "-M", "html", "docs/source", "docs/build", "-a"])
@@ -557,7 +557,7 @@ def convert_notebook(all_flag, overwrite_flag, filepath):
         sys.exit(1)
 
     kedro_project_path = context.project_path
-    kedro_package_name = "cmdc"
+    kedro_package_name = "cmdc_tools"
 
     if all_flag:
         # pathlib glob does not ignore hidden directories,
