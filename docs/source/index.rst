@@ -1,8 +1,8 @@
-.. cmdc documentation master file, created by sphinx-quickstart.
+.. cmdc_tools documentation master file, created by sphinx-quickstart.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to project's cmdc API docs!
+Welcome to project's cmdc_tools API docs!
 =============================================
 
 .. toctree::

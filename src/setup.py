@@ -28,9 +28,7 @@
 
 from setuptools import find_packages, setup
 
-entry_point = (
-    "cmdc = cmdc.run:run_package"
-)
+entry_point = "cmdc_tools = cmdc_tools.run:run_package"
 
 
 # get the dependencies and installs
@@ -45,7 +43,7 @@ with open("requirements.txt", "r", encoding="utf-8") as f:
             requires.append(req)
 
 setup(
-    name="cmdc",
+    name="cmdc_tools",
     version="0.1",
     packages=find_packages(exclude=["tests"]),
     entry_points={"console_scripts": [entry_point]},

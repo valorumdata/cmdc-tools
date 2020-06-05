@@ -25,30 +25,37 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""
-This module contains an example test.
 
-Tests should be placed in ``src/tests``, in modules that mirror your
-project's structure, and in files named test_*.py. They are simply functions
-named ``test_*`` which test a unit of logic.
-
-To run the tests, run ``kedro test``.
-"""
+"""Application entry point."""
 from pathlib import Path
+from typing import Dict
 
-import pytest
+from kedro.context import KedroContext, load_context
+from kedro.pipeline import Pipeline
 
-from cmdc_tools.run import ProjectContext
-
-
-@pytest.fixture
-def project_context():
-    return ProjectContext(str(Path.cwd()))
+from cmdc_tools.pipeline import create_pipelines
 
 
-class TestProjectContext:
-    def test_project_name(self, project_context):
-        assert project_context.project_name == "COVID Modeling Data Collaborative"
+class ProjectContext(KedroContext):
+    """Users can override the remaining methods from the parent class here,
+    or create new ones (e.g. as required by plugins)
+    """
 
-    def test_project_version(self, project_context):
-        assert project_context.project_version == "0.15.8"
+    project_name = "COVID Modeling Data Collaborative"
+    project_version = "0.15.8"
+
+    def _get_pipelines(self) -> Dict[str, Pipeline]:
+        return create_pipelines()
+
+
+def run_package():
+    # entry point for running pip-install projects
+    # using `<project_package>` command
+    project_context = load_context(Path.cwd())
+    project_context.run()
+
+
+if __name__ == "__main__":
+    # entry point for running pip-installed projects
+    # using `python -m <project_package>.run` command
+    run_package()
