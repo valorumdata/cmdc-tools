@@ -20,11 +20,12 @@
         "titleBar.inactiveBackground": "#02201499",
         "titleBar.inactiveForeground": "#e7e7e799"
     },
-    "python.linting.prospectorEnabled": true,
+    "python.linting.prospectorEnabled": false,
     "python.linting.enabled": true,
     "peacock.color": "#022014",
     "python.testing.pytestArgs": [],
     "python.testing.unittestEnabled": false,
     "python.testing.nosetestsEnabled": false,
-    "python.testing.pytestEnabled": true
+    "python.testing.pytestEnabled": true,
+    "python.linting.pylintEnabled": true
 }
