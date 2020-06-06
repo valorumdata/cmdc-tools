@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS meta.us_fips CASCADE;
 CREATE TABLE meta.us_fips (
     "id" SERIAL PRIMARY KEY,
     "fips" BIGINT,
-    "name" VARCHAR(30),
+    "name" TEXT,
     "area" REAL,
     "latitude" REAL,
     "longitude" REAL
