@@ -1,3 +1,5 @@
+import textwrap
+
 import pandas as pd
 import requests
 
@@ -5,51 +7,63 @@ from ..base import ArcGIS
 
 
 class Arkansas(ArcGIS):
+    ARCGIS_ID = "PwY9ZuZRDiI5nXUB"
+
     def __init__(self, params=None):
-        self.ARCGID_ID = "PwY9ZuZRDiI5nXUB"
 
         if params is None:
-            self.params = {
+            params = {
                 "f": "json",
                 "where": "1=1",
                 "outFields": "*",
                 "returnGeometry": "false",
             }
 
-        super(ArcGIS, self).__init__(params=params)
+        super(Arkansas, self).__init__(params)
+
+    def _insert_query(self, df, table_name, temp_name, pk):
+        out = f"""
+        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
+        SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value
+        FROM {temp_name} tt
+        LEFT JOIN meta.us_fips us ON tt.county=us.name
+        LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
+        WHERE us.fips > 5000 AND us.fips < 6000
+        ON CONFLICT {pk} DO NOTHING
+        """
+
+        return textwrap.dedent(out)
 
     def get(self):
-        res = requests.get(
-            self.arcgis_query_url(
-                service="ADH_COVID19_State_Case_Metrics", sheet=0, srvid=None
-            )
+        url = self.arcgis_query_url(
+            service="ADH_COVID19_Positive_Test_Results", sheet=0, srvid=""
         )
+        res = requests.get(url, params=self.params)
 
         df = pd.DataFrame.from_records(
-            [x["attributes"] for x in res.json()["features"]]
+            [x['attributes'] for x in res.json()["features"]]
         )
 
-        # TODO: Filter columns
-        keep = df.rename(
-            columns={
-                "county_nam": "county",
-                "positive": "positive_tests_total",
-                "negative": "negative_tests_total",
-                "Recoveries": "recovered_total",
-                "deaths": "deaths_total",
-                "active_cases": "active_total",
-            }
-        )
+        # Filter columns
+        crename = {
+            "county_nam": "county",
+            "positive": "positive_tests_total",
+            "negative": "negative_tests_total",
+            "Recoveries": "recovered_total",
+            "deaths": "deaths_total",
+            "active_cases": "active_total",
+        }
+        keep = df.rename(columns=crename)
 
-        keep = keep[
-            [
-                "county",
-                "positive_tests_total",
-                "negative_tests_total",
-                "recovered_total",
-                "deaths_total",
-                "active_total",
-            ]
-        ]
+        keeprows = ~keep["county"].str.lower().str.contains("missing")
+        keep = keep.loc[keeprows, crename.values()]
+
+        keep["vintage"] = pd.datetime.today().date()
+        keep["dt"] = pd.datetime.today().date()
+        keep = keep.melt(
+            id_vars=["vintage", "dt", "county"],
+            var_name="variable_name",
+            value_name="value"
+        )
 
         return keep

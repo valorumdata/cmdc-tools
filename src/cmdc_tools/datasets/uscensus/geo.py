@@ -133,3 +133,23 @@ class USGeoBaseAPI(InsertWithTempTable, DatasetBaseNoDate):
 
     def get(self):
         return download_shape_files(self.geo, self.year).query(FIPS_RESTRICT_QUERY)
+
+
+# class USGeoUnknownCounties(InsertWithTempTable, DAtasetBaseNoDate):
+#     table_name = "us_fips"
+#     pk = '("id")'
+#
+#     def __init__(self):
+#         super(USGeoUnknownCounties, self).__init__()
+#
+#     def _insert_query(self, df, table_name, temp_name, pk):
+#         _sql_unkcounty_insert = f"""
+#         WITH unkwn AS (
+#             SELECT 1000*fips + 999 as fips, 'Unknown' as name
+#             FROM meta.us_fips WHERE fips<100
+#         )
+#         INSERT INTO meta.us_fips (fips, name)
+#         SELECT fips, name FROM unkwn
+#         ON CONFLICT (fips) DO UPDATE SET fips=EXCLUDED.fips, name=EXCLUDED.name
+#         """
+#         return _sql_unkcounty_insert
