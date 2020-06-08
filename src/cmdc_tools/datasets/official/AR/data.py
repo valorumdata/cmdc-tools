@@ -21,7 +21,7 @@ class Arkansas(ArcGIS):
 
     def get(self):
         url = self.arcgis_query_url(
-            service="ADH_COVID19_State_Case_Metrics", sheet=0, srvid=""
+            service="ADH_COVID19_Positive_Test_Results", sheet=0, srvid=""
         )
         res = requests.get(url, params=self.params)
 
@@ -29,7 +29,7 @@ class Arkansas(ArcGIS):
             [x['attributes'] for x in res.json()["features"]]
         )
 
-        # TODO: Filter columns
+        # Filter columns
         keep = df.rename(columns={
             "county_nam": "county",
             "positive": "positive_tests_total",
