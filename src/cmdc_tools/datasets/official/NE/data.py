@@ -1,30 +1,41 @@
 import pandas as pd
 import requests
 
+from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
 
 
-class Nebraska(ArcGIS):
+class Nebraska(ArcGIS, DatasetBaseNoDate):
     ARCGIS_ID = ""
 
     def __init__(self, params=None):
 
         if params is None:
-            self.params = {
+            params = {
                 "f": "json",
                 "where": "1=1",
                 "outFields": "*",
                 "returnGeometry": "false",
             }
-        super(ArcGIS, self).__init__(params=params)
+        super().__init__(params)
 
     def arcgis_query_url(self, service="Covid19_Update_service", sheet=0, srvid=1):
         # "https://gis.ne.gov/Agency/rest/services/Covid19_Update_service/MapServer/0/query?f=json&where=1%3D1&returnGeometry=false&outFields=*"
         out = f"https://gis.ne.gov/Agency/rest/services/{service}/MapServer/{sheet}/query"
-
+                # https://gis.ne.gov/Agency/rest/services/{service}/MapServer/{sheet}/query
         return out
 
     def get(self):
+        state_dat = self.get_state()
+        county_dat = self.get_county()
+
+        # TODO: Join county level data
+        all_dat = pd.concat([state_dat, county_dat])
+        # TODO: Melt and format
+
+        return all_dat
+
+    def get_state(self):
         res = requests.get(self.arcgis_query_url(), params=self.params)        
 
         # Parse into PD df
@@ -61,26 +72,29 @@ class Nebraska(ArcGIS):
             "dt",
         ]]
 
-        # TODO: Convert timestamps
+        # Convert timestamps
         keep["dt"] = keep["dt"].map(
             lambda x: pd.datetime.fromtimestamp(x/1000)
         )
 
+        keep['fips'] = 31
+
         return keep
 
     def get_county(self):
-        res = requests.get(self.arcgis_query_url(service='COVID19_County_Layer'))
+        res = requests.get(self.arcgis_query_url(service='COVID19_County_Layer'), params=self.params)
         df = pd.DataFrame.from_records(
             [x['attributes'] for x in res.json()["features"]]
         )
-
         # Rename columns
         keep = df.rename(columns={
             "NAME": "county",
             "totalCountyPosFin": "positive_tests_total",
             "totalCountyNotDetFin": "negative_tests_total",
             "totalCountyDeathsFin": "deaths_confirmed",
-            "totalCountyDeaths": "deaths_suspected"
-        })[['county', 'positive_tests_total', 'negative_tests_total', 'deaths_confirmed', 'deaths_suspected']]
-
+            "COUNTYFP": "fips",
+        })[['county', 'positive_tests_total', 'negative_tests_total', 'deaths_confirmed', "fips"]]
+        
+        keep.fips = 31000 + keep.fips.astype(int)
+        
         return keep
