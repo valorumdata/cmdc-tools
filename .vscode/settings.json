@@ -1,4 +1,30 @@
 {
-    "python.pythonPath": "/home/sglyon/anaconda3/envs/covid-airflow/bin/python",
-    "python.formatting.provider": "black"
+    "python.pythonPath": "/home/sglyon/anaconda3/envs/cmdc-airflow/bin/python",
+    "python.formatting.provider": "black",
+    "peacock.remoteColor": "#022014",
+    "workbench.colorCustomizations": {
+        "activityBar.activeBackground": "#055032",
+        "activityBar.activeBorder": "#13021e",
+        "activityBar.background": "#055032",
+        "activityBar.foreground": "#e7e7e7",
+        "activityBar.inactiveForeground": "#e7e7e799",
+        "activityBarBadge.background": "#13021e",
+        "activityBarBadge.foreground": "#e7e7e7",
+        "statusBar.background": "#022014",
+        "statusBar.border": "#022014",
+        "statusBar.foreground": "#e7e7e7",
+        "statusBarItem.hoverBackground": "#055032",
+        "titleBar.activeBackground": "#022014",
+        "titleBar.activeForeground": "#e7e7e7",
+        "titleBar.border": "#022014",
+        "titleBar.inactiveBackground": "#02201499",
+        "titleBar.inactiveForeground": "#e7e7e799"
+    },
+    "python.linting.prospectorEnabled": true,
+    "python.linting.enabled": true,
+    "peacock.color": "#022014",
+    "python.testing.pytestArgs": [],
+    "python.testing.unittestEnabled": false,
+    "python.testing.nosetestsEnabled": false,
+    "python.testing.pytestEnabled": true
 }
