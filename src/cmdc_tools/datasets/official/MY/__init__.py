@@ -1,1 +1,1 @@
-from cmdc.datasets.official.MY.data import TotalsForMaryaland, CasesForMaryland
+from cmdc_tools.datasets.official.MY.data import Maryland
