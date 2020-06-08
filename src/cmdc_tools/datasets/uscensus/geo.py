@@ -132,4 +132,4 @@ class USGeoBaseAPI(InsertWithTempTable, DatasetBaseNoDate):
         return _sql_geo_insert
 
     def get(self):
-        return download_shape_files(self.geo, self.year).query(FIPS_RESTRICT_QUERY)
+        return download_shape_files(self.geo, self.year)
