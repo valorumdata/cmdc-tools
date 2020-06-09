@@ -38,7 +38,7 @@ from pathlib import Path
 
 import pytest
 
-from cmdc.run import ProjectContext
+from cmdc_tools.run import ProjectContext
 
 
 @pytest.fixture

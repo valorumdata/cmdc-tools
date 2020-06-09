@@ -14,6 +14,8 @@ COMMENT ON TABLE meta.covid_variables IS E'This table contains a list of variabl
 * deaths_total: Total number of deaths including both suspected and confirmed
 * positive_tests_total: The total number of tests that have returned positive for COVID
 * negative_tests_total: The total number of tests that have returned negative for COVID
+* recovered_total: The total number of individuals who have recovered from COVID, to date
+* active_total: The number of currently active COVID cases
 * icu_beds_capacity_count: The number of ICU beds available in a particular geography
 * icu_beds_in_use_any: The number of ICU beds currently occupied by a patient
 * icu_beds_in_use_covid_suspected: The number of ICU beds occupied by a patient that is suspected to have COVID
@@ -32,8 +34,6 @@ COMMENT ON TABLE meta.covid_variables IS E'This table contains a list of variabl
 * ventilators_in_use_covid_confirmed: The number of patients that are confirmed to have COVID that are being supported by a ventilator
 * ventilators_in_use_covid_total: The total number of patients being supported by a ventilator who are confirmed or suspected of having COVID
 * ventilators_in_use_covid_new: The number of new patients who have been put on a ventilator
-* recovered_total: The total number of individuals who have recovered from COVID, to date
-* active_total: The number of currently active COVID cases
 ';
 
 COMMENT ON COLUMN meta.covid_variables.id is E'The variable id used in `data.us_covid`';
@@ -77,7 +77,7 @@ CREATE TABLE data.us_covid (
     fips INT references meta.us_fips(fips),
     variable_id SMALLINT REFERENCES meta.covid_variables(id),
     value INT,
-    PRIMARY KEY (vintage, dt, fips, variable_id)
+    PRIMARY KEY (fips, dt, vintage, variable_id)
 );
 
 COMMENT ON TABLE data.us_covid IS E'Contains key count data for tracking COVID-19 cases across regions in the US.';
