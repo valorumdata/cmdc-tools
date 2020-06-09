@@ -1,4 +1,5 @@
 import pandas as pd
+import requests
 import textwrap
 
 from .. import InsertWithTempTable

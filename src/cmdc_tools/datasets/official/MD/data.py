@@ -59,12 +59,12 @@ class Maryland(ArcGIS, DatasetBaseNoDate):
 
         # Convert timestamps
         result = pd.concat([cdf, sdf], sort=False)
-        result["dt"] = keep["dt"].map(
-            lambda x: pd.datetime.fromtimestamp(x/1000)
+        result["dt"] = result["dt"].map(
+            lambda x: pd.datetime.fromtimestamp(x/1000).date()
         )
         result["vintage"] = pd.datetime.today().date()
 
-        return result.sort_values("dt")
+        return result.sort_values("dt").dropna()
 
     def separate_state_specific_data(self, df):
         """
@@ -114,13 +114,6 @@ class Maryland(ArcGIS, DatasetBaseNoDate):
         of Maryland COVID data and extracts any of the relevant county
         level data
         """
-        # Column renaming conventions
-        crenamer = {
-            f"{county}_": "cases_total",  # Somerset is `SOME_`
-            f"{county}": "cases_total",  # All others are `{CTY}`
-            f"death{county}": "deaths_confirmed",
-            f"pdeath{county}": "deaths_suspected"
-        }
         # Only have relevant data on these columns
         cols_to_keep = [
             "dt", "fips", "cases_total", "deaths_confirmed",
@@ -130,6 +123,15 @@ class Maryland(ArcGIS, DatasetBaseNoDate):
         # Gather together all county data
         county_dfs = []
         for (county, cid) in MD_COUNTY_NF_MAP.items():
+            # Column renaming conventions
+            crenamer = {
+                "ReportDate": "dt",
+                f"{county}_": "cases_total",  # Somerset is `SOME_`
+                f"{county}": "cases_total",  # All others are `{CTY}`
+                f"death{county}": "deaths_confirmed",
+                f"pDeath{county}": "deaths_suspected"
+            }
+
             # Find out which columns correspond to a particular county
             # but make sure to keep the report date column
             county_cols = [col for col in df.columns if county in col]
@@ -143,7 +145,7 @@ class Maryland(ArcGIS, DatasetBaseNoDate):
             county_df['fips'] = 24000 + cid
 
             # Rename columns and subset to final data
-            county_df = county_df.rename(crenamer)
+            county_df = county_df.rename(columns=crenamer)
             county_df["deaths_total"] = county_df.eval(
                 "deaths_confirmed + deaths_suspected"
             )
@@ -153,12 +155,7 @@ class Maryland(ArcGIS, DatasetBaseNoDate):
             county_dfs.append(county_df)
 
         # Concat individual county dfs together
-        counties_df = pd.concat(counties_dfs)
-
-        # Format timestamps
-        counties_df["dt"] = counties_df["dt"].map(
-            lambda x: pd.datetime.fromtimestamp(x/1000)
-        )
+        counties_df = pd.concat(county_dfs)
 
         counties_df = counties_df.melt(
             id_vars=["dt", "fips"],

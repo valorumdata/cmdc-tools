@@ -1,4 +1,4 @@
 from .base import ArcGIS, CountyData
 from .AK import Alaska
 from .CA import LA, CACountyData, Imperial, SanDiego
-from .MY import Maryland
+from .MD import Maryland
