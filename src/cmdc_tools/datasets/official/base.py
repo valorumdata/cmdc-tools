@@ -55,3 +55,15 @@ class ArcGIS(CountyData):
         out += f"ArcGIS/rest/services/{service}/FeatureServer/{sheet}/query"
 
         return out
+
+    def get_single_sheet_to_df(self, service, sheet, srvid):
+        url = self.arcgis_query_url(
+            service=service, sheet=sheet, srvid=srvid
+        )
+        res = requests.get(url, params=self.params)
+
+        df = pd.DataFrame.from_records(
+            [x['attributes'] for x in res.json()["features"]]
+        )
+
+        return df
