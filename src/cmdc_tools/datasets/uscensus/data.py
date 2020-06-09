@@ -5,7 +5,7 @@ from typing import List, Union
 import os
 
 from .census import ACSAPI
-from .geo import _create_fips, FIPS_RESTRICT_QUERY
+from .geo import _create_fips
 from .. import InsertWithTempTable, DatasetBaseNoDate
 from ..db_util import TempTable
 
@@ -83,7 +83,6 @@ class ACS(ACSAPI, InsertWithTempTable, DatasetBaseNoDate):
 
         # Convert to fips representation
         df = self._create_fips(df)
-        df = df.query(FIPS_RESTRICT_QUERY)
 
         # Reshape into desired format
         df = df.melt(id_vars="fips", var_name="census_id", value_name="value")
