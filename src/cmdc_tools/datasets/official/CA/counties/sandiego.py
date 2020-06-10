@@ -22,14 +22,15 @@ class SanDiego(ArcGIS, DatasetBaseNoDate):
     ARCGIS_ID = "1vIhDJwtG5eNmiqX"
     FIPS = 6073
 
-    def __init__(self):
+    def __init__(self, params=None):
         # Default parameter values
-        params = {
-            "where": "0=0",
-            "outFields": "Date,Tests,Positives",
-            "returnGeometry": "false",
-            "f": "pjson",
-        }
+        if params is None:
+            params = {
+                "where": "0=0",
+                "outFields": "Date,Tests,Positives",
+                "returnGeometry": "false",
+                "f": "pjson",
+            }
 
         super(SanDiego, self).__init__(params=params)
 
