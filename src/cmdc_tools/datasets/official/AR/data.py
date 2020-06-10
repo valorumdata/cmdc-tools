@@ -1,6 +1,7 @@
+import textwrap
+
 import pandas as pd
 import requests
-import textwrap
 
 from ..base import ArcGIS
 

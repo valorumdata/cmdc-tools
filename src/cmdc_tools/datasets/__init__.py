@@ -9,7 +9,7 @@ from .dol import StateUIClaims
 from .jhu import DailyReports, DailyReportsUS, Locations
 from .official import (
     Alaska, Arkansas, CACountyData, Imperial, LA,
-    Massachusetts, Maryland, SanDiego
+    Massachusetts, Maryland, Montana, SanDiego
 )
 from .uscensus import ACS, ACSVariables
 from .wei import WEI
