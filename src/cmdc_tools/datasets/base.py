@@ -43,23 +43,23 @@ class DatasetBaseNeedsDate(DatasetBase, ABC):
 
 
 def _build_on_conflict_do_nothing_query(
-    df: pd.DataFrame, t_home: str, t_temp: str, pkey: str
+    df: pd.DataFrame, t_home: str, t_temp: str, pk: str
 ):
     colnames = ", ".join(list(df))
     cols = "(" + colnames + ")"
-    if not pkey.startswith("("):
-        pkey = f"({pkey})"
+    if not pk.startswith("("):
+        pk = f"({pk})"
 
     return f"""
     INSERT INTO data.{t_home} {cols}
     SELECT {colnames} from {t_temp}
-    ON CONFLICT {pkey} DO NOTHING;
+    ON CONFLICT {pk} DO NOTHING;
     """
 
 
 class InsertWithTempTable(DatasetBase, ABC):
     def _insert_query(
-        self, df: pd.DataFrame, table_name: str, temp_name: str, pkey: str
+        self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str
     ):
 
         out = _build_on_conflict_do_nothing_query(df, table_name, temp_name, pk)
