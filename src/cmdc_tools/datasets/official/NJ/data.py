@@ -62,31 +62,27 @@ class NewJersey(ArcGIS, DatasetBaseNoDate):
         )
 
     def _get_hospital_data(self):
-        url = self.arcgis_query_url(service="PPE_Capacity", sheet=0, srvid=7)
-        res = requests.get(url, params=self.params)
-        df = pd.DataFrame.from_records(
-            [x['attributes'] for x in res.json()["features"]]
-        )
-        df["survey_period"] = df["survey_period"].map(
+        df = self.get_all_sheet_to_df(service="PPE_Capacity", sheet=0, srvid=7)
+        df["survey_period"] = pd.to_datetime(df["survey_period"].map(
             lambda x: pd.datetime.fromtimestamp(x/1000).date()
-        )
+        ))
         df.to_csv("~/Downloads/nj_covid_hosp.csv")
         unstacked = (
             df
             .groupby(['County', 'structure_measure_identifier', "survey_period"])
             .Value
-            .max()
+            .sum()
             .unstack(level="structure_measure_identifier")
             .fillna(0)
             .astype(int)
         )
         renamed = unstacked.rename(columns={
-            "Available Beds - Critical Care": "beds_cc",
-            'Available Beds - Intensive Care': "beds_ic",
-            'Available Beds - Medical Surgical': "beds_ms",
-            'Available Beds - Other': "beds",
+            "Available Beds - Critical Care": "available_beds_cc",
+            'Available Beds - Intensive Care': "available_beds_ic",
+            'Available Beds - Medical Surgical': "available_beds_ms",
+            'Available Beds - Other': "available_beds",
             "COVID-19 Positive and PUI Patients Combined in a - Critical Care Bed": "beds_cc_in_use",
-            'COVID-19 Positive and PUI Patients Combined in a - Intensive Care Bed': "icu_beds_in_use_covid_total",
+            'COVID-19 Positive and PUI Patients Combined in a - Intensive Care Bed': "beds_icu_in_use",
             'COVID-19 Positive and PUI Patients Combined in a - Medical Surgical Bed': "beds_ms_in_use",
             'COVID-19 Positive and PUI Patients Combined in a - Other Bed': "beds_in_use",
             'Case count of COVID-19 positive cases currently in the hospital': "total_covid_hosp",
@@ -95,12 +91,12 @@ class NewJersey(ArcGIS, DatasetBaseNoDate):
         })
 
         renamed = renamed[[
-            "beds_cc",
-            "beds_ic",
-            "beds_ms",
-            "beds",
+            "available_beds_cc",
+            "available_beds_ic",
+            "available_beds_ms",
+            "available_beds",
             "beds_cc_in_use",
-            "icu_beds_in_use_covid_total",
+            "beds_icu_in_use",
             "beds_ms_in_use",
             "beds_in_use",
             "total_covid_hosp",
@@ -108,8 +104,14 @@ class NewJersey(ArcGIS, DatasetBaseNoDate):
             "ventilators_in_use_covid_total",
         ]]
 
-        renamed['hospital_beds_in_use_covid_total'] = renamed.beds_cc_in_use + renamed.beds_in_use + renamed.beds_ms_in_use
-        renamed['icu_beds_capacity_count'] = renamed.beds_ic + renamed.icu_beds_in_use_covid_total
+        renamed['hospital_beds_in_use_covid_total'] = renamed.beds_in_use + renamed.beds_ms_in_use
+        renamed['icu_beds_capacity_count'] = (
+            renamed.available_beds_ic + 
+            renamed.beds_icu_in_use + 
+            renamed.available_beds_cc + 
+            renamed.beds_cc_in_use
+        )
+        renamed['icu_beds_in_use_covid_total'] = renamed.beds_cc_in_use + renamed.beds_icu_in_use
 
         renamed = renamed.reset_index()
         renamed = renamed.rename(columns={
@@ -134,11 +136,7 @@ class NewJersey(ArcGIS, DatasetBaseNoDate):
 
 
     def _get_cases(self):
-        url = self.arcgis_query_url(service="DailyCaseCounts", sheet=0, srvid=7)
-        res = requests.get(url, params=self.params)
-        df = pd.DataFrame.from_records(
-            [x['attributes'] for x in res.json()["features"]]
-        )
+        df = self.get_all_sheet_to_df(service="DailyCaseCounts", sheet=0, srvid=7)
 
         # Rename columns
         keep = df.rename(columns={
