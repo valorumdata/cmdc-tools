@@ -49,7 +49,7 @@ class Maryland(ArcGIS, DatasetBaseNoDate):
 
     def get(self):
         # Get main DataFrame
-        df = self.get_single_sheet_to_df("MASTERCaseTracker", 0, "")
+        df = self.get_single_sheet_to_df("MASTERCaseTracker", 0, "", self.params)
 
         # Split out relevant county data
         cdf = self.separate_county_specific_data(df)
