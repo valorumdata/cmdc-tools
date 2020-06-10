@@ -1,7 +1,7 @@
 import pandas as pd
 import re
 
-from .. import CountyData
+from ..base import CountyData
 from ... import DatasetBaseNoDate
 
 __all__ = ["Alaska"]
