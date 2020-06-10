@@ -38,6 +38,9 @@ class DatasetBaseNeedsDate(DatasetBase, ABC):
     def transform_date(self, date: pd.Timestamp) -> pd.Timestamp:
         return date
 
+    def quit_early(self, date: pd.Timestamp) -> bool:
+        return False
+
 
 def _build_on_conflict_do_nothing_query(
     df: pd.DataFrame, t_home: str, t_temp: str, pkey: str

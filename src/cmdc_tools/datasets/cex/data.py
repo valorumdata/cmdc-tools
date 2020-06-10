@@ -52,6 +52,12 @@ class DailyStateLex(InsertWithTempTable, DatasetBaseNeedsDate):
         """
         return textwrap.dedent(out)
 
+    def transform_date(self, date: pd.Timestamp) -> pd.Timestamp:
+        return date - pd.Timedelta(days=6)
+
+    def quit_early(self, date):
+        return date.dayofweek >= 5
+
 
 class DailyCountyLex(DailyStateLex, DatasetBaseNeedsDate):
     geo_name = "county"
