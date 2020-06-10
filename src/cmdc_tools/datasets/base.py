@@ -7,6 +7,8 @@ import pandas as pd
 
 
 class DatasetBase:
+    autodag = True
+
     def __init__(self):
         pass
 
@@ -32,6 +34,9 @@ class DatasetBaseNeedsDate(DatasetBase, ABC):
     @abstractmethod
     def get(self, date: str):
         raise NotImplementedError("Must be implemented by subclass")
+
+    def transform_date(self, date: pd.Timestamp) -> pd.Timestamp:
+        return date
 
 
 def _build_on_conflict_do_nothing_query(

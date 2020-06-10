@@ -117,6 +117,7 @@ def download_shape_files(geo: str, year: int):
 class USGeoBaseAPI(InsertWithTempTable, DatasetBaseNoDate):
     table_name = "us_fips"
     pk = '("id")'
+    autodag = False
 
     def __init__(self, geo: str = "state", year: int = 2019):
         self.geo = geo
