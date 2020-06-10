@@ -1,155 +1,143 @@
 import pandas as pd
 import requests
+import textwrap
 
 from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
 
 
+_NJ_PPA_COLS = {
+    "# of new COVID patients (confirmed and PUI) were admitted to the hospital in the past 24 hours":
+        "hospital_beds_in_use_covid_new",
+    "COVID-19 Positive and PUI Patients Combined in a - Critical Care Bed":
+        "cc_bed_in_use",
+    "COVID-19 Positive and PUI Patients Combined in a - Intensive Care Bed":
+        "icu_bed_in_use",
+    "COVID-19 Positive and PUI Patients Combined in a - Medical Surgical Bed":
+        "ms_bed_in_use",
+    "COVID-19 Positive and PUI Patients Combined in a - Other Bed":
+        "other_bed_in_use",
+    "Case count of COVID-19 positive cases currently in the hospital":
+        "hospital_beds_in_use_covid_confirmed",
+    "Case count of persons under investigation (PUI) / presumptive positive cases currently in the hospital":
+        "hospital_beds_in_use_covid_suspected",
+    "Total # of COVID Patients Currently on a Ventilator":
+        "ventilators_in_use_covid_total",
+}
+
+
 class NewJersey(ArcGIS, DatasetBaseNoDate):
+    """
+    Notes:
+
+    * We combine Critical Care and Intensive Care beds under the variable
+      `icu_beds_in_use_covid_total`
+    """
     ARCGIS_ID = "Z0rixLlManVefxqY"
 
-    counties = {
-        'ATLANTIC':1,
-        'BERGEN':3,
-        'BURLINGTON':5,
-        'CAMDEN':7,
-        'CAPE MAY':9,
-
-        'CUMBERLAND':11,
-        'ESSEX':13,
-        'GLOUCESTER':15,
-        'HUDSON':17,
-        'HUNTERDON':19,
-
-        'MERCER':21,
-        'MONMOUTH':25,
-        'OCEAN':29,
-        'PASSAIC':31,
-        'SALEM':33,
-        'SOMERSET':35,
-
-        'SUSSEX':37,
-        'UNION':39,
-        'WARREN':41,
-        'MORRIS': 27,
-        'MIDDLESEX':23,
-    }
-
     def __init__(self, params=None):
-        if params is None:
-            params = {
-                "f": "json",
-                "where": "1=1",
-                "outFields": "*",
-                "returnGeometry": "false",
-            }
-
         super().__init__(params=params)
 
-    
+    def _insert_query(self, df, table_name, temp_name, pk):
+        out = f"""
+        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
+        SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value
+        FROM {temp_name} tt
+        LEFT JOIN meta.us_fips us ON tt.county=us.name
+        LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
+        WHERE us.fips > 34000 AND us.fips < 35000
+        ON CONFLICT {pk} DO NOTHING
+        """
+
+        return textwrap.dedent(out)
+
     def get(self):
         cases = self._get_cases()
         hosp = self._get_hospital_data()
 
-        joined = pd.concat([hosp, cases], sort=False)
-        
-        # Melt
-        return (
-            joined
-            .sort_values(['dt', 'county'])
-            .melt(id_vars=["dt", 'county', "fips"], var_name="variable_name")
-            .assign(vintage=pd.Timestamp.now().normalize())
-        )
+        # Concat data
+        df = pd.concat([hosp, cases], axis=0).sort_values(["dt", "county"])
+        df["vintage"] = pd.Timestamp.now().normalize()
+
+        return df
 
     def _get_hospital_data(self):
+        # Download all data and convert timestamp to date
         df = self.get_all_sheet_to_df(service="PPE_Capacity", sheet=0, srvid=7)
         df["survey_period"] = pd.to_datetime(df["survey_period"].map(
             lambda x: pd.datetime.fromtimestamp(x/1000).date()
         ))
-        df.to_csv("~/Downloads/nj_covid_hosp.csv")
-        unstacked = (
+
+        # Group by the county, date, and variable and sum up all values
+        df = (
             df
             .groupby(['County', 'structure_measure_identifier', "survey_period"])
             .Value
             .sum()
             .unstack(level="structure_measure_identifier")
-            .fillna(0)
-            .astype(int)
         )
-        renamed = unstacked.rename(columns={
-            "Available Beds - Critical Care": "available_beds_cc",
-            'Available Beds - Intensive Care': "available_beds_ic",
-            'Available Beds - Medical Surgical': "available_beds_ms",
-            'Available Beds - Other': "available_beds",
-            "COVID-19 Positive and PUI Patients Combined in a - Critical Care Bed": "beds_cc_in_use",
-            'COVID-19 Positive and PUI Patients Combined in a - Intensive Care Bed': "beds_icu_in_use",
-            'COVID-19 Positive and PUI Patients Combined in a - Medical Surgical Bed': "beds_ms_in_use",
-            'COVID-19 Positive and PUI Patients Combined in a - Other Bed': "beds_in_use",
-            'Case count of COVID-19 positive cases currently in the hospital': "total_covid_hosp",
-            'Case count of persons under investigation (PUI) / presumptive positive cases currently in the hospital': "cases_suspected",
-            'Total # of COVID Patients Currently on a Ventilator': "ventilators_in_use_covid_total",
-        })
 
-        renamed = renamed[[
-            "available_beds_cc",
-            "available_beds_ic",
-            "available_beds_ms",
-            "available_beds",
-            "beds_cc_in_use",
-            "beds_icu_in_use",
-            "beds_ms_in_use",
-            "beds_in_use",
-            "total_covid_hosp",
-            "cases_suspected",
-            "ventilators_in_use_covid_total",
-        ]]
-
-        renamed['hospital_beds_in_use_covid_total'] = renamed.beds_in_use + renamed.beds_ms_in_use
-        renamed['icu_beds_capacity_count'] = (
-            renamed.available_beds_ic + 
-            renamed.beds_icu_in_use + 
-            renamed.available_beds_cc + 
-            renamed.beds_cc_in_use
+        # Rename and create new variables
+        df = df.rename(columns=_NJ_PPA_COLS)
+        df["icu_beds_in_use_covid_total"] = df.eval(
+            "cc_bed_in_use + icu_bed_in_use"
         )
-        renamed['icu_beds_in_use_covid_total'] = renamed.beds_cc_in_use + renamed.beds_icu_in_use
+        df["hospital_beds_in_use_covid_total"] = df.eval(
+            "hospital_beds_in_use_covid_suspected + hospital_beds_in_use_covid_confirmed"
+        )
+        # Another potential way to compute hospital_beds_in_use_covid_total --
+        # It usually matches but, when it doesn't, the first way matches the
+        # NJ dashboard
+        # df["hospital_beds_in_use_covid_total2"] = df.eval(
+        #     "cc_bed_in_use + icu_bed_in_use + ms_bed_in_use + other_bed_in_use"
+        # )
 
-        renamed = renamed.reset_index()
-        renamed = renamed.rename(columns={
+        # Only keep a subset
+        df = df[
+            [
+                "icu_beds_in_use_covid_total",
+                "hospital_beds_in_use_covid_confirmed",
+                "hospital_beds_in_use_covid_suspected",
+                "hospital_beds_in_use_covid_total",
+                "hospital_beds_in_use_covid_new",
+                "ventilators_in_use_covid_total"
+            ]
+        ]
+        df = df.reset_index()
+        df = df.rename(columns={
             "County": "county",
             "survey_period": "dt"
         })
-        renamed.county = renamed.county.str.upper()
-        renamed['fips'] = renamed.county.map(self.counties)
-        renamed.fips = renamed.fips + 31000
-        renamed = renamed[[
-            'dt',
-            'county',
-            'fips',
-            "cases_suspected",
-            'hospital_beds_in_use_covid_total',
-            "icu_beds_in_use_covid_total",
-            'icu_beds_capacity_count',
-            "ventilators_in_use_covid_total",
-        ]]
+        df.county = df.county.str.title()
+        df.columns.name = ""
 
-        return renamed
+        df = df.melt(
+            id_vars=["dt", "county"],
+            var_name="variable_name",
+            value_name="value",
+        )
+
+        return df
 
 
     def _get_cases(self):
         df = self.get_all_sheet_to_df(service="DailyCaseCounts", sheet=0, srvid=7)
 
         # Rename columns
-        keep = df.rename(columns={
+        df = df.rename(columns={
             "TOTAL_CASES": "cases_total",
             "TOTAL_DEATHS": "deaths_total",
             "COUNTY": "county"
         })
 
-        # TODO: Add fips
-        keep['fips'] = keep.county.map(self.counties)
-        keep = keep[["cases_total", "deaths_total", "county", "fips"]]
+        df = df[["county", "cases_total", "deaths_total"]]
         dt = pd.Timestamp.now().normalize()
-        keep['dt'] = dt
-        keep.fips = keep.fips + 34000
+        df['dt'] = dt
 
-        return keep
+        df = df.melt(
+            id_vars=["dt", "county"],
+            var_name="variable_name",
+            value_name="value",
+        )
+
+        return df
