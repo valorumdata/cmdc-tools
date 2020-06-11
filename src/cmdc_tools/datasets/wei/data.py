@@ -11,7 +11,7 @@ from google.auth.transport.requests import Request
 
 # Default values for credential and token files
 CRED_FILE = pathlib.Path.home() / ".cmdc" / "google_credentials.json"
-TOKEN_FILE = pathlib.Path.home() / "google_token.pickle"
+TOKEN_FILE = pathlib.Path.home() / ".cmdc." / "google_token.pickle"
 
 
 def create_gdrive_service(
