@@ -2,18 +2,16 @@ import io
 import os
 import pandas as pd
 import pickle
+import pathlib
 
 from .. import InsertWithTempTable, DatasetBaseNoDate
 from googleapiclient.discovery import build, Resource
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 
-os.path.join(os.path.dirname(__file__))
-
-
 # Default values for credential and token files
-CRED_FILE = "./conf/local/google_credentials.json"
-TOKEN_FILE = "./conf/local/google_token.pickle"
+CRED_FILE = pathlib.Path.home() / ".cmdc" / "google_credentials.json"
+TOKEN_FILE = pathlib.Path.home() / "google_token.pickle"
 
 
 def create_gdrive_service(
@@ -116,8 +114,6 @@ class WEI(InsertWithTempTable, DatasetBaseNoDate):
     def __init__(self, cred_fn: str = CRED_FILE, token_fn: str = TOKEN_FILE):
         self.cred_fn = cred_fn
         self.token_fn = token_fn
-
-        return None
 
     def get(self):
         """
