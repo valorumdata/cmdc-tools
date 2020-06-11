@@ -1,1 +1,1 @@
-from .data import Locations, DailyReports, DailyReportsUS
+from .data import Locations, JHUDailyReports, JHUDailyReportsUS
