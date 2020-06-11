@@ -28,14 +28,13 @@ class Nebraska(ArcGIS, DatasetBaseNoDate):
         return out
 
     def get(self):
-        state_dat = self.get_state()
-        county_dat = self.get_county()
+        state = self.get_state()
+        county = self.get_county()
+        county["dt"] = state["dt"].iloc[0]
 
-        # TODO: Join county level data
-        all_dat = pd.concat([state_dat, county_dat])
-        # TODO: Melt and format
-
-        return all_dat
+        return pd.concat([state, county], ignore_index=True).assign(
+            vintage=pd.Timestamp.utcnow().normalize()
+        )
 
     def get_state(self):
         res = requests.get(self.arcgis_query_url(), params=self.params)
@@ -89,7 +88,7 @@ class Nebraska(ArcGIS, DatasetBaseNoDate):
 
         keep["fips"] = 31
 
-        return keep
+        return keep.melt(["dt", "fips"], var_name="variable_name")
 
     def get_county(self):
         res = requests.get(
@@ -99,24 +98,16 @@ class Nebraska(ArcGIS, DatasetBaseNoDate):
             [x["attributes"] for x in res.json()["features"]]
         )
         # Rename columns
-        keep = df.rename(
-            columns={
-                "NAME": "county",
-                "totalCountyPosFin": "positive_tests_total",
-                "totalCountyNotDetFin": "negative_tests_total",
-                "totalCountyDeathsFin": "deaths_confirmed",
-                "COUNTYFP": "fips",
-            }
-        )[
-            [
-                "county",
-                "positive_tests_total",
-                "negative_tests_total",
-                "deaths_confirmed",
-                "fips",
-            ]
-        ]
+        colmap = {
+            "totalCountyPosFin": "positive_tests_total",
+            "totalCountyNotDetFin": "negative_tests_total",
+            "totalCountyDeathsFin": "deaths_confirmed",
+            "COUNTYFP": "fips",
+        }
 
-        keep.fips = 31000 + keep.fips.astype(int)
-
-        return keep
+        return (
+            df.rename(columns=colmap)
+            .loc[:, list(colmap.values())]
+            .assign(fips=lambda x: x["fips"].astype(int) + 31000)
+            .melt(id_vars=["fips"], var_name="variable_name")
+        )
