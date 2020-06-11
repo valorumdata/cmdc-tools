@@ -109,7 +109,7 @@ class WEI(InsertWithTempTable, DatasetBaseNoDate):
 
     fileId = "192MTTC1Tqol_LLgF-00R7-2c8jel-QmV"
     pk = '("date")'
-    table_name = "wei"
+    table_name = "weeklyeconomicindex"
 
     def __init__(self, cred_fn: str = CRED_FILE, token_fn: str = TOKEN_FILE):
         self.cred_fn = cred_fn
