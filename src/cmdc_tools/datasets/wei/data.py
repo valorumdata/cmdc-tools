@@ -135,10 +135,6 @@ class WEI(InsertWithTempTable, DatasetBaseNoDate):
 
         # Rename columns and set country value in case we add other
         # countries in the future
-        wei = wei.rename(columns={"Date": "date", "WEI": "wei"})
-        wei["country"] = "US"
-
-        # Set index values so that we have primary key set
-        wei = wei.set_index("date")
+        wei = wei.rename(columns={"Date": "dt", "WEI": "wei"})
 
         return wei
