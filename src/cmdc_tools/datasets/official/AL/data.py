@@ -67,11 +67,11 @@ class Alabama(ArcGIS, DatasetBaseNoDate):
             .sort_values(['dt','county'])
             .melt(
                 id_vars=['dt', 'county', 'fips'],
-                var_name="variabled_name",
+                var_name="variable_name",
                 value_name="value"
             )
             .assign(
-                vintage=pd.Timestamp.now().normalize()
+                vintage=pd.Timestamp.utcnow().normalize()
             )
         )
 
