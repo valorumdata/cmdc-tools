@@ -8,18 +8,18 @@ from .. import CountyData
 from ... import DatasetBaseNeedsDate
 
 
-class MA(CountyData, DatasetBaseNeedsDate):
+class Massachusetts(CountyData, DatasetBaseNeedsDate):
     start_date = "2020-04-29"
 
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         return f"""
         INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
         SELECT tt.vintage, tt.dt, uf.fips, cv.id, tt.value
-        FROM {temp_name} tt         
+        FROM {temp_name} tt
         INNER JOIN (
-            SELECT fips, name 
-            FROM meta.us_fips 
-            WHERE fips::TEXT LIKE '25___' 
+            SELECT fips, name
+            FROM meta.us_fips
+            WHERE fips::TEXT LIKE '25___'
         ) uf on uf.name = tt.county_name
         LEFT JOIN meta.covid_variables cv on cv.name = tt.variable_name
         ON CONFLICT {pk} DO UPDATE SET value = EXCLUDED.value;

@@ -18,6 +18,7 @@ class ACS(ACSAPI, InsertWithTempTable, DatasetBaseNoDate):
 
     table_name = "acs_data"
     pk = '("id", "fips")'
+    autodag = False
 
     def __init__(
         self,
