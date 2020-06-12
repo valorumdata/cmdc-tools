@@ -4,6 +4,7 @@ on: [push, pull_request]
 
 env:
   BEA_KEY: ${{ secrets.BEA_KEY }}
+  CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
 
 jobs:
   test:
