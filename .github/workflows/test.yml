@@ -20,4 +20,4 @@ jobs:
           pip install kedro==0.15.8
           kedro install
       - run: black --check ./src
-      - run: pytest
+      - run: pytest src
