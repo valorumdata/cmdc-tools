@@ -32,7 +32,7 @@ class Nebraska(ArcGIS, DatasetBaseNoDate):
         county = self.get_county()
         county["dt"] = state["dt"].iloc[0]
 
-        return pd.concat([state, county], ignore_index=True).assign(
+        return pd.concat([state, county], ignore_index=True, sort=True).assign(
             vintage=pd.Timestamp.utcnow().normalize()
         )
 
