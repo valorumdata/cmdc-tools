@@ -58,9 +58,7 @@ def _build_on_conflict_do_nothing_query(
 
 
 class InsertWithTempTable(DatasetBase, ABC):
-    def _insert_query(
-        self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str
-    ):
+    def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
 
         out = _build_on_conflict_do_nothing_query(df, table_name, temp_name, pk)
         return out
