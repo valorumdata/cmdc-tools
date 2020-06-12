@@ -28,12 +28,7 @@ class Alabama(ArcGIS, DatasetBaseNoDate):
         return out
 
     def get(self):
-        url = self.arcgis_query_url()
-        res = requests.get(url, params=self.params)
-
-        df = pd.DataFrame.from_records(
-            [x['attributes'] for x in res.json()["features"]]
-        )
+        df = self.get_all_sheet_to_df(service="COVID19_ALCountiesData", sheet=1, srvid=1)
         # Rename columns
         renamed = df.rename(columns={
             "NAME": "county",
