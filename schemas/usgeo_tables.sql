@@ -11,6 +11,10 @@ CREATE TABLE meta.us_fips (
 
 CREATE UNIQUE INDEX fips_ind ON meta.us_fips("fips");
 
+INSERT INTO meta.us_fips (fips, name, area, latitude, longitude)
+  VALUES (0, 'United States', 3535948.12, 39.8283, -98.5795)
+;
+
 COMMENT ON TABLE meta.us_fips is E'This table contains the FIPS codes for states, counties, and census tracts.';
 
 COMMENT ON COLUMN meta.us_fips.id is E'An internal, unique identifier for this geography';

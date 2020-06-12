@@ -5,7 +5,7 @@ from .. import InsertWithTempTable, DatasetBaseNeedsDate, DatasetBaseNoDate
 
 
 class NYTimesState(InsertWithTempTable, DatasetBaseNoDate):
-    table_name = "covid_nytimes"
+    table_name = "nyt_covid"
     pk = '(vintage, dt, fips, variable_id)'
     url = "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv"
 
@@ -47,6 +47,3 @@ class NYTimesState(InsertWithTempTable, DatasetBaseNoDate):
         df.name = "value"
 
         return df.reset_index()
-
-
-
