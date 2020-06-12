@@ -41,5 +41,5 @@ class RhodeIsland(ArcGIS, DatasetBaseNoDate):
             renamed
             .sort_values(["dt", "city"])
             .melt(id_vars=['dt', 'city'], var_name="variable_name")
-            .assign(vintage=pd.Timestamp.now().normalize())
+            .assign(vintage=pd.Timestamp.utcnow().normalize())
         )
