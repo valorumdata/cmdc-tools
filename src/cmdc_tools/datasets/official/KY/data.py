@@ -28,6 +28,10 @@ class Kentucky(ArcGIS, DatasetBaseNoDate):
         renamed = df.rename(columns=column_map).loc[:, list(column_map.values())]
 
         dt = pd.Timestamp.utcnow().normalize()
-        return renamed.melt(
-            id_vars=["county", "fips"], var_name="variable_name", value_name="value"
-        ).assign(vintage=dt, dt=dt)
+        return (
+            renamed.melt(
+                id_vars=["county", "fips"], var_name="variable_name", value_name="value"
+            )
+            .dropna(subset=["fips"])
+            .assign(vintage=dt, dt=dt, fips=lambda x: x["fips"].astype(int))
+        )
