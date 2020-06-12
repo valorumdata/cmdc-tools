@@ -1,3 +1,4 @@
+import textwrap
 import pandas as pd
 
 from ...base import DatasetBaseNoDate
@@ -7,10 +8,27 @@ from ..base import ArcGIS
 class Pennsylvania(ArcGIS, DatasetBaseNoDate):
     ARCGIS_ID = "xtuWQvb2YQnp0z3F"
 
-    def get(self):
-        df = self.get_all_sheet_to_df(service="County_Case_Data_Public", sheet=0, srvid=2)
+    def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
+        out = f"""
+        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
+        SELECT tt.vintage, tt.dt, mc.fips, mv.id as variable_id, tt.value
+        FROM {temp_name} tt
+        INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name
+        FULL OUTER JOIN (
+            SELECT fips, name
+            FROM meta.us_fips where fips BETWEEN 42000 and 42999
+        ) mc on LOWER(mc.name) = LOWER(tt.county)   
+        ON CONFLICT {pk} DO NOTHING
+        """
 
-        renamed = df.rename(columns={
+        return textwrap.dedent(out)
+
+    def get(self):
+        df = self.get_all_sheet_to_df(
+            service="County_Case_Data_Public", sheet=0, srvid=2
+        )
+
+        column_map = {
             "COUNTY_NAM": "county",
             "Cases": "cases_total",
             "Deaths": "deaths_total",
@@ -19,26 +37,19 @@ class Pennsylvania(ArcGIS, DatasetBaseNoDate):
             "AvailableBedsPICU": "available_picu_beds",
             "COVID19Hospitalized": "hospital_beds_in_use_covid_confirmed",
             "TotalVents": "ventilators_capacity_count",
-            "VentsInUse": "ventilators_in_use_any"
-        })
+            "VentsInUse": "ventilators_in_use_any",
+            "COVID19onVents": "ventilators_in_use_covid_confirmed",
+        }
 
-        renamed = renamed[[
-            "county",
-            "cases_total",
-            "deaths_total",
-            "available_icu_beds",
-            "available_other_beds",
-            "available_picu_beds",
-            "hospital_beds_in_use_covid_confirmed",
-            "ventilators_capacity_count",
-            "ventilators_in_use_any"
-        ]]
+        renamed = df.rename(columns=column_map)
+
+        # the column we used was non-covid, need to add covid to get total
+        renamed["ventilators_in_use_any"] += renamed[
+            "ventilators_in_use_covid_confirmed"
+        ]
+
+        renamed = renamed.loc[:, list(column_map.values())]
         dt = pd.Timestamp.utcnow().normalize()
-        return (
-            renamed
-            .melt(
-                id_vars=['county'],
-                var_name="variable_name",
-                value_name="value"
-            ).assign(dt=dt, vintage=dt)
-        )
+        return renamed.melt(
+            id_vars=["county"], var_name="variable_name", value_name="value"
+        ).assign(dt=dt, vintage=dt)

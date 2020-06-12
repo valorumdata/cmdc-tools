@@ -6,3 +6,4 @@ from .MD import Maryland
 from .MA import Massachusetts
 from .NJ import NewJersey
 from .MT import Montana
+from .PA import Pennsylvania
