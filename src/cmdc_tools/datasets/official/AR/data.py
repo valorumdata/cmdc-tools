@@ -1,6 +1,7 @@
+import textwrap
+
 import pandas as pd
 import requests
-import textwrap
 
 from ..base import ArcGIS
 
@@ -40,7 +41,7 @@ class Arkansas(ArcGIS):
         res = requests.get(url, params=self.params)
 
         df = pd.DataFrame.from_records(
-            [x['attributes'] for x in res.json()["features"]]
+            [x["attributes"] for x in res.json()["features"]]
         )
 
         # Filter columns
@@ -62,7 +63,7 @@ class Arkansas(ArcGIS):
         keep = keep.melt(
             id_vars=["vintage", "dt", "county"],
             var_name="variable_name",
-            value_name="value"
+            value_name="value",
         )
 
         return keep
