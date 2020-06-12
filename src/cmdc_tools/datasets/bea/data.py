@@ -49,6 +49,7 @@ def _build_variable_dataframe():
 
 
 class CountyGDP(InsertWithTempTable, DatasetBaseNoDate):
+    autodag = False
     pk = '("id", "year", "fips")'
     table_name = "bea_gdp"
 

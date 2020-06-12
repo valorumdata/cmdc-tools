@@ -10,17 +10,18 @@ from .covidactnow import (
 from .covidtrackingproject import CTP
 from .db_util import TempTable, fast_to_sql
 from .dol import StateUIClaims
-from .jhu import DailyReports, DailyReportsUS, Locations
+from .jhu import JHUDailyReports, JHUDailyReportsUS, Locations
 from .official import (
-    LA,
-    Alabama,
     Alaska,
     Arkansas,
     CACountyData,
     Imperial,
-    Maryland,
+    Kentucky,
+    LA,
     Massachusetts,
+    Maryland,
     Montana,
+    NewJersey,
     SanDiego,
 )
 from .uscensus import ACS, ACSVariables
