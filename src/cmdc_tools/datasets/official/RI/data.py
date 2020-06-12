@@ -20,7 +20,7 @@ class RhodeIsland(ArcGIS, DatasetBaseNoDate):
             lambda x: pd.datetime.fromtimestamp(x/1000).date()
         ))
 
-        renamed = df.rename(columns={
+        cols = {
             "Count_of_COVID_19_Positive": "cases_confirmed",
             "Covid_Deaths": "deaths_confirmed",
             "Covid_ICU": "icu_beds_in_use_covid_confirmed",
@@ -29,22 +29,14 @@ class RhodeIsland(ArcGIS, DatasetBaseNoDate):
             "Negative_Covid_Lab_Tests": "negative_tests_total",
             "City_Town": "city",
             "Date": "dt", # TODO: Dates are all 2020-04-07. wtf?
-        })
+        }
+
+        renamed = df.rename(columns=cols)
 
         renamed['positive_tests_total'] = renamed.total_tests - renamed.negative_tests_total
-
-        renamed = renamed[[
-            "dt",
-            "city",
-            "cases_confirmed",
-            "deaths_confirmed",
-            "icu_beds_in_use_covid_confirmed",
-            "ventilators_in_use_covid_confirmed",
-            "total_tests",
-            "negative_tests_total",
-            "positive_tests_total",
-        ]]
-        return renamed
+        keep_cols = list(cols.values())
+        keep_cols.append("positive_tests_total")
+        renamed = renamed[keep_cols]
         return (
             renamed
             .sort_values(["dt", "city"])
