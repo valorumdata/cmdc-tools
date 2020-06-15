@@ -4,7 +4,7 @@ from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
 
 
-class Virginia(ArcGIS, DatasetBaseNoDate):
+class Vermont(ArcGIS, DatasetBaseNoDate):
     ARCGIS_ID = "BkFxaEFNwHqX3tAw"
 
     def get(self):
@@ -51,31 +51,30 @@ class Virginia(ArcGIS, DatasetBaseNoDate):
 
         renamed = df.rename(columns={
             "date": "dt",
-            "positive_cases": "positive_tests_total", # daily
-            "total_deaths": "cummulative_deaths_total", # cummulative
+            "positive_cases": "daily_positive_tests_total", # daily
+            "total_deaths": "cumulative_deaths_total", # cumulative
             "daily_deaths": "deaths_total",
-            "daily_recovered": "recovered_total", # daily
-            "total_recovered": "cummulative_recovered_total", # cummulative
-            "current_hospitalizations": "hospital_beds_in_use_any" # daily
+            "daily_recovered": "daily_recovered_total", # daily
+            "total_recovered": "cumulative_recovered_total", # cumulative
+            "current_hospitalizations": "hospital_beds_in_use_covid_confirmed" # daily
         })
 
-        renamed['negative_tests_total'] = renamed.total_tests - renamed.positive_tests_total
 
         # Convert Timestamps
         renamed["dt"] = pd.to_datetime(renamed["dt"].map(
             lambda x: pd.datetime.fromtimestamp(x/1000).date()
         ))
-        renamed['fips'] = 51
+        renamed['fips'] = 50
 
 
         renamed = renamed[[
             "dt",
-            "positive_tests_total",
-            "cummulative_deaths_total",
+            "daily_positive_tests_total",
+            "cumulative_deaths_total",
             "deaths_total",
-            "recovered_total",
-            "cummulative_recovered_total",
-            'negative_tests_total',
+            "daily_recovered_total",
+            "cumulative_recovered_total",
+            "hospital_beds_in_use_covid_confirmed",
             "fips"
         ]]
 
