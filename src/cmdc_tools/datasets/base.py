@@ -48,15 +48,19 @@ class DatasetBase:
             loc = "fips"
         elif "county" in df:
             if state_fips is None:
-                msg = "Found county column, but state_fips not given. Must pass to correctly join"
+                msg = "Found county column, but state_fips not given."
+                msg += " Must pass to correctly join"
+
                 raise ValueError(msg)
+
             assert isinstance(state_fips, int)
             assert state_fips < 100
             fips_min = state_fips * 1000  # map from XX to XX000
             fips_max = fips_min + 999  # map from XX000 to XX999
 
-            select = "SELECT name, fips from meta.us_fips where fips between {fips_min} and {fips_max}"
-            join_locs = f"LEFT JOIN ({select}) ff on ff.name = tt.county"
+            select = "SELECT name, fips FROM meta.us_fips"
+            select += " WHERE fips BETWEEN {fips_min} AND {fips_max}"
+            join_locs = f"LEFT JOIN ({select}) ff ON ff.name = tt.county"
             loc = "county"
         else:
             raise ValueError("Expected either `fips` or `county` in `df`")
@@ -64,7 +68,7 @@ class DatasetBase:
         if "variable_name" in df:
             var = "variable_name"
             join_covid = (
-                "LEFT JOIN meta.covid_variables mv on mv.name = tt.variable_name"
+                "LEFT JOIN meta.covid_variables mv ON mv.name = tt.variable_name"
             )
         elif "variable_id" in df:
             var = "variable_id"
