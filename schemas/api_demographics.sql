@@ -1,4 +1,3 @@
-/* TODO: Need to add a unique constraint for name in the acs_variables_selected table */
 CREATE OR REPLACE VIEW api.demographics AS
   WITH idtoname AS (
     SELECT mv.id, mvs.name
