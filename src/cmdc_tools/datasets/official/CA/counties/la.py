@@ -73,7 +73,11 @@ async def test_data():
     ]
 
 
-class LA(CountyData, DatasetBaseNoDate):
+class LA(DatasetBaseNoDate, CountyData):
+    source = (
+        "http://dashboard.publichealth.lacounty.gov/covid19_surveillance_dashboard/"
+    )
+
     def get(self):
         df = asyncio.run(test_data())
         return (

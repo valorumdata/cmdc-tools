@@ -18,7 +18,7 @@ _NJ_PPA_COLS = {
 }
 
 
-class NewJersey(ArcGIS, DatasetBaseNoDate):
+class NewJersey(DatasetBaseNoDate, ArcGIS):
     """
     Notes:
 
@@ -27,6 +27,7 @@ class NewJersey(ArcGIS, DatasetBaseNoDate):
     """
 
     ARCGIS_ID = "Z0rixLlManVefxqY"
+    source = "https://covid19.nj.gov/#live-updates"
 
     def __init__(self, params=None):
         super().__init__(params=params)

@@ -21,7 +21,9 @@ C_RENAMER = {
 }
 
 
-class CACountyData(CountyData, DatasetBaseNoDate):
+class CACountyData(DatasetBaseNoDate, CountyData):
+    source = CA_COUNTY_URL
+
     def _insert_query(self, df, table_name, temp_name, pk):
         out = f"""
         INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)

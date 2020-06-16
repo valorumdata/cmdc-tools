@@ -8,8 +8,12 @@ from .. import CountyData
 from ... import DatasetBaseNeedsDate
 
 
-class Massachusetts(CountyData, DatasetBaseNeedsDate):
+class Massachusetts(DatasetBaseNeedsDate, CountyData):
     start_date = "2020-04-29"
+    source = (
+        "https://www.mass.gov/info-details/"
+        "covid-19-response-reporting#covid-19-daily-dashboard-"
+    )
 
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         return f"""

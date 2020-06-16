@@ -5,8 +5,12 @@ from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
 
 
-class Pennsylvania(ArcGIS, DatasetBaseNoDate):
+class Pennsylvania(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = "xtuWQvb2YQnp0z3F"
+    source = (
+        "https://www.arcgis.com/apps/opsdashboard/"
+        "index.html#/85054b06472e4208b02285b8557f24cf"
+    )
 
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         out = f"""
