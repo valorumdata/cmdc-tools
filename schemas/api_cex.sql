@@ -1,7 +1,8 @@
 /* DEX view */
 CREATE OR REPLACE VIEW api.mobility_devices AS
-  SELECT csd.dt, csd.fips as location, csd.variable, csd.value
+  SELECT csd.dt, csd.fips as location, dex_var.variable_name as variable, csd.value
   FROM data.mobility_dex csd
+  left join meta.mobility_dex_variables dex_var on dex_var.id = csd.variable_id
 ;
 
 COMMENT ON VIEW api.mobility_devices IS E'The DEX, or device exposure index, is an index that measures how much movement there is within a particular geography (state or county). This data is currently only available for the US.

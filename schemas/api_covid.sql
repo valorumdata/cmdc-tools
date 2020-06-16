@@ -2,13 +2,13 @@
 CREATE OR REPLACE VIEW api.jhu_covid AS
   WITH last_vintage as (
     SELECT dt, fips, variable_id, MAX(date_updated) AS date_updated
-    FROM data.jhu_covid
+    FROM data.jhu_daily_reports_us
     GROUP BY (dt, fips, variable_id)
   )
   SELECT jhu.dt, jhu.fips, cv.name as variable, jhu.value
   FROM last_vintage lv
-  LEFT JOIN data.jhu_covid jhu using (dt, fips, variable_id, date_updated)
-  left join meta.covid_variables cv ON cv.id = uc.variable_id;
+  LEFT JOIN data.jhu_daily_reports_us jhu using (dt, fips, variable_id, date_updated)
+  left join meta.covid_variables cv ON cv.id = jhu.variable_id;
 
 
 /* NYTimes */
@@ -21,7 +21,7 @@ CREATE OR REPLACE VIEW api.nytimes_covid AS
   SELECT nyt.dt, nyt.fips, cv.name as variable, nyt.value
   FROM last_vintage lv
   LEFT JOIN data.nyt_covid nyt using (dt, fips, variable_id, vintage)
-  LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
+  LEFT JOIN meta.covid_variables cv ON cv.id = nyt.variable_id;
 
 COMMENT ON VIEW api.nytimes_covid IS E'This table contains the data from the NY Times COVID data
 

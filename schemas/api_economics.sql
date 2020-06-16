@@ -1,16 +1,12 @@
 CREATE OR REPLACE VIEW api.economics AS
   WITH last_vintage AS (
-    SELECT MAX(vintage), dt, fips, variable_name
-    FROM dol_ui
+    SELECT MAX(vintage) as vintage, dt, fips, variable_name
+    FROM data.dol_ui
     GROUP BY dt, fips, variable_name
   )
-  SELECT dt, fips as location, variable_name as variable, value
-  FROM dol_ui ui
-  LEFT JOIN last_vintage lv
-    ON lv.vintage=ui.vintage
-    AND lv.dt=ui.dt
-    AND lv.fips=ui.fips
-    AND lv.variable_name=ui.variable_name
+  SELECT lv.dt, lv.fips as location, lv.variable_name as variable, value
+  FROM data.dol_ui ui
+  LEFT JOIN last_vintage lv USING (vintage, dt, fips, variable_name)
   UNION ALL
   SELECT dt, 0 as location, 'wei'::TEXT AS variable, wei AS value
   FROM data.weeklyeconomicindex
@@ -36,17 +32,17 @@ Source(s):
 ';
 
 COMMENT ON COLUMN api.economics.dt is E'The date of the observation';
-COMMENT ON COLUMN api.economics.fips is E'The fips code';
+COMMENT ON COLUMN api.economics.location is E'The fips code';
 COMMENT ON COLUMN api.economics.variable is E'A description of the variable';
 COMMENT ON COLUMN api.economics.value is E'The value of the variable';
 
 CREATE OR REPLACE VIEW api.economic_snapshots AS
-    bg.fips as location,
-    'GDP_'::text || bv.description AS variable,
-    bg.value
+    SELECT
+           bg.fips as location,
+           'GDP_'::text || bv.description AS variable,
+           bg.value
    FROM data.bea_gdp bg
-     LEFT JOIN meta.bea_variables bv ON bv.id = bg.id
-;
+     LEFT JOIN meta.bea_variables bv ON bv.id = bg.id;
 
 COMMENT ON VIEW api.economic_snapshots IS E'This table contains information on economic characteristics of different geographic areas.
 
@@ -65,6 +61,6 @@ Source(s):
 * Bureau of Economic Analysis
 ';
 
-COMMENT ON COLUMN api.economic_snapshots.fips is E'The fips code';
+COMMENT ON COLUMN api.economic_snapshots.location is E'The fips code';
 COMMENT ON COLUMN api.economic_snapshots.variable is E'A description of the variable';
 COMMENT ON COLUMN api.economics.value is E'The value of the variable';

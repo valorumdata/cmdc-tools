@@ -1,5 +1,5 @@
 CREATE OR REPLACE VIEW api.demographics AS
-  WITH idtoname AS (
+  WITH temp AS (
     SELECT mv.id, mvs.name
     FROM meta.acs_variables mv
     RIGHT JOIN meta.acs_variables_selected mvs
@@ -7,7 +7,7 @@ CREATE OR REPLACE VIEW api.demographics AS
   )
   SELECT dd.fips as location, idn.name, dd.value
   FROM data.acs_data dd
-  LEFT JOIN idtoname idn
+  LEFT JOIN temp idn
   ON dd.id=idn.id
   ORDER BY dd.fips, idn.name
 ;
