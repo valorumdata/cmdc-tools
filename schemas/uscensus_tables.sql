@@ -38,8 +38,8 @@ CREATE TABLE meta.acs_variables_selected (
     geo TEXT,
     census_id VARCHAR(20),
     name TEXT,
-	PRIMARY KEY (year, product, census_id),
-	FOREIGN KEY (year, product, census_id) REFERENCES meta.acs_variables(year, product, census_id),
+    PRIMARY KEY (year, product, census_id),
+    FOREIGN KEY (year, product, census_id) REFERENCES meta.acs_variables(year, product, census_id),
     UNIQUE (year, geo, name)
 );
 
