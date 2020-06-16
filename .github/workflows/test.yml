@@ -1,0 +1,24 @@
+name: Test
+
+on: [push, pull_request]
+
+env:
+  BEA_KEY: ${{ secrets.BEA_KEY }}
+  CENSUS_API_KEY: ${{ secrets.CENSUS_API_KEY }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.7
+
+      - name: Install dependencies
+        run: |
+          pip install kedro==0.15.8
+          kedro install
+      - run: black --check ./src
+      - run: pytest src

@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS meta.acs_variables;
+DROP TABLE IF EXISTS meta.acs_variables CASCADE;
 
 /* Create and define metadata tables */
 CREATE TABLE meta.acs_variables (
@@ -29,7 +29,24 @@ COMMENT ON COLUMN meta.acs_variables.census_id IS E'The variable name according 
 COMMENT ON COLUMN meta.acs_variables.label IS E'A short label that describes what the variable includes.';
 
 
+/* Create and define the selected variables */
+DROP TABLE IF EXISTS meta.acs_variables_selected CASCADE;
+
+CREATE TABLE meta.acs_variables_selected (
+    year INTEGER,
+    product CHAR(4),
+    geo TEXT,
+    census_id VARCHAR(20),
+    name TEXT,
+    PRIMARY KEY (year, product, census_id),
+    FOREIGN KEY (year, product, census_id) REFERENCES meta.acs_variables(year, product, census_id),
+    UNIQUE (year, geo, name)
+);
+
+
 /* Create and define data tables */
+DROP TABLE IF EXISTS data.acs_data CASCADE;
+
 CREATE TABLE data.acs_data (
     "id" INTEGER REFERENCES meta.acs_variables(id),
     "fips" BIGINT REFERENCES meta.us_fips(fips),

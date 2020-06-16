@@ -11,15 +11,16 @@ CREATE OR REPLACE VIEW api.jhu_covid AS
   LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
 */
 
+/* NYTimes */
 CREATE OR REPLACE VIEW api.nytimes_covid AS
   WITH last_vintage as (
-    SELECT fips, variable_id, MAX(vintage) AS vintage
+    SELECT dt, fips, variable_id, MAX(vintage) AS vintage
     FROM data.nyt_covid
-    GROUP BY (fips, variable_id)
+    GROUP BY (dt, fips, variable_id)
   )
   SELECT nyt.dt, nyt.fips, cv.name as variable, nyt.value
   FROM last_vintage lv
-  LEFT JOIN data.nyt_covid nyt using (fips, variable_id, vintage)
+  LEFT JOIN data.nyt_covid nyt using (dt, fips, variable_id, vintage)
   LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
 
 COMMENT ON VIEW api.nytimes_covid IS E'This table contains the data from the NY Times COVID data
@@ -59,13 +60,41 @@ COMMENT ON COLUMN api.nytimes_covid.fips is E'The fips code corresponding to the
 COMMENT ON COLUMN api.nytimes_covid.variable is E'Denotes whether observation is total cases or total deaths';
 COMMENT ON COLUMN api.nytimes_covid.value is E'The value of the observation';
 
+/* USAFacts */
+CREATE OR REPLACE VIEW api.usafacts_covid AS
+  WITH last_vintage as (
+    SELECT fips, variable_id, MAX(vintage) AS vintage
+    FROM data.usafacts_covid
+    GROUP BY (fips, variable_id)
+  )
+  SELECT ufc.dt, ufc.fips, cv.name as variable, ufc.value
+  FROM last_vintage lv
+  LEFT JOIN data.usafacts_covid ufc using (fips, variable_id, vintage)
+  LEFT JOIN meta.covid_variables cv ON cv.id = ufc.variable_id;
+
+COMMENT ON VIEW api.usafacts_covid IS E'This table the USAFacts COVID data
+
+This table only includes the most recent observation for each date, location, and variable. If you are interested in historical revisions of this data, please reach out -- We have previous "vintages" of the USAFacts data but, in order to simplify our list of tables, we have chosen not to expose (but are happy to if it would be useful).
+
+The data only includes total number of cases and total number of COVID related deaths. If you use this data, we recommend that you read the corresponding documentation on their webpage as it provides useful insights to how the data were collected and how they should be used etc...
+
+The USAFacts COVID data can be found online at https://usafacts.org/visualizations/coronavirus-covid-19-spread-map/ and is released under the Creative Commons Share Alike 4.0 license:
+
+To see the terms of this license refer to https://creativecommons.org/licenses/by-sa/4.0/
+';
+
+COMMENT ON COLUMN api.usafacts_covid.dt is E'The date of the observation';
+COMMENT ON COLUMN api.usafacts_covid.fips is E'The fips code corresponding to the observation';
+COMMENT ON COLUMN api.usafacts_covid.variable is E'Denotes whether observation is total cases or total deaths';
+COMMENT ON COLUMN api.usafacts_covid.value is E'The value of the observation';
+
 
 /* The covid view */
 CREATE OR REPLACE VIEW api.covid AS
 WITH last_vintage as (
-  SELECT fips, variable_id, max(vintage) as vintage
+  SELECT dt, fips, variable_id, max(vintage) as vintage
   from data.us_covid uc
-  group by (fips, variable_id)
+  group by (dt, fips, variable_id)
 )
  SELECT lv.vintage,
     uc.dt,
@@ -73,7 +102,7 @@ WITH last_vintage as (
     cv.name AS variable,
     uc.value
    FROM last_vintage lv
-   LEFT JOIN data.us_covid uc using (fips, variable_id, vintage)
+   LEFT JOIN data.us_covid uc using (dt, fips, variable_id, vintage)
    LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
 
 

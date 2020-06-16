@@ -22,7 +22,7 @@ class Locations(InsertWithTempTable, DatasetBaseNoDate):
         return df
 
 
-class DailyReports(InsertWithTempTable, DatasetBaseNeedsDate):
+class JHUDailyReports(InsertWithTempTable, DatasetBaseNeedsDate):
     table_name = "jhu_daily_reports"
     pk = "(date_updated, dt, uid, variable_id)"
     raw_cols = [
@@ -106,7 +106,7 @@ class DailyReports(InsertWithTempTable, DatasetBaseNeedsDate):
         return textwrap.dedent(out)
 
 
-class DailyReportsUS(DailyReports, DatasetBaseNeedsDate):
+class JHUDailyReportsUS(JHUDailyReports, DatasetBaseNeedsDate):
     table_name = "jhu_daily_reports_us"
     pk = "(date_updated, dt, fips, variable_id)"
     raw_cols = [
