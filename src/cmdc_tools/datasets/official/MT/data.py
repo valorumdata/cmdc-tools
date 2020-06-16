@@ -53,7 +53,7 @@ class Montana(ArcGIS, DatasetBaseNoDate):
         # get hospitalzation
         hbiuc = self.get_hospitalization_stats(main)
 
-        return(
+        return (
             case_outcome
             # Join tables together
             .join(hbiuc)
@@ -73,11 +73,13 @@ class Montana(ArcGIS, DatasetBaseNoDate):
             .unstack(level="Outcome")
             .fillna(0)
             .astype(int)
-            .rename(columns={
-                "Active":"active_total",
-                "Deceased":"deaths_total",
-                "Recovered":"recovered_total"
-            })
+            .rename(
+                columns={
+                    "Active": "active_total",
+                    "Deceased": "deaths_total",
+                    "Recovered": "recovered_total",
+                }
+            )
         )
 
         return case_outcome

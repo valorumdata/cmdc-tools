@@ -60,17 +60,13 @@ class ArcGIS(CountyData):
 
     def get_res_json(self, service, sheet, srvid, params):
         # Perform actual request
-        url = self.arcgis_query_url(
-            service=service, sheet=sheet, srvid=srvid
-        )
+        url = self.arcgis_query_url(service=service, sheet=sheet, srvid=srvid)
         res = requests.get(url, params=params)
 
         return res.json()
 
     def arcgis_json_to_df(self, res_json):
-        df = pd.DataFrame.from_records(
-            [x["attributes"] for x in res_json["features"]]
-        )
+        df = pd.DataFrame.from_records([x["attributes"] for x in res_json["features"]])
 
         return df
 
@@ -94,9 +90,7 @@ class ArcGIS(CountyData):
         total_offset = len(res_json["features"])
 
         # Use first response to create first DataFrame
-        _dfs = [
-            self.arcgis_json_to_df(res_json)
-        ]
+        _dfs = [self.arcgis_json_to_df(res_json)]
         unbroken_chain = res_json.get("exceededTransferLimit", False)
         while unbroken_chain:
             # Update parameters and make request

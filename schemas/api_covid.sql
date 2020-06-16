@@ -14,13 +14,13 @@ CREATE OR REPLACE VIEW api.jhu_covid AS
 /* NYTimes */
 CREATE OR REPLACE VIEW api.nytimes_covid AS
   WITH last_vintage as (
-    SELECT fips, variable_id, MAX(vintage) AS vintage
+    SELECT dt, fips, variable_id, MAX(vintage) AS vintage
     FROM data.nyt_covid
-    GROUP BY (fips, variable_id)
+    GROUP BY (dt, fips, variable_id)
   )
   SELECT nyt.dt, nyt.fips, cv.name as variable, nyt.value
   FROM last_vintage lv
-  LEFT JOIN data.nyt_covid nyt using (fips, variable_id, vintage)
+  LEFT JOIN data.nyt_covid nyt using (dt, fips, variable_id, vintage)
   LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
 
 COMMENT ON VIEW api.nytimes_covid IS E'This table contains the data from the NY Times COVID data
@@ -92,9 +92,9 @@ COMMENT ON COLUMN api.usafacts_covid.value is E'The value of the observation';
 /* The covid view */
 CREATE OR REPLACE VIEW api.covid AS
 WITH last_vintage as (
-  SELECT fips, variable_id, max(vintage) as vintage
+  SELECT dt, fips, variable_id, max(vintage) as vintage
   from data.us_covid uc
-  group by (fips, variable_id)
+  group by (dt, fips, variable_id)
 )
  SELECT lv.vintage,
     uc.dt,
@@ -102,7 +102,7 @@ WITH last_vintage as (
     cv.name AS variable,
     uc.value
    FROM last_vintage lv
-   LEFT JOIN data.us_covid uc using (fips, variable_id, vintage)
+   LEFT JOIN data.us_covid uc using (dt, fips, variable_id, vintage)
    LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
 
 

@@ -5,30 +5,30 @@ from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
 
 MD_COUNTY_NF_MAP = {
-    'ALLE': 1,
-    'ANNE': 3,
-    'BALT': 5,
-    'BCITY': 510,
-    'CALV': 9,
-    'CARO': 11,
-    'CARR': 13,
-    'CECI': 15,
-    'CHAR': 17,
-    'DORC': 19,
-    'FRED': 21,
-    'GARR': 23,
-    'HARF': 25,
-    'HOWA': 27,
-    'KENT': 29,
-    'MONT': 31,
-    'PRIN': 33,
-    'QUEE': 35,
-    'SOME': 39,
-    'STMA': 37,
-    'TALB': 41,
-    'WASH': 43,
-    'WICO': 45,
-    'WORC': 47,
+    "ALLE": 1,
+    "ANNE": 3,
+    "BALT": 5,
+    "BCITY": 510,
+    "CALV": 9,
+    "CARO": 11,
+    "CARR": 13,
+    "CECI": 15,
+    "CHAR": 17,
+    "DORC": 19,
+    "FRED": 21,
+    "GARR": 23,
+    "HARF": 25,
+    "HOWA": 27,
+    "KENT": 29,
+    "MONT": 31,
+    "PRIN": 33,
+    "QUEE": 35,
+    "SOME": 39,
+    "STMA": 37,
+    "TALB": 41,
+    "WASH": 43,
+    "WICO": 45,
+    "WORC": 47,
 }
 
 
@@ -60,7 +60,7 @@ class Maryland(ArcGIS, DatasetBaseNoDate):
         # Convert timestamps
         result = pd.concat([cdf, sdf], sort=False)
         result["dt"] = result["dt"].map(
-            lambda x: pd.datetime.fromtimestamp(x/1000).date()
+            lambda x: pd.datetime.fromtimestamp(x / 1000).date()
         )
         result["vintage"] = pd.datetime.today().date()
 
@@ -84,26 +84,27 @@ class Maryland(ArcGIS, DatasetBaseNoDate):
         }
         # Only have relevant data on these columns
         cols_to_keep = [
-            "dt", "fips", "cases_total",
-            "deaths_confirmed", "deaths_suspected", "deaths_total",
+            "dt",
+            "fips",
+            "cases_total",
+            "deaths_confirmed",
+            "deaths_suspected",
+            "deaths_total",
             "hospital_beds_in_use_covid_total",
             "icu_beds_in_use_covid_total",
-            "negative_tests_total", "positive_tests_total"
+            "negative_tests_total",
+            "positive_tests_total",
         ]
 
         # Rename and create additional variables
         df = df.rename(columns=crenamer)
-        df['positive_tests_total'] = df.eval(
-            "(PosTestPercent/100) * TotalTests"
-        )
+        df["positive_tests_total"] = df.eval("(PosTestPercent/100) * TotalTests")
         df["fips"] = 24
 
         df = df.loc[:, cols_to_keep]
 
         df = df.melt(
-            id_vars=["dt", "fips"],
-            var_name="variable_name",
-            value_name="value",
+            id_vars=["dt", "fips"], var_name="variable_name", value_name="value",
         )
 
         return df
@@ -116,8 +117,12 @@ class Maryland(ArcGIS, DatasetBaseNoDate):
         """
         # Only have relevant data on these columns
         cols_to_keep = [
-            "dt", "fips", "cases_total", "deaths_confirmed",
-            "deaths_suspected", "deaths_total"
+            "dt",
+            "fips",
+            "cases_total",
+            "deaths_confirmed",
+            "deaths_suspected",
+            "deaths_total",
         ]
 
         # Gather together all county data
@@ -129,7 +134,7 @@ class Maryland(ArcGIS, DatasetBaseNoDate):
                 f"{county}_": "cases_total",  # Somerset is `SOME_`
                 f"{county}": "cases_total",  # All others are `{CTY}`
                 f"death{county}": "deaths_confirmed",
-                f"pDeath{county}": "deaths_suspected"
+                f"pDeath{county}": "deaths_suspected",
             }
 
             # Find out which columns correspond to a particular county
@@ -142,7 +147,7 @@ class Maryland(ArcGIS, DatasetBaseNoDate):
             county_df = df[county_cols]
 
             # Add fips
-            county_df['fips'] = 24000 + cid
+            county_df["fips"] = 24000 + cid
 
             # Rename columns and subset to final data
             county_df = county_df.rename(columns=crenamer)
@@ -158,9 +163,7 @@ class Maryland(ArcGIS, DatasetBaseNoDate):
         counties_df = pd.concat(county_dfs)
 
         counties_df = counties_df.melt(
-            id_vars=["dt", "fips"],
-            var_name="variable_name",
-            value_name="value",
+            id_vars=["dt", "fips"], var_name="variable_name", value_name="value",
         )
 
         return counties_df
