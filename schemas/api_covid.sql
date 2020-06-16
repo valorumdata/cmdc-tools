@@ -13,7 +13,7 @@ CREATE OR REPLACE VIEW api.jhu_covid AS
 
 CREATE OR REPLACE VIEW api.nytimes_covid AS
   WITH last_vintage as (
-    SELECT fips, variable_id, MAX(vintage) AS vintage
+    SELECT dt, fips, variable_id, MAX(vintage) AS vintage
     FROM data.nyt_covid
     GROUP BY (dt, fips, variable_id)
   )
