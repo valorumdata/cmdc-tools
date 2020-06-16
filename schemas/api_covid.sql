@@ -15,7 +15,7 @@ CREATE OR REPLACE VIEW api.nytimes_covid AS
   WITH last_vintage as (
     SELECT fips, variable_id, MAX(vintage) AS vintage
     FROM data.nyt_covid
-    GROUP BY (fips, variable_id)
+    GROUP BY (dt, fips, variable_id)
   )
   SELECT nyt.dt, nyt.fips, cv.name as variable, nyt.value
   FROM last_vintage lv
