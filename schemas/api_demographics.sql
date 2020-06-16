@@ -3,7 +3,7 @@ CREATE OR REPLACE VIEW api.demographics AS
   WITH idtoname AS (
     SELECT mv.id, mvs.name
     FROM meta.acs_variables mv
-    LEFT JOIN meta.acs_variables_selected mvs
+    RIGHT JOIN meta.acs_variables_selected mvs
     ON mv.year=mvs.year AND mv.product=mvs.product AND mv.census_id=mvs.census_id
   )
   SELECT dd.fips as location, idn.name, dd.value
@@ -37,5 +37,5 @@ US Census American Community Survey (https://www.census.gov/programs-surveys/acs
 ';
 
 COMMENT ON COLUMN api.demographics.location is E'This value is a numerical representation of a geography. For the United States, this number is the FIPS code. See our documentation page for more information.';
-COMMENT ON COLUMN api.demographics.variable is E'A description of the variable';
+COMMENT ON COLUMN api.demographics.name is E'A description of the variable';
 COMMENT ON COLUMN api.demographics.value is E'The value of the variable';
