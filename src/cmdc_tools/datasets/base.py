@@ -31,13 +31,18 @@ class DatasetBase:
         """
         Log the source of all variables in the DataFrame df
 
-        :param conn: SQLAlchemy engine
-        :param df: The DataFrame added to the data.us_covid table
-        :param source: A string containing the source of the data
-        :param state_fips: If `df` recognizes locations by name lookup
-        from `county` column, the fips state code must be passed to
-        disambiguate the location code for the observation
-        :return:
+        Parameters
+        ----------
+        conn: SQLAlchemy engine
+            The database connection where the sources will be stored
+        df: pd.DataFrame
+            The DataFrame added to the data.us_covid table
+        source: str
+            A string containing the source of the data
+        state_fips: Optional(Int)
+            If `df` recognizes locations by name lookup from `county`
+            column, the fips state code must be passed to disambiguate
+            the location code for the observation
         """
         # check for valid column names
         # first look for fips
