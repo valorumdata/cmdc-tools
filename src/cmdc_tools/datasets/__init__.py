@@ -29,5 +29,6 @@ from .official import (
     Pennsylvania,
     SanDiego,
 )
+from .usafacts import USAFactsDeaths, USAFactsCases
 from .uscensus import ACS, ACSVariables
 from .wei import WEI
