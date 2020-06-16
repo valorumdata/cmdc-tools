@@ -1,15 +1,15 @@
-/*
+-- JHU
 CREATE OR REPLACE VIEW api.jhu_covid AS
   WITH last_vintage as (
-    SELECT fips, variable_id, MAX(vintage) AS vintage
+    SELECT dt, fips, variable_id, MAX(date_updated) AS date_updated
     FROM data.jhu_covid
-    GROUP BY (fips, variable_id)
+    GROUP BY (dt, fips, variable_id)
   )
   SELECT jhu.dt, jhu.fips, cv.name as variable, jhu.value
   FROM last_vintage lv
-  LEFT JOIN data.jhu_covid nyt using (fips, variable_id, vintage)
-  LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
-*/
+  LEFT JOIN data.jhu_covid jhu using (dt, fips, variable_id, date_updated)
+  left join meta.covid_variables cv ON cv.id = uc.variable_id;
+
 
 /* NYTimes */
 CREATE OR REPLACE VIEW api.nytimes_covid AS
