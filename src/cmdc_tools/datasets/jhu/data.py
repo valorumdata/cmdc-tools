@@ -80,7 +80,7 @@ class JHUDailyReports(InsertWithTempTable, DatasetBaseNeedsDate):
         count_cols = ["cases_total", "deaths_total", "recovered_total", "active_total"]
         if "active_total" not in list(df):
             df["active_total"] = (
-                df["confirmed_total"].fillna(0)
+                df["cases_total"].fillna(0)
                 - df["deaths_total"].fillna(0)
                 - df["recovered_total"].fillna(0)
             )
