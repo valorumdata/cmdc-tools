@@ -11,8 +11,8 @@ from ..db_util import TempTable
 
 
 _VARIABLES_ACS = {
-    "DP05_0001E":  "Total population",
-    "DP05_0018E":  "Median age",
+    "DP05_0001E": "Total population",
+    "DP05_0018E": "Median age",
     "DP05_0024PE": "Fraction of population over 65",
     "DP05_0037PE": "Percent white",
     "DP05_0038PE": "Percent black",
@@ -50,6 +50,7 @@ class ACS(ACSAPI, InsertWithTempTable, DatasetBaseNoDate):
     Used to insert data and variable names into the database specified
     by schema.sql
     """
+
     table_name = "acs_data"
     pk = '("id", "fips")'
     autodag = False
