@@ -19,7 +19,7 @@ CREATE OR REPLACE VIEW api.nytimes_covid AS
   )
   SELECT nyt.dt, nyt.fips, cv.name as variable, nyt.value
   FROM last_vintage lv
-  LEFT JOIN data.nyt_covid nyt using (fips, variable_id, vintage)
+  LEFT JOIN data.nyt_covid nyt using (dt, fips, variable_id, vintage)
   LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
 
 COMMENT ON VIEW api.nytimes_covid IS E'This table contains the data from the NY Times COVID data
