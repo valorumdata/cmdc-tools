@@ -54,7 +54,7 @@ class JHUDailyReports(InsertWithTempTable, DatasetBaseNeedsDate):
                 "confirmed": "cases_total",
                 "deaths": "deaths_total",
                 "recovered": "recovered_total",
-                "active": "active_total"
+                "active": "active_total",
             }
         )
 
@@ -77,9 +77,7 @@ class JHUDailyReports(InsertWithTempTable, DatasetBaseNeedsDate):
             )
 
         # Check for any missing data and fill with 0s
-        count_cols = [
-            "cases_total", "deaths_total", "recovered_total", "active_total"
-        ]
+        count_cols = ["cases_total", "deaths_total", "recovered_total", "active_total"]
         if "active_total" not in list(df):
             df["active_total"] = (
                 df["confirmed_total"].fillna(0)
@@ -89,7 +87,8 @@ class JHUDailyReports(InsertWithTempTable, DatasetBaseNeedsDate):
         df[count_cols] = df[count_cols].fillna(0).astype(int)
         self.df = df[self.raw_cols].melt(
             id_vars=["date_updated", "dt", "combined_key"],
-            var_name="variable_name", value_name="value"
+            var_name="variable_name",
+            value_name="value",
         )
 
         return self.df
@@ -136,7 +135,6 @@ class JHUDailyReportsUS(JHUDailyReports, DatasetBaseNeedsDate):
         """
         return textwrap.dedent(out)
 
-
     def get(self, date):
         # Get date and build url
         dt = pd.to_datetime(date)
@@ -146,16 +144,18 @@ class JHUDailyReportsUS(JHUDailyReports, DatasetBaseNeedsDate):
         # Read csv and rename columns
         df = pd.read_csv(url)
         df.columns = [x.lower() for x in list(df)]
-        df = df.rename(columns={
-            "last_update": "date_updated",
-            "long_": "lon",
-            "confirmed": "cases_total",
-            "deaths": "deaths_total",
-            "recovered": "recovered_total",
-            "active": "active_total",
-            # "people_tested": "tests_total"
-            # "people_hospitalized": "hospitalized_cumulative"
-        })
+        df = df.rename(
+            columns={
+                "last_update": "date_updated",
+                "long_": "lon",
+                "confirmed": "cases_total",
+                "deaths": "deaths_total",
+                "recovered": "recovered_total",
+                "active": "active_total",
+                # "people_tested": "tests_total"
+                # "people_hospitalized": "hospitalized_cumulative"
+            }
+        )
 
         # Set date information
         df["date_updated"] = pd.to_datetime(df["date_updated"]).dt.tz_localize("UTC")
@@ -166,13 +166,19 @@ class JHUDailyReportsUS(JHUDailyReports, DatasetBaseNeedsDate):
 
         # Store full df but only return subsetted df with melt
         cols_to_keep = [
-            "date_updated", "dt", "fips",
-            "cases_total", "deaths_total", "recovered_total", "active_total"
+            "date_updated",
+            "dt",
+            "fips",
+            "cases_total",
+            "deaths_total",
+            "recovered_total",
+            "active_total",
         ]
         self._df_full = df
         self.df = df[cols_to_keep].melt(
             id_vars=["date_updated", "dt", "fips"],
-            var_name="variable_name", value_name="value"
+            var_name="variable_name",
+            value_name="value",
         )
 
         return self.df
