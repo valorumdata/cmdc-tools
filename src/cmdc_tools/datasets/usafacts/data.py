@@ -13,11 +13,12 @@ class USAFactsCases(InsertWithTempTable, DatasetBaseNoDate):
 
     Source: https://usafacts.org/visualizations/coronavirus-covid-19-spread-map
     """
-
     filename = "covid-19/covid_confirmed_usafacts.csv"
     variablename = "cases_total"
     table_name = "usafacts_covid"
     pk = "(vintage, dt, fips, variable_id)"
+    data_type = "covid"
+    source = "https://usafacts.org/issues/coronavirus/"
 
     def __init__(self):
         super(USAFactsCases, self).__init__()

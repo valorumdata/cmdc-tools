@@ -7,6 +7,8 @@ from .. import InsertWithTempTable, DatasetBaseNeedsDate, DatasetBaseNoDate
 class NYTimesState(InsertWithTempTable, DatasetBaseNoDate):
     table_name = "nyt_covid"
     pk = "(vintage, dt, fips, variable_id)"
+    data_type = "covid"
+    source = "https://github.com/nytimes/covid-19-data"
     url = "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv"
 
     def __init__(self):
