@@ -4,10 +4,12 @@ import pandas as pd
 import requests
 
 from ..base import ArcGIS
+from ...base import DatasetBaseNoDate
 
 
-class Arkansas(ArcGIS):
+class Arkansas(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = "PwY9ZuZRDiI5nXUB"
+    source = "https://experience.arcgis.com/experience/c2ef4a4fcbe5458fbf2e48a21e4fece9"
 
     def __init__(self, params=None):
 

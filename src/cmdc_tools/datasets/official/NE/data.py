@@ -5,8 +5,12 @@ from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
 
 
-class Nebraska(ArcGIS, DatasetBaseNoDate):
+class Nebraska(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = ""
+    source = (
+        "https://nebraska.maps.arcgis.com/apps/opsdashboard/"
+        "index.html#/4213f719a45647bc873ffb58783ffef3"
+    )
 
     def __init__(self, params=None):
 

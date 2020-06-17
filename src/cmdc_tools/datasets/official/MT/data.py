@@ -6,7 +6,12 @@ from ..base import ArcGIS
 from ...base import DatasetBaseNoDate
 
 
-class Montana(ArcGIS, DatasetBaseNoDate):
+class Montana(DatasetBaseNoDate, ArcGIS):
+    source = (
+        "https://montana.maps.arcgis.com/apps/MapSeries"
+        "/index.html?appid=7c34f3412536439491adcc2103421d4b"
+    )
+
     def __init__(self, params=None):
         self.ARCGIS_ID = "qnjIrwR8z5Izc0ij"
 
