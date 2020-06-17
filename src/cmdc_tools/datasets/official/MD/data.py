@@ -32,8 +32,9 @@ MD_COUNTY_NF_MAP = {
 }
 
 
-class Maryland(ArcGIS, DatasetBaseNoDate):
+class Maryland(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = "njFNhDsUCentVYJW"
+    source = "https://coronavirus.maryland.gov/"
 
     def __init__(self, params=None):
 

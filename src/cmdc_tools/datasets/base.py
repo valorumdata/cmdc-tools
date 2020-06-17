@@ -9,7 +9,8 @@ import pandas as pd
 
 
 class DatasetBase:
-    autodag = True
+    autodag: bool = True
+    data_type: str = "general"
 
     def __init__(self):
         pass

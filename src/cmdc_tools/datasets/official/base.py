@@ -8,6 +8,7 @@ from .. import InsertWithTempTable
 class CountyData(InsertWithTempTable):
     table_name = "us_covid"
     pk = '("vintage", "dt", "fips", "variable_id")'
+    data_type = "covid"
 
     def __init__(self):
         super(CountyData, self).__init__()
