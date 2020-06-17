@@ -11,6 +11,7 @@ class Pennsylvania(DatasetBaseNoDate, ArcGIS):
         "https://www.arcgis.com/apps/opsdashboard/"
         "index.html#/85054b06472e4208b02285b8557f24cf"
     )
+    state_fips = 42
 
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         out = f"""

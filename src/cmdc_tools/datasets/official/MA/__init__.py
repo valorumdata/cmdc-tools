@@ -14,6 +14,7 @@ class Massachusetts(DatasetBaseNeedsDate, CountyData):
         "https://www.mass.gov/info-details/"
         "covid-19-response-reporting#covid-19-daily-dashboard-"
     )
+    state_fips = 25
 
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         return f"""
@@ -23,7 +24,7 @@ class Massachusetts(DatasetBaseNeedsDate, CountyData):
         INNER JOIN (
             SELECT fips, name
             FROM meta.us_fips
-            WHERE fips::TEXT LIKE '25___'
+            WHERE fips BETWEEN 25000 AND 25999
         ) uf on uf.name = tt.county_name
         LEFT JOIN meta.covid_variables cv on cv.name = tt.variable_name
         ON CONFLICT {pk} DO UPDATE SET value = EXCLUDED.value;

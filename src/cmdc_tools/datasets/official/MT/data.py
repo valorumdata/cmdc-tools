@@ -11,6 +11,7 @@ class Montana(DatasetBaseNoDate, ArcGIS):
         "https://montana.maps.arcgis.com/apps/MapSeries"
         "/index.html?appid=7c34f3412536439491adcc2103421d4b"
     )
+    state_fips = 30
 
     def __init__(self, params=None):
         self.ARCGIS_ID = "qnjIrwR8z5Izc0ij"

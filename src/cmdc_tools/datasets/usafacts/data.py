@@ -20,6 +20,7 @@ class USAFactsCases(InsertWithTempTable, DatasetBaseNoDate):
     pk = "(vintage, dt, fips, variable_id)"
     data_type = "covid"
     source = "https://usafacts.org/issues/coronavirus/"
+    has_fips = True
 
     def __init__(self):
         super(USAFactsCases, self).__init__()

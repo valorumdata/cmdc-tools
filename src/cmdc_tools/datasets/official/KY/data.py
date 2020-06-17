@@ -10,6 +10,7 @@ class Kentucky(DatasetBaseNoDate, ArcGIS):
         "https://kygeonet.maps.arcgis.com/apps/opsdashboard/"
         "index.html#/543ac64bc40445918cf8bc34dc40e334"
     )
+    state_fips = 21
 
     def arcgis_query_url(self, service, sheet, srvid=1):
         out = f"https://kygisserver.ky.gov/arcgis/rest/services/WGS84WM_Services/{service}/FeatureServer/{sheet}/query"

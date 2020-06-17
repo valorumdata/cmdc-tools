@@ -23,6 +23,7 @@ C_RENAMER = {
 
 class CACountyData(DatasetBaseNoDate, CountyData):
     source = CA_COUNTY_URL
+    state_fips = 6
 
     def _insert_query(self, df, table_name, temp_name, pk):
         out = f"""

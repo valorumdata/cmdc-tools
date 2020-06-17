@@ -37,3 +37,4 @@ def test_all_dataset_has_type(cls):
 def test_covid_dataset_has_source(cls):
     if getattr(cls, "data_type", False) == "covid":
         assert hasattr(cls, "source")
+        assert hasattr(cls, "state_fips") or getattr(cls, "has_fips", False)

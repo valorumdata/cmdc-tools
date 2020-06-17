@@ -28,6 +28,7 @@ class NewJersey(DatasetBaseNoDate, ArcGIS):
 
     ARCGIS_ID = "Z0rixLlManVefxqY"
     source = "https://covid19.nj.gov/#live-updates"
+    state_fips = 34
 
     def __init__(self, params=None):
         super().__init__(params=params)

@@ -34,12 +34,13 @@ class DatasetBase:
 
         Parameters
         ----------
-        conn: SQLAlchemy engine
+        connstr: SQLAlchemy engine
             The database connection where the sources will be stored
         df: pd.DataFrame
             The DataFrame added to the data.us_covid table
-        source: str
             A string containing the source of the data
+        source: str
+            The URL of the website hosting the data
         state_fips: Optional(Int)
             If `df` recognizes locations by name lookup from `county`
             column, the fips state code must be passed to disambiguate

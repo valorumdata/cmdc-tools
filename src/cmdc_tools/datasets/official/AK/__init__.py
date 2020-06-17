@@ -38,6 +38,7 @@ class Alaska(DatasetBaseNoDate, CountyData):
     table_name = "us_covid"
     pk = '("vintage", "dt", "fips", "variable_id")'
     source = "https://www.arcgis.com/apps/opsdashboard/index.html#/83c63cfec8b24397bdf359f49b11f218"
+    state_fips = 2
 
     def get_cases(self):
         url = "https://www.arcgis.com/sharing/rest/content/items/"

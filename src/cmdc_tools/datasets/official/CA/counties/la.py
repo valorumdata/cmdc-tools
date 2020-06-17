@@ -77,6 +77,7 @@ class LA(DatasetBaseNoDate, CountyData):
     source = (
         "http://dashboard.publichealth.lacounty.gov/covid19_surveillance_dashboard/"
     )
+    state_fips = 6
 
     def get(self):
         df = asyncio.run(test_data())

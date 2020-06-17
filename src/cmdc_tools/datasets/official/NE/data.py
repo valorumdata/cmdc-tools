@@ -11,6 +11,7 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
         "https://nebraska.maps.arcgis.com/apps/opsdashboard/"
         "index.html#/4213f719a45647bc873ffb58783ffef3"
     )
+    state_fips = 31
 
     def __init__(self, params=None):
 

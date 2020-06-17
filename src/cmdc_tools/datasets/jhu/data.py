@@ -25,7 +25,6 @@ class Locations(InsertWithTempTable, DatasetBaseNoDate):
 class JHUDailyReports(InsertWithTempTable, DatasetBaseNeedsDate):
     table_name = "jhu_daily_reports"
     pk = "(date_updated, dt, uid, variable_id)"
-    data_type = "covid"
     source = "https://github.com/CSSEGISandData/COVID-19"
     raw_cols = [
         "date_updated",
@@ -127,6 +126,7 @@ class JHUDailyReportsUS(JHUDailyReports, DatasetBaseNeedsDate):
         # "testing_rate",
         # "hospitalization_rate",
     ]
+    has_fips = True
 
     def _insert_query(self, df, table_name, temp_name, pk):
         out = f"""
