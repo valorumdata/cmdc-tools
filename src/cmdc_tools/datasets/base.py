@@ -51,7 +51,7 @@ class DatasetBase:
         columns = list(df.columns)
 
         if "fips" in df:
-            join_locs = "LEFT JOIN META.us_fips ff using(fips)"
+            join_locs = "INNER JOIN META.us_fips ff using(fips)"
             loc = "fips"
         elif "county" in df:
             if state_fips is None:
@@ -66,8 +66,8 @@ class DatasetBase:
             fips_max = fips_min + 999  # map from XX000 to XX999
 
             select = "SELECT name, fips FROM meta.us_fips"
-            select += " WHERE fips BETWEEN {fips_min} AND {fips_max}"
-            join_locs = f"LEFT JOIN ({select}) ff ON ff.name = tt.county"
+            select += f" WHERE fips BETWEEN {fips_min} AND {fips_max}"
+            join_locs = f"INNER JOIN ({select}) ff ON ff.name = tt.county"
             loc = "county"
         else:
             raise ValueError("Expected either `fips` or `county` in `df`")
@@ -75,11 +75,11 @@ class DatasetBase:
         if "variable_name" in df:
             var = "variable_name"
             join_covid = (
-                "LEFT JOIN meta.covid_variables mv ON mv.name = tt.variable_name"
+                "INNER JOIN meta.covid_variables mv ON mv.name = tt.variable_name"
             )
         elif "variable_id" in df:
             var = "variable_id"
-            join_covid = "LEFT JOIN meta.covid_variables mv on mv.id = tt.variable_id"
+            join_covid = "INNER JOIN meta.covid_variables mv on mv.id = tt.variable_id"
         else:
             raise ValueError("Expected either `variable_name` or `variable_id` in `df`")
 

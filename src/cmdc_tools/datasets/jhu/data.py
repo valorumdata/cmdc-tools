@@ -166,7 +166,7 @@ class JHUDailyReportsUS(JHUDailyReports, DatasetBaseNeedsDate):
         df["dt"] = _date
 
         # Ignore values without a fips code
-        df = df.dropna(subset=["fips"])
+        df = df.dropna(subset=["date_updated", "fips"])
 
         # Store full df but only return subsetted df with melt
         cols_to_keep = [
