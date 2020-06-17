@@ -105,6 +105,21 @@ WITH last_vintage as (
    LEFT JOIN data.us_covid uc using (dt, fips, variable_id, vintage)
    LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
 
+/* The covid view */
+CREATE OR REPLACE VIEW api.covid_us AS
+WITH last_vintage as (
+  SELECT dt, fips, variable_id, max(vintage) as vintage
+  from data.us_covid uc
+  group by (dt, fips, variable_id)
+)
+ SELECT uc.dt,
+    uc.fips as location,
+    cv.name AS variable,
+    uc.value
+   FROM last_vintage lv
+   LEFT JOIN data.us_covid uc using (dt, fips, variable_id, vintage)
+   LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
+
 
 COMMENT ON VIEW api.covid IS E'This table contains relevant information on COVID-19
 
