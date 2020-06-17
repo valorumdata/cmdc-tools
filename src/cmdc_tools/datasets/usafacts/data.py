@@ -13,6 +13,7 @@ class USAFactsCases(InsertWithTempTable, DatasetBaseNoDate):
 
     Source: https://usafacts.org/visualizations/coronavirus-covid-19-spread-map
     """
+
     filename = "covid-19/covid_confirmed_usafacts.csv"
     variablename = "cases_total"
     table_name = "usafacts_covid"
