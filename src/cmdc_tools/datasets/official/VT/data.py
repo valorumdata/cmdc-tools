@@ -7,8 +7,7 @@ from ..base import ArcGIS
 class Vermont(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = "BkFxaEFNwHqX3tAw"
     source = (
-        "https://experience.arcgis.com/experience/"
-        "85f43bd849e743cb957993a545d17170"
+        "https://experience.arcgis.com/experience/" "85f43bd849e743cb957993a545d17170"
     )
 
     def _insert_query(self, df, table_name, temp_name, pk):
