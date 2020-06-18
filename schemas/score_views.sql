@@ -30,15 +30,16 @@ CREATE OR REPLACE VIEW public.scores AS
   SELECT
     s.location,
     CASE
-      WHEN ucf.name=st.name THEN ucf.name
+      WHEN usf.name=st.name THEN usf.name
     ELSE
-      ucf.name || ', ' || st.name
+      usf.name || ', ' || st.name
     END
     AS name,
     s.score
   FROM scores s
   LEFT JOIN meta.us_fips usf ON s.location=usf.fips
   LEFT JOIN states st ON usf.state=st.state
+  ORDER BY s.score DESC
 ;
 
 
