@@ -7,75 +7,78 @@ from ..base import ArcGIS
 class Vermont(ArcGIS, DatasetBaseNoDate):
     ARCGIS_ID = "BkFxaEFNwHqX3tAw"
 
-    def get(self):
-        df = self.get_all_sheet_to_df(service="VT_Counties_Cases", sheet=0, srvid=1)
+    def _insert_query(self, df, table_name, temp_name, pk):
+        out = f"""
+        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
+        SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value
+        FROM {temp_name} tt
+        INNER JOIN meta.us_fips us ON tt.fips=us.fips
+        LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
+        ON CONFLICT {pk} DO NOTHING
+        """
+        return out
 
-        renamed = df.rename(columns={
-            "CntyLabel": "county",
+    def get(self):
+        # Download county data which only includes cases and deaths in VT
+        county = self.get_all_sheet_to_df(
+            service="VT_Counties_Cases", sheet=0, srvid=1
+        )
+        county = county.rename(columns={
             "CNTYGEOID": "fips",
             "Cases": "cases_total",
             "Deaths": "deaths_total",
             "DateUpd": "dt"
         })
+
         # Convert Timestamps
-        renamed["dt"] = pd.to_datetime(renamed["dt"].map(
+        county["dt"] = pd.to_datetime(county["dt"].map(
             lambda x: pd.datetime.fromtimestamp(x/1000).date()
         ))
-
-        county_summ = self._get_county_summary()
-
-
-        renamed = renamed[[
-            "county",
-            "fips",
-            "cases_total",
-            "deaths_total",
-            "dt"
-        ]]
-        result = pd.concat([renamed, county_summ], sort=False)
-        return (
-            result
-            .sort_values(['dt', 'county'])
-            .melt(
-                id_vars=['dt', 'county','fips'],
-                var_name="variable_name",
-                value_name="value"
-            )
-            .assign(
-                vintage=pd.Timestamp.utcnow().normalize()
-            )
+        county = county.loc[:, ["dt", "fips", "cases_total", "deaths_total"]]
+        county = county.melt(
+            id_vars=["dt", "fips"], var_name="variable_name",
+            value_name="value"
         )
 
-    def _get_county_summary(self):
-        df = self.get_all_sheet_to_df(service="county_summary", sheet=0, srvid=1)
-
-        renamed = df.rename(columns={
+        state = self.get_all_sheet_to_df(service="county_summary", sheet=0, srvid=1)
+        state = state.rename(columns={
             "date": "dt",
-            "positive_cases": "daily_positive_tests_total", # daily
-            "total_deaths": "cumulative_deaths_total", # cumulative
-            "daily_deaths": "deaths_total",
-            "daily_recovered": "daily_recovered_total", # daily
-            "total_recovered": "cumulative_recovered_total", # cumulative
-            "current_hospitalizations": "hospital_beds_in_use_covid_confirmed" # daily
+            # "positive_cases": "daily_positive_tests_total", # daily
+            "cumulative_positives": "cases_total",
+            "total_deaths": "deaths_total", # cumulative
+            "total_recovered": "recovered_total", # cumulative
+            # "daily_deaths": "deaths_total",
+            # "daily_recovered": "daily_recovered_total", # daily
+            "current_hospitalizations": "hospital_beds_in_use_covid_confirmed", # daily
+            "hosp_pui": "hospital_beds_in_use_covid_suspected",
         })
-
+        state["hospital_beds_in_use_covid_total"] = state.eval(
+            "hospital_beds_in_use_covid_confirmed " +
+            "+ hospital_beds_in_use_covid_confirmed"
+        )
 
         # Convert Timestamps
-        renamed["dt"] = pd.to_datetime(renamed["dt"].map(
+        state["dt"] = pd.to_datetime(state["dt"].map(
             lambda x: pd.datetime.fromtimestamp(x/1000).date()
         ))
-        renamed['fips'] = 50
+        state['fips'] = 50
 
-
-        renamed = renamed[[
-            "dt",
-            "daily_positive_tests_total",
-            "cumulative_deaths_total",
-            "deaths_total",
-            "daily_recovered_total",
-            "cumulative_recovered_total",
+        state_keep = [
+            "dt", "fips", "cases_total", "deaths_total", "recovered_total",
             "hospital_beds_in_use_covid_confirmed",
-            "fips"
-        ]]
+            "hospital_beds_in_use_covid_suspected",
+            "hospital_beds_in_use_covid_total",
+        ]
+        state = state.loc[:, state_keep]
+        state = state.melt(
+            id_vars=["dt", "fips"], var_name="variable_name",
+            value_name="value"
+        )
 
-        return renamed
+        result = pd.concat([county, state], ignore_index=True).assign(
+            vintage=pd.Timestamp.utcnow().normalize()
+        ).dropna()
+        result["fips"] = result["fips"].astype(int)
+
+        return result.sort_values(["dt", "fips"])
+
