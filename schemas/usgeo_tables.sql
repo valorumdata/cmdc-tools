@@ -3,6 +3,8 @@ DROP TABLE IF EXISTS meta.us_fips CASCADE;
 CREATE TABLE meta.us_fips (
     "id" SERIAL PRIMARY KEY,
     "fips" BIGINT,
+    "state" TEXT,
+    "county" TEXT,
     "name" TEXT,
     "area" REAL,
     "latitude" REAL,
@@ -11,8 +13,8 @@ CREATE TABLE meta.us_fips (
 
 CREATE UNIQUE INDEX fips_ind ON meta.us_fips("fips");
 
-INSERT INTO meta.us_fips (fips, name, area, latitude, longitude)
-  VALUES (0, 'United States', 3535948.12, 39.8283, -98.5795)
+INSERT INTO meta.us_fips (fips, state, county, name, area, latitude, longitude)
+  VALUES (0, '00', '000', 'United States', 3535948.12, 39.8283, -98.5795)
 ;
 
 COMMENT ON TABLE meta.us_fips is E'This table contains the FIPS codes for states, counties, and census tracts.';
