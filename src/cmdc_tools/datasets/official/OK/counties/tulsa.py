@@ -43,19 +43,17 @@ class OKTulsa(DatasetBaseNoDate, ArcGIS):
     def get(self):
         # Note: Service=Covid19Coronavirusdata_V3_View seems to have caser by
         #       case data
-        df_cd = self.get_all_sheet_to_df(
-            "COVID19_Regions_V3_View", 0, 3
-        ).drop(columns=["FID", "Latitude", "Longitude"])
-        df_hosp = self.get_all_sheet_to_df(
-            "COVID19Hospitalizations_View", 0, 3
-        ).drop(columns=["FID", "Latitude", "Longitude"])
+        df_cd = self.get_all_sheet_to_df("COVID19_Regions_V3_View", 0, 3).drop(
+            columns=["FID", "Latitude", "Longitude"]
+        )
+        df_hosp = self.get_all_sheet_to_df("COVID19Hospitalizations_View", 0, 3).drop(
+            columns=["FID", "Latitude", "Longitude"]
+        )
         df = df_cd.merge(df_hosp, on=["Date", "County"], how="outer")
 
         # Divide by 1000 because arcgis spits time out in epoch milliseconds
         # rather than epoch seconds
-        df["Date"] = df["Date"].map(
-            lambda x: pd.datetime.fromtimestamp(x / 1000)
-        )
+        df["Date"] = df["Date"].map(lambda x: pd.datetime.fromtimestamp(x / 1000))
 
         # Rename columns
         crenamer = {
@@ -74,9 +72,7 @@ class OKTulsa(DatasetBaseNoDate, ArcGIS):
         df = df.rename(columns=crenamer)
 
         df = df.loc[:, list(crenamer.values())].melt(
-            id_vars=["dt", "county"],
-            var_name="variable_name",
-            value_name="value",
+            id_vars=["dt", "county"], var_name="variable_name", value_name="value",
         )
         df["vintage"] = pd.Timestamp.utcnow().normalize()
 
