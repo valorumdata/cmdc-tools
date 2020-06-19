@@ -91,7 +91,7 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
         # Convert timestamps
         keep["dt"] = keep["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000))
 
-        keep["fips"] = 31
+        keep["fips"] = self.state_fips
 
         return keep.melt(["dt", "fips"], var_name="variable_name")
 
@@ -113,6 +113,6 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
         return (
             df.rename(columns=colmap)
             .loc[:, list(colmap.values())]
-            .assign(fips=lambda x: x["fips"].astype(int) + 31000)
+            .assign(fips=lambda x: x["fips"].astype(int) + self.state_fips * 1000)
             .melt(id_vars=["fips"], var_name="variable_name")
         )

@@ -40,7 +40,7 @@ class NewJersey(DatasetBaseNoDate, ArcGIS):
         FROM {temp_name} tt
         LEFT JOIN meta.us_fips us ON tt.county=us.name
         LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        WHERE us.fips > 34000 AND us.fips < 35000
+        WHERE us.state = LPAD({self.state_fips}::TEXT, 2, '0')
         ON CONFLICT {pk} DO NOTHING
         """
 

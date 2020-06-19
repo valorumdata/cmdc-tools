@@ -21,8 +21,8 @@ class Pennsylvania(DatasetBaseNoDate, ArcGIS):
         INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name
         FULL OUTER JOIN (
             SELECT fips, name
-            FROM meta.us_fips where fips BETWEEN 42000 and 42999
-        ) mc on LOWER(mc.name) = LOWER(tt.county)   
+            FROM meta.us_fips WHERE state = LPAD({self.state_fips}::TEXT, 2, '0')
+        ) mc on LOWER(mc.name) = LOWER(tt.county)
         ON CONFLICT {pk} DO NOTHING
         """
 

@@ -101,7 +101,7 @@ class Maryland(DatasetBaseNoDate, ArcGIS):
         # Rename and create additional variables
         df = df.rename(columns=crenamer)
         df["positive_tests_total"] = df.eval("(PosTestPercent/100) * TotalTests")
-        df["fips"] = 24
+        df["fips"] = self.state_fips
 
         df = df.loc[:, cols_to_keep]
 
@@ -149,7 +149,7 @@ class Maryland(DatasetBaseNoDate, ArcGIS):
             county_df = df[county_cols]
 
             # Add fips
-            county_df["fips"] = 24000 + cid
+            county_df["fips"] = self.state_fips * 1000 + cid
 
             # Rename columns and subset to final data
             county_df = county_df.rename(columns=crenamer)
