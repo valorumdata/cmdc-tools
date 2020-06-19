@@ -9,3 +9,4 @@ from .MT import Montana
 from .NE import Nebraska
 from .NJ import NewJersey
 from .PA import Pennsylvania
+from .VT import Vermont

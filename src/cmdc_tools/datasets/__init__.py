@@ -28,6 +28,7 @@ from .official import (
     NewJersey,
     Pennsylvania,
     SanDiego,
+    Vermont,
 )
 from .usafacts import USAFactsDeaths, USAFactsCases
 from .uscensus import ACS, ACSVariables
