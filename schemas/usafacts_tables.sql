@@ -11,3 +11,4 @@ CREATE TABLE data.usafacts_covid (
 
 COMMENT ON TABLE data.usafacts_covid IS E'This table contains the data collected by USAFacts';
 
+CREATE INDEX dt_idx on data.usafacts_covid (dt);
