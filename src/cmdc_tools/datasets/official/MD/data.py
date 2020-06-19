@@ -149,7 +149,7 @@ class Maryland(DatasetBaseNoDate, ArcGIS):
             county_df = df[county_cols]
 
             # Add fips
-            county_df["fips"] = self.state_fips*1000 + cid
+            county_df["fips"] = self.state_fips * 1000 + cid
 
             # Rename columns and subset to final data
             county_df = county_df.rename(columns=crenamer)

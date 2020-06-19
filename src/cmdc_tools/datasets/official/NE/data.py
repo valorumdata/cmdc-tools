@@ -113,6 +113,6 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
         return (
             df.rename(columns=colmap)
             .loc[:, list(colmap.values())]
-            .assign(fips=lambda x: x["fips"].astype(int) + self.state_fips*1000)
+            .assign(fips=lambda x: x["fips"].astype(int) + self.state_fips * 1000)
             .melt(id_vars=["fips"], var_name="variable_name")
         )
