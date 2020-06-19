@@ -24,7 +24,7 @@ class Imperial(DatasetBaseNoDate, ArcGIS):
     """
 
     ARCGIS_ID = "RomaVqqozKczDNgd"
-    FIPS = 6073
+    FIPS = 6025
     source = (
         "http://www.icphd.org/health-information-and-resources/healthy-facts/covid-19/"
     )
