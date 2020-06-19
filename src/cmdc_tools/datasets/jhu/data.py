@@ -41,6 +41,7 @@ class JHUDailyReports(InsertWithTempTable, DatasetBaseNeedsDate):
         dt = pd.to_datetime(date)
         _date = pd.to_datetime(dt.strftime("%Y-%m-%d"))
         url = f"{BASE_URL}/csse_covid_19_data/csse_covid_19_daily_reports/{dt:%m-%d-%Y}.csv"
+        print("About to fetch from {url}".format(url=url))
 
         # Read csv file and modify column names
         df = pd.read_csv(url)
@@ -110,7 +111,7 @@ class JHUDailyReportsUS(JHUDailyReports, DatasetBaseNeedsDate):
     table_name = "jhu_daily_reports_us"
     pk = "(date_updated, dt, fips, variable_id)"
     data_type = "covid"
-    source = "https://github.com/CSSEGISandData/COVID-19"
+    source = "https://github.com/CSSEGISandData/COVID-19/tree/master/csse_covid_19_data/csse_covid_19_daily_reports_us"
     raw_cols = [
         "fips",
         "dt",
@@ -144,6 +145,7 @@ class JHUDailyReportsUS(JHUDailyReports, DatasetBaseNeedsDate):
         dt = pd.to_datetime(date)
         _date = pd.to_datetime(dt.strftime("%Y-%m-%d"))
         url = f"{BASE_URL}/csse_covid_19_data/csse_covid_19_daily_reports_us/{dt:%m-%d-%Y}.csv"
+        print("About to fetch from: {url}".format(url=url))
 
         # Read csv and rename columns
         df = pd.read_csv(url)
