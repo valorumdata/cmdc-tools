@@ -28,6 +28,7 @@ class Imperial(DatasetBaseNoDate, ArcGIS):
     source = (
         "http://www.icphd.org/health-information-and-resources/healthy-facts/covid-19/"
     )
+    state_fips = 6
 
     def __init__(self):
         self.hospitaloutfields = {
