@@ -24,7 +24,7 @@ class Massachusetts(DatasetBaseNeedsDate, CountyData):
         INNER JOIN (
             SELECT fips, name
             FROM meta.us_fips
-            WHERE fips BETWEEN 25000 AND 25999
+            WHERE state = LPAD({self.state_fips}::TEXT, 2, '0')
         ) uf on uf.name = tt.county_name
         LEFT JOIN meta.covid_variables cv on cv.name = tt.variable_name
         ON CONFLICT {pk} DO UPDATE SET value = EXCLUDED.value;
