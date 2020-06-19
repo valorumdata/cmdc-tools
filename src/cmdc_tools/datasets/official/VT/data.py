@@ -9,6 +9,7 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
     source = (
         "https://experience.arcgis.com/experience/" "85f43bd849e743cb957993a545d17170"
     )
+    state_fips = 50
 
     def _insert_query(self, df, table_name, temp_name, pk):
         out = f"""
