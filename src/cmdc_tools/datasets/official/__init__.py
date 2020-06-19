@@ -8,4 +8,5 @@ from .MD import Maryland
 from .MT import Montana
 from .NE import Nebraska
 from .NJ import NewJersey
+from .OK import OKTulsa
 from .PA import Pennsylvania
