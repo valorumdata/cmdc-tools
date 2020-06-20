@@ -1,8 +1,10 @@
+import io
+from typing import Optional
+import zipfile
+
 import pandas as pd
 import requests
-import io
-import zipfile
-from typing import Optional
+import us
 
 from .. import CountyData
 from ... import DatasetBaseNeedsDate
@@ -14,7 +16,10 @@ class Massachusetts(DatasetBaseNeedsDate, CountyData):
         "https://www.mass.gov/info-details/"
         "covid-19-response-reporting#covid-19-daily-dashboard-"
     )
-    state_fips = 25
+    state_fips = us.states.lookup("Massachusetts")
+
+    def transform_date(self, date: pd.Timestamp) -> pd.Timestamp:
+        return date - pd.Timedelta(hours=12)
 
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         return f"""
