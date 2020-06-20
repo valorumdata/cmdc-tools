@@ -1,20 +1,18 @@
+from abc import ABC
+import textwrap
+
 import pandas as pd
 import requests
-import textwrap
 
 from .. import InsertWithTempTable
 
 
-class CountyData(InsertWithTempTable):
-    table_name = "us_covid"
-    pk = '("vintage", "dt", "fips", "variable_id")'
-    data_type = "covid"
+class CountyData(InsertWithTempTable, ABC):
+    table_name: str = "us_covid"
+    pk: str = '("vintage", "dt", "fips", "variable_id")'
+    data_type: str = "covid"
     has_fips: bool
-
-    def __init__(self):
-        super(CountyData, self).__init__()
-
-        return None
+    state_fips: int
 
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         if self.has_fips:
@@ -43,7 +41,7 @@ class CountyData(InsertWithTempTable):
         return textwrap.dedent(out)
 
 
-class ArcGIS(CountyData):
+class ArcGIS(CountyData, ABC):
     """
     Must define class variables:
 
@@ -52,6 +50,8 @@ class ArcGIS(CountyData):
 
     in order to use this class
     """
+
+    ARCGIS_ID: str
 
     def __init__(self, params=None):
         super(ArcGIS, self).__init__()
@@ -66,8 +66,6 @@ class ArcGIS(CountyData):
             }
 
         self.params = params
-
-        return None
 
     def arcgis_query_url(self, service, sheet, srvid=1):
         out = f"https://services{srvid}.arcgis.com/{self.ARCGIS_ID}/"

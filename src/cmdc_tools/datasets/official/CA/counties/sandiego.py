@@ -1,5 +1,6 @@
 import requests
 import pandas as pd
+import us
 
 from ... import ArcGIS
 from .... import DatasetBaseNoDate
@@ -25,7 +26,7 @@ class SanDiego(DatasetBaseNoDate, ArcGIS):
         "https://www.sandiegocounty.gov/content/sdc/hhsa/programs"
         "/phs/community_epidemiology/dc/2019-nCoV/status.html"
     )
-    state_fips = 6
+    state_fips = int(us.states.lookup("California").fips)
     has_fips = True
 
     def __init__(self, params=None):

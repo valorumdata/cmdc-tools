@@ -1,4 +1,5 @@
 import pandas as pd
+import us
 
 from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
@@ -9,8 +10,8 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
     source = (
         "https://experience.arcgis.com/experience/" "85f43bd849e743cb957993a545d17170"
     )
-    state_fips = 50
-    has_fips = True
+    state_fips: int = int(us.states.lookup("Vermont").fips)
+    has_fips: bool = True
 
     def get(self):
         # Download county data which only includes cases and deaths in VT
@@ -80,4 +81,4 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
         )
         result["fips"] = result["fips"].astype(int)
 
-        return result.sort_values(["dt", "fips"])
+        return result.sort_values(["dt", "fips"]).query("fips != 99999")

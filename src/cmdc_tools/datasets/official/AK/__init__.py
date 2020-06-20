@@ -1,6 +1,8 @@
 import pandas as pd
 import re
 
+import us
+
 from ..base import CountyData
 from ... import DatasetBaseNoDate
 
@@ -38,7 +40,7 @@ class Alaska(DatasetBaseNoDate, CountyData):
     table_name = "us_covid"
     pk = '("vintage", "dt", "fips", "variable_id")'
     source = "https://www.arcgis.com/apps/opsdashboard/index.html#/83c63cfec8b24397bdf359f49b11f218"
-    state_fips = 2
+    state_fips = int(us.states.lookup("Alaska").fips)
     has_fips = True
 
     def get_cases(self):

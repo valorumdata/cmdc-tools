@@ -2,6 +2,8 @@ import pandas as pd
 import requests
 import textwrap
 
+import us
+
 from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
 
@@ -28,7 +30,7 @@ class NewJersey(DatasetBaseNoDate, ArcGIS):
 
     ARCGIS_ID = "Z0rixLlManVefxqY"
     source = "https://covid19.nj.gov/#live-updates"
-    state_fips = 34
+    state_fips = int(us.states.lookup("New Jersey").fips)
     has_fips = False
 
     def __init__(self, params=None):

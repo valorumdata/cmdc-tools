@@ -2,6 +2,7 @@ import textwrap
 
 import pandas as pd
 import requests
+import us
 
 from ..base import ArcGIS
 from ...base import DatasetBaseNoDate
@@ -10,7 +11,7 @@ from ...base import DatasetBaseNoDate
 class Arkansas(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = "PwY9ZuZRDiI5nXUB"
     source = "https://experience.arcgis.com/experience/c2ef4a4fcbe5458fbf2e48a21e4fece9"
-    state_fips = 5
+    state_fips = int(us.states.lookup("Arkansas").fips)
     has_fips = False
 
     def __init__(self, params=None):

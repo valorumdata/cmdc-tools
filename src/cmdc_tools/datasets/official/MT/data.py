@@ -2,6 +2,8 @@ import pandas as pd
 import requests
 import textwrap
 
+import us
+
 from ..base import ArcGIS
 from ...base import DatasetBaseNoDate
 
@@ -11,7 +13,7 @@ class Montana(DatasetBaseNoDate, ArcGIS):
         "https://montana.maps.arcgis.com/apps/MapSeries"
         "/index.html?appid=7c34f3412536439491adcc2103421d4b"
     )
-    state_fips = 30
+    state_fips = int(us.states.lookup("Montana").fips)
     has_fips = False
 
     def __init__(self, params=None):
