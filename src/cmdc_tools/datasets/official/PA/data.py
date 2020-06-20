@@ -1,5 +1,6 @@
 import textwrap
 import pandas as pd
+import us
 
 from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
@@ -11,7 +12,7 @@ class Pennsylvania(DatasetBaseNoDate, ArcGIS):
         "https://www.arcgis.com/apps/opsdashboard/"
         "index.html#/85054b06472e4208b02285b8557f24cf"
     )
-    state_fips = 42
+    state_fips = int(us.states.lookup("Pennsylvania").fips)
 
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         out = f"""
@@ -19,7 +20,7 @@ class Pennsylvania(DatasetBaseNoDate, ArcGIS):
         SELECT tt.vintage, tt.dt, mc.fips, mv.id as variable_id, tt.value
         FROM {temp_name} tt
         INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        FULL OUTER JOIN (
+        LEFT JOIN (
             SELECT fips, name
             FROM meta.us_fips WHERE state = LPAD({self.state_fips}::TEXT, 2, '0')
         ) mc on LOWER(mc.name) = LOWER(tt.county)
