@@ -17,23 +17,10 @@ class Massachusetts(DatasetBaseNeedsDate, CountyData):
         "covid-19-response-reporting#covid-19-daily-dashboard-"
     )
     state_fips = int(us.states.lookup("Massachusetts").fips)
+    has_fips = False
 
     def transform_date(self, date: pd.Timestamp) -> pd.Timestamp:
         return date - pd.Timedelta(hours=12)
-
-    def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
-        return f"""
-        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, uf.fips, cv.id, tt.value
-        FROM {temp_name} tt
-        INNER JOIN (
-            SELECT fips, name
-            FROM meta.us_fips
-            WHERE state = LPAD({self.state_fips}::TEXT, 2, '0')
-        ) uf on uf.name = tt.county
-        LEFT JOIN meta.covid_variables cv on cv.name = tt.variable_name
-        ON CONFLICT {pk} DO UPDATE SET value = EXCLUDED.value;
-        """
 
     def _get_cases_deaths(self, zf: zipfile.ZipFile) -> pd.DataFrame:
         with zf.open("County.csv") as csv_f:

@@ -2,6 +2,8 @@ import pandas as pd
 import requests
 import textwrap
 
+import us
+
 from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
 
@@ -28,23 +30,11 @@ class NewJersey(DatasetBaseNoDate, ArcGIS):
 
     ARCGIS_ID = "Z0rixLlManVefxqY"
     source = "https://covid19.nj.gov/#live-updates"
-    state_fips = 34
+    state_fips = int(us.states.lookup("New Jersey").fips)
+    has_fips = False
 
     def __init__(self, params=None):
         super().__init__(params=params)
-
-    def _insert_query(self, df, table_name, temp_name, pk):
-        out = f"""
-        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value
-        FROM {temp_name} tt
-        LEFT JOIN meta.us_fips us ON tt.county=us.name
-        LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        WHERE us.state = LPAD({self.state_fips}::TEXT, 2, '0')
-        ON CONFLICT {pk} DO NOTHING
-        """
-
-        return textwrap.dedent(out)
 
     def get(self):
         cases = self._get_cases()

@@ -1,5 +1,6 @@
 import pandas as pd
 import requests
+import us
 
 from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
@@ -35,7 +36,8 @@ MD_COUNTY_NF_MAP = {
 class Maryland(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = "njFNhDsUCentVYJW"
     source = "https://coronavirus.maryland.gov/"
-    state_fips = 24
+    state_fips = int(us.states.lookup("Maryland").fips)
+    has_fips = True
 
     def __init__(self, params=None):
 

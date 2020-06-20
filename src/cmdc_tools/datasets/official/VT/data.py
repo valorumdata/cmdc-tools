@@ -1,4 +1,5 @@
 import pandas as pd
+import us
 
 from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
@@ -9,18 +10,8 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
     source = (
         "https://experience.arcgis.com/experience/" "85f43bd849e743cb957993a545d17170"
     )
-    state_fips = 50
-
-    def _insert_query(self, df, table_name, temp_name, pk):
-        out = f"""
-        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value
-        FROM {temp_name} tt
-        INNER JOIN meta.us_fips us ON tt.fips=us.fips
-        LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        ON CONFLICT {pk} DO NOTHING
-        """
-        return out
+    state_fips: int = int(us.states.lookup("Vermont").fips)
+    has_fips: bool = True
 
     def get(self):
         # Download county data which only includes cases and deaths in VT
@@ -90,4 +81,4 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
         )
         result["fips"] = result["fips"].astype(int)
 
-        return result.sort_values(["dt", "fips"])
+        return result.sort_values(["dt", "fips"]).query("fips != 99999")

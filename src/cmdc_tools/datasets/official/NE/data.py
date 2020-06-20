@@ -1,5 +1,6 @@
 import pandas as pd
 import requests
+import us
 
 from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
@@ -11,7 +12,8 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
         "https://nebraska.maps.arcgis.com/apps/opsdashboard/"
         "index.html#/4213f719a45647bc873ffb58783ffef3"
     )
-    state_fips = 31
+    state_fips: int = int(us.states.lookup("Nebraska").fips)
+    has_fips: bool = True
 
     def __init__(self, params=None):
 
@@ -37,8 +39,10 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
         county = self.get_county()
         county["dt"] = state["dt"].iloc[0]
 
-        return pd.concat([state, county], ignore_index=True, sort=True).assign(
-            vintage=pd.Timestamp.utcnow().normalize()
+        return (
+            pd.concat([state, county], ignore_index=True, sort=True)
+            .assign(vintage=pd.Timestamp.utcnow().normalize())
+            .drop_duplicates(subset=["dt", "vintage", "fips", "variable_name"])
         )
 
     def get_state(self):
