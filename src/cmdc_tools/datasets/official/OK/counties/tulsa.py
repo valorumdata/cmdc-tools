@@ -23,11 +23,6 @@ class OKTulsa(DatasetBaseNoDate, ArcGIS):
     )
     state_fips = int(us.states.lookup("OK").fips)
 
-    def __init__(self, params=None):
-        super(OKTulsa, self).__init__(params=params)
-
-        return None
-
     def _insert_query(self, df, table_name, temp_name, pk):
         return ArcGIS._insert_query(self, df, table_name, temp_name, pk, on_name=True)
 
