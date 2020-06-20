@@ -1,5 +1,6 @@
 import pandas as pd
 import textwrap
+import us
 
 from ... import ArcGIS
 from .... import DatasetBaseNoDate
@@ -20,7 +21,7 @@ class OKTulsa(DatasetBaseNoDate, ArcGIS):
         "https://tcchd.maps.arcgis.com/apps/opsdashboard/index.html#/"
         "ebb119cd215b4c57933b7fbe477e7c30"
     )
-    state_fips = 40
+    state_fips = int(us.states.lookup("OK").fips)
 
     def __init__(self, params=None):
         super(OKTulsa, self).__init__(params=params)
@@ -28,17 +29,9 @@ class OKTulsa(DatasetBaseNoDate, ArcGIS):
         return None
 
     def _insert_query(self, df, table_name, temp_name, pk):
-        out = f"""
-        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value
-        FROM {temp_name} tt
-        INNER JOIN meta.us_fips us ON tt.county=us.name
-        LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        WHERE us.state = LPAD({self.state_fips}::TEXT, 2, '0')
-        ON CONFLICT {pk} DO NOTHING
-        """
-
-        return textwrap.dedent(out)
+        return ArcGIS._insert_query(
+            self, df, table_name, temp_name, pk, on_name=True
+        )
 
     def get(self):
         # Note: Service=Covid19Coronavirusdata_V3_View seems to have caser by
@@ -73,7 +66,7 @@ class OKTulsa(DatasetBaseNoDate, ArcGIS):
 
         df = df.loc[:, list(crenamer.values())].melt(
             id_vars=["dt", "county"], var_name="variable_name", value_name="value",
-        )
+        ).dropna()
         df["vintage"] = pd.Timestamp.utcnow().normalize()
 
         return df
