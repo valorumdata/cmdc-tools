@@ -16,7 +16,7 @@ class Massachusetts(DatasetBaseNeedsDate, CountyData):
         "https://www.mass.gov/info-details/"
         "covid-19-response-reporting#covid-19-daily-dashboard-"
     )
-    state_fips = us.states.lookup("Massachusetts")
+    state_fips = us.states.lookup("Massachusetts").fips
 
     def transform_date(self, date: pd.Timestamp) -> pd.Timestamp:
         return date - pd.Timedelta(hours=12)
