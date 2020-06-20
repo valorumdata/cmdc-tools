@@ -15,15 +15,31 @@ class CountyData(InsertWithTempTable):
 
         return None
 
-    def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
-        out = f"""
-        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
-        FROM {temp_name} tt
-        LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        ON CONFLICT {pk} DO NOTHING
-        """
-
+    def _insert_query(
+        self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str, on_name=False
+    ):
+        if not on_name:
+            out = f"""
+            INSERT INTO data.{table_name} (
+              vintage, dt, fips, variable_id, value
+            )
+            SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
+            FROM {temp_name} tt
+            LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
+            ON CONFLICT {pk} DO NOTHING
+            """
+        else:
+            out = f"""
+            INSERT INTO data.{table_name} (
+              vintage, dt, fips, variable_id, value
+            )
+            SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value
+            FROM {temp_name} tt
+            INNER JOIN meta.us_fips us on tt.county=us.name
+            LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
+            WHERE us.state = LPAD({self.state_fips}::TEXT, 2, '0')
+            ON CONFLICT {pk} DO NOTHING
+            """
         return textwrap.dedent(out)
 
 
