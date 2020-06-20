@@ -9,26 +9,26 @@ class CountyData(InsertWithTempTable):
     table_name = "us_covid"
     pk = '("vintage", "dt", "fips", "variable_id")'
     data_type = "covid"
+    has_fips: bool
 
     def __init__(self):
         super(CountyData, self).__init__()
 
         return None
 
-    def _insert_query(
-        self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str, on_name=False
-    ):
-        if not on_name:
+    def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
+        if self.has_fips:
             out = f"""
             INSERT INTO data.{table_name} (
               vintage, dt, fips, variable_id, value
             )
             SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
             FROM {temp_name} tt
-            LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-            ON CONFLICT {pk} DO NOTHING
+            INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name
+            ON CONFLICT {pk} DO UPDATE set value = excluded.value
             """
         else:
+            assert "county" in df.columns
             out = f"""
             INSERT INTO data.{table_name} (
               vintage, dt, fips, variable_id, value
@@ -36,9 +36,9 @@ class CountyData(InsertWithTempTable):
             SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value
             FROM {temp_name} tt
             INNER JOIN meta.us_fips us on tt.county=us.name
-            LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
+            INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name
             WHERE us.state = LPAD({self.state_fips}::TEXT, 2, '0')
-            ON CONFLICT {pk} DO NOTHING
+            ON CONFLICT {pk} DO UPDATE SET value = excluded.value
             """
         return textwrap.dedent(out)
 

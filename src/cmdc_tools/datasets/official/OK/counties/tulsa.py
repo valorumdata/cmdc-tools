@@ -22,9 +22,7 @@ class OKTulsa(DatasetBaseNoDate, ArcGIS):
         "ebb119cd215b4c57933b7fbe477e7c30"
     )
     state_fips = int(us.states.lookup("OK").fips)
-
-    def _insert_query(self, df, table_name, temp_name, pk):
-        return ArcGIS._insert_query(self, df, table_name, temp_name, pk, on_name=True)
+    has_fips = False
 
     def get(self):
         # Note: Service=Covid19Coronavirusdata_V3_View seems to have caser by

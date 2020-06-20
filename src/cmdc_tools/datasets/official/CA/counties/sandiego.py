@@ -26,6 +26,7 @@ class SanDiego(DatasetBaseNoDate, ArcGIS):
         "/phs/community_epidemiology/dc/2019-nCoV/status.html"
     )
     state_fips = 6
+    has_fips = True
 
     def __init__(self, params=None):
         # Default parameter values

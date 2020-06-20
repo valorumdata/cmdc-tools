@@ -10,17 +10,7 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
         "https://experience.arcgis.com/experience/" "85f43bd849e743cb957993a545d17170"
     )
     state_fips = 50
-
-    def _insert_query(self, df, table_name, temp_name, pk):
-        out = f"""
-        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value
-        FROM {temp_name} tt
-        INNER JOIN meta.us_fips us ON tt.fips=us.fips
-        LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        ON CONFLICT {pk} DO NOTHING
-        """
-        return out
+    has_fips = True
 
     def get(self):
         # Download county data which only includes cases and deaths in VT

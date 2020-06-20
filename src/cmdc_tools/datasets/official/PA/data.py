@@ -13,21 +13,7 @@ class Pennsylvania(DatasetBaseNoDate, ArcGIS):
         "index.html#/85054b06472e4208b02285b8557f24cf"
     )
     state_fips = int(us.states.lookup("Pennsylvania").fips)
-
-    def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
-        out = f"""
-        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, mc.fips, mv.id as variable_id, tt.value
-        FROM {temp_name} tt
-        INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        LEFT JOIN (
-            SELECT fips, name
-            FROM meta.us_fips WHERE state = LPAD({self.state_fips}::TEXT, 2, '0')
-        ) mc on LOWER(mc.name) = LOWER(tt.county)
-        ON CONFLICT {pk} DO NOTHING
-        """
-
-        return textwrap.dedent(out)
+    has_fips: bool = False
 
     def get(self):
         df = self.get_all_sheet_to_df(

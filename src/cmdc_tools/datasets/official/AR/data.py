@@ -11,6 +11,7 @@ class Arkansas(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = "PwY9ZuZRDiI5nXUB"
     source = "https://experience.arcgis.com/experience/c2ef4a4fcbe5458fbf2e48a21e4fece9"
     state_fips = 5
+    has_fips = False
 
     def __init__(self, params=None):
 
