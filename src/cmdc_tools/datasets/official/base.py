@@ -16,9 +16,8 @@ class CountyData(InsertWithTempTable):
         return None
 
     def _insert_query(
-            self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str,
-            on_name=False
-        ):
+        self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str, on_name=False
+    ):
         if not on_name:
             out = f"""
             INSERT INTO data.{table_name} (

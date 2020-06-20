@@ -29,9 +29,7 @@ class OKTulsa(DatasetBaseNoDate, ArcGIS):
         return None
 
     def _insert_query(self, df, table_name, temp_name, pk):
-        return ArcGIS._insert_query(
-            self, df, table_name, temp_name, pk, on_name=True
-        )
+        return ArcGIS._insert_query(self, df, table_name, temp_name, pk, on_name=True)
 
     def get(self):
         # Note: Service=Covid19Coronavirusdata_V3_View seems to have caser by
@@ -64,9 +62,13 @@ class OKTulsa(DatasetBaseNoDate, ArcGIS):
         }
         df = df.rename(columns=crenamer)
 
-        df = df.loc[:, list(crenamer.values())].melt(
-            id_vars=["dt", "county"], var_name="variable_name", value_name="value",
-        ).dropna()
+        df = (
+            df.loc[:, list(crenamer.values())]
+            .melt(
+                id_vars=["dt", "county"], var_name="variable_name", value_name="value",
+            )
+            .dropna()
+        )
         df["vintage"] = pd.Timestamp.utcnow().normalize()
 
         return df
