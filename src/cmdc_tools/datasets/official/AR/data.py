@@ -26,19 +26,6 @@ class Arkansas(DatasetBaseNoDate, ArcGIS):
 
         super(Arkansas, self).__init__(params)
 
-    def _insert_query(self, df, table_name, temp_name, pk):
-        out = f"""
-        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value
-        FROM {temp_name} tt
-        LEFT JOIN meta.us_fips us ON tt.county=us.name
-        LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        WHERE us.state = LPAD({self.state_fips}::text, 2, '0')
-        ON CONFLICT {pk} DO NOTHING
-        """
-
-        return textwrap.dedent(out)
-
     def get(self):
         url = self.arcgis_query_url(
             service="ADH_COVID19_Positive_Test_Results", sheet=0, srvid=""
