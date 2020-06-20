@@ -11,6 +11,7 @@ import pandas as pd
 class DatasetBase:
     autodag: bool = True
     data_type: str = "general"
+    table_name: str
 
     def __init__(self):
         pass
@@ -85,8 +86,8 @@ class DatasetBase:
 
         temp_table = "__covid_sources_{}".format(str(random.randint(1000, 9999)))
         sql = f"""
-        INSERT INTO data.covid_sources(date_accessed, location, variable_id, source)
-        SELECT tt.this_date, ff.fips, mv.id, tt.src
+        INSERT INTO data.covid_sources(date_accessed, location, variable_id, source, table_name)
+        SELECT tt.this_date, ff.fips, mv.id, tt.src, '{self.table_name}'
         from {temp_table} tt
         {join_locs}
         {join_covid}
@@ -144,7 +145,6 @@ def _build_on_conflict_do_nothing_query(
 
 class InsertWithTempTable(DatasetBase, ABC):
     pk: str
-    table_name: str
 
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
 
