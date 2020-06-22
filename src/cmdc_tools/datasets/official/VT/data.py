@@ -14,27 +14,77 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
     has_fips: bool = True
 
     def get(self):
-        # Download county data which only includes cases and deaths in VT
-        county = self.get_all_sheet_to_df(service="VT_Counties_Cases", sheet=0, srvid=1)
-        county = county.rename(
+        state = self._get_daily_count()
+        hosp = self._get_hosp()
+        county = self._get_county_daily()
+
+        result = (
+            pd.concat([county, state, hosp], ignore_index=True)
+            .assign(vintage=pd.Timestamp.utcnow().normalize())
+            .dropna()
+        )
+        result["fips"] = result["fips"].astype(int)
+
+        return result.sort_values(["dt", "fips"]).query("fips != 99999")
+
+    def _get_hosp(self):
+        hosp = self.get_all_sheet_to_df("V_EMR_Hospitalization_PUBLIC", 0, 1)
+        hosp = hosp.rename(
             columns={
-                "CNTYGEOID": "fips",
-                "Cases": "cases_total",
-                "Deaths": "deaths_total",
-                "DateUpd": "dt",
+                "date": "dt",
+                "current_hospitalizations": "hospital_beds_in_use_covid_confirmed",  # daily
+                "hosp_pui": "hospital_beds_in_use_covid_suspected",
             }
         )
-
-        # Convert Timestamps
-        county["dt"] = pd.to_datetime(
-            county["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000).date())
+        hosp["hospital_beds_in_use_covid_total"] = (
+            hosp["hospital_beds_in_use_covid_confirmed"]
+            + hosp["hospital_beds_in_use_covid_suspected"]
         )
-        county = county.loc[:, ["dt", "fips", "cases_total", "deaths_total"]]
-        county = county.melt(
+
+        hosp["dt"] = pd.to_datetime(
+            hosp["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000).date())
+        )
+        hosp["fips"] = 50
+
+        hosp = hosp[
+            [
+                "dt",
+                "fips",
+                "hospital_beds_in_use_covid_confirmed",
+                "hospital_beds_in_use_covid_suspected",
+                "hospital_beds_in_use_covid_total",
+            ]
+        ]
+
+        return hosp.melt(
             id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
         )
 
-        state = self.get_all_sheet_to_df(service="county_summary", sheet=0, srvid=1)
+    def _get_county_daily(self):
+        county = self.get_all_sheet_to_df(
+            "V_EPI_CountyDailyCount_GEO_PUBLIC", sheet=0, srvid=1
+        )
+        county = county.rename(
+            columns={
+                "CNTYGEOID": "fips",
+                "date": "dt",
+                "C_Total": "cases_confirmed",
+                "D_Total": "deaths_total",
+            }
+        )
+
+        county["dt"] = pd.to_datetime(
+            county["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000).date())
+        )
+
+        return county[["dt", "fips", "cases_confirmed", "deaths_total"]].melt(
+            id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
+        )
+
+    def _get_daily_count(self):
+        state = self.get_all_sheet_to_df(
+            service="V_EPI_DailyCount_PUBLIC", sheet=0, srvid=1
+        )
         state = state.rename(
             columns={
                 "date": "dt",
@@ -44,13 +94,7 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
                 "total_recovered": "recovered_total",  # cumulative
                 # "daily_deaths": "deaths_total",
                 # "daily_recovered": "daily_recovered_total", # daily
-                "current_hospitalizations": "hospital_beds_in_use_covid_confirmed",  # daily
-                "hosp_pui": "hospital_beds_in_use_covid_suspected",
             }
-        )
-        state["hospital_beds_in_use_covid_total"] = state.eval(
-            "hospital_beds_in_use_covid_confirmed "
-            + "+ hospital_beds_in_use_covid_confirmed"
         )
 
         # Convert Timestamps
@@ -65,20 +109,10 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
             "cases_total",
             "deaths_total",
             "recovered_total",
-            "hospital_beds_in_use_covid_confirmed",
-            "hospital_beds_in_use_covid_suspected",
-            "hospital_beds_in_use_covid_total",
         ]
-        state = state.loc[:, state_keep]
+        state = state[state_keep]
         state = state.melt(
             id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
         )
 
-        result = (
-            pd.concat([county, state], ignore_index=True)
-            .assign(vintage=pd.Timestamp.utcnow().normalize())
-            .dropna()
-        )
-        result["fips"] = result["fips"].astype(int)
-
-        return result.sort_values(["dt", "fips"]).query("fips != 99999")
+        return state
