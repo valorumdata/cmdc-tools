@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS data.jhu_locations;
+DROP TABLE IF EXISTS data.jhu_locations CASCADE;
 
 CREATE TABLE data.jhu_locations (
     uid int PRIMARY KEY,
@@ -44,18 +44,18 @@ COMMENT ON COLUMN data.jhu_locations.population IS E'Population of the region';
 DROP TABLE IF EXISTS data.jhu_daily_reports;
 
 CREATE TABLE data.jhu_daily_reports (
+    date_updated timestamptz,
+    dt DATE,
     uid int REFERENCES data.jhu_locations(uid),
-    "date" DATE,
-    "date_updated" timestamptz,
-    "confirmed" int,
-    "deaths" int,
-    "recovered" int,
-    "active" int,
-    PRIMARY KEY (uid, date)
+    variable_id SMALLINT REFERENCES meta.covid_variables(id),
+    value INT,
+    PRIMARY KEY (date_updated, dt, uid, variable_id)
 );
+
 
 COMMENT ON TABLE data.jhu_daily_reports IS E'Daily case reports. https://github.com/CSSEGISandData/COVID-19/tree/dce1b48f54bd7551295c27a2878701cf2c58a1c8/csse_covid_19_data/csse_covid_19_daily_reports';
 
+/*
 COMMENT ON COLUMN data.jhu_daily_reports.date IS E'Date for which data applies. This is the file name on github';
 
 COMMENT ON COLUMN data.jhu_daily_reports.date_updated IS E'MM/DD/YYYY HH:mm:ss (24 hour format, in UTC). This is the field in the dataset itself.';
@@ -68,27 +68,22 @@ COMMENT ON COLUMN data.jhu_daily_reports.recovered IS E'Recovered cases outside 
 
 COMMENT ON COLUMN data.jhu_daily_reports.active IS E'Active cases = total confirmed - total recovered - total deaths.';
 
+*/
+
 DROP TABLE IF EXISTS data.jhu_daily_reports_us;
 
 CREATE TABLE data.jhu_daily_reports_us (
-    "fips" int references meta.us_fips(fips),
-    "date" DATE,
-    "date_updated" timestamptz,
-    "confirmed" int,
-    "deaths" int,
-    "recovered" int,
-    "active" int,
-    "incident_rate" numeric(12, 6),
-    "people_tested" int,
-    "people_hospitalized" int,
-    "mortality_rate" numeric(12, 6),
-    "testing_rate" numeric(12, 6),
-    "hospitalization_rate" numeric(12, 6),
-    PRIMARY KEY (fips, date)
+    date_updated timestamptz,
+    dt DATE,
+    fips int REFERENCES meta.us_fips(fips),
+    variable_id SMALLINT REFERENCES meta.covid_variables(id),
+    value INT,
+    PRIMARY KEY (date_updated, dt, fips, variable_id)
 );
 
 COMMENT ON TABLE data.jhu_daily_reports_us IS E'This table contains an aggregation of each US State level data.';
 
+/*
 COMMENT ON COLUMN data.jhu_daily_reports_us.fips IS 'FIPS code identifying county in USA';
 
 COMMENT ON COLUMN data.jhu_daily_reports_us.date IS E'The data corresponding to the data (the date of the filename in GitHub).';
@@ -114,4 +109,4 @@ COMMENT ON COLUMN data.jhu_daily_reports_us.mortality_rate IS E'Number recorded 
 COMMENT ON COLUMN data.jhu_daily_reports_us.testing_rate IS E'Total number of people tested per 100,000 persons.';
 
 COMMENT ON COLUMN data.jhu_daily_reports_us.hospitalization_rate IS E'Total number of people hospitalized * 100/ Number of confirmed cases.';
-
+*/

@@ -1,11 +1,12 @@
 import requests
 import pandas as pd
+import us
 
 from ... import ArcGIS
 from .... import DatasetBaseNoDate
 
 
-class Imperial(ArcGIS, DatasetBaseNoDate):
+class Imperial(DatasetBaseNoDate, ArcGIS):
     """
     Imperial publishes their county level data in a dashboard that can
     be found at:
@@ -24,7 +25,12 @@ class Imperial(ArcGIS, DatasetBaseNoDate):
     """
 
     ARCGIS_ID = "RomaVqqozKczDNgd"
-    FIPS = 6073
+    FIPS = 6025
+    source = (
+        "http://www.icphd.org/health-information-and-resources/healthy-facts/covid-19/"
+    )
+    state_fips = int(us.states.lookup("California").fips)
+    has_fips = True
 
     def __init__(self):
         self.hospitaloutfields = {

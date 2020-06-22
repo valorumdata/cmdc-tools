@@ -1,12 +1,19 @@
 import pandas as pd
 import requests
+import us
 
 from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
 
 
-class Nebraska(ArcGIS, DatasetBaseNoDate):
+class Nebraska(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = ""
+    source = (
+        "https://nebraska.maps.arcgis.com/apps/opsdashboard/"
+        "index.html#/4213f719a45647bc873ffb58783ffef3"
+    )
+    state_fips: int = int(us.states.lookup("Nebraska").fips)
+    has_fips: bool = True
 
     def __init__(self, params=None):
 
@@ -32,8 +39,10 @@ class Nebraska(ArcGIS, DatasetBaseNoDate):
         county = self.get_county()
         county["dt"] = state["dt"].iloc[0]
 
-        return pd.concat([state, county], ignore_index=True, sort=True).assign(
-            vintage=pd.Timestamp.utcnow().normalize()
+        return (
+            pd.concat([state, county], ignore_index=True, sort=True)
+            .assign(vintage=pd.Timestamp.utcnow().normalize())
+            .drop_duplicates(subset=["dt", "vintage", "fips", "variable_name"])
         )
 
     def get_state(self):
@@ -86,7 +95,7 @@ class Nebraska(ArcGIS, DatasetBaseNoDate):
         # Convert timestamps
         keep["dt"] = keep["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000))
 
-        keep["fips"] = 31
+        keep["fips"] = self.state_fips
 
         return keep.melt(["dt", "fips"], var_name="variable_name")
 
@@ -108,6 +117,6 @@ class Nebraska(ArcGIS, DatasetBaseNoDate):
         return (
             df.rename(columns=colmap)
             .loc[:, list(colmap.values())]
-            .assign(fips=lambda x: x["fips"].astype(int) + 31000)
+            .assign(fips=lambda x: x["fips"].astype(int) + self.state_fips * 1000)
             .melt(id_vars=["fips"], var_name="variable_name")
         )

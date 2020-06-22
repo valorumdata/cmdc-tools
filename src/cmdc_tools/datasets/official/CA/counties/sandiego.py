@@ -1,11 +1,12 @@
 import requests
 import pandas as pd
+import us
 
 from ... import ArcGIS
 from .... import DatasetBaseNoDate
 
 
-class SanDiego(ArcGIS, DatasetBaseNoDate):
+class SanDiego(DatasetBaseNoDate, ArcGIS):
     """
     San Diego publishes their county level data in a dashboard that can
     be found at:
@@ -21,6 +22,12 @@ class SanDiego(ArcGIS, DatasetBaseNoDate):
 
     ARCGIS_ID = "1vIhDJwtG5eNmiqX"
     FIPS = 6073
+    source = (
+        "https://www.sandiegocounty.gov/content/sdc/hhsa/programs"
+        "/phs/community_epidemiology/dc/2019-nCoV/status.html"
+    )
+    state_fips = int(us.states.lookup("California").fips)
+    has_fips = True
 
     def __init__(self, params=None):
         # Default parameter values

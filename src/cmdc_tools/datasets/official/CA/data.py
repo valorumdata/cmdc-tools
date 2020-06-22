@@ -1,6 +1,8 @@
 import pandas as pd
 import textwrap
 
+import us
+
 from ..base import CountyData
 from ... import DatasetBaseNoDate
 
@@ -10,7 +12,7 @@ CA_COUNTY_URL += "dataset/6882c390-b2d7-4b9a-aefa-2068cee63e47/resource/"
 CA_COUNTY_URL += "6cd8d424-dfaa-4bdd-9410-a3d656e1176e/download/covid19data.csv"
 
 C_RENAMER = {
-    "County Name": "name",
+    "County Name": "county",
     "Most Recent Date": "dt",
     "Total Count Confirmed": "cases_total",
     "Total Count Deaths": "deaths_total",
@@ -21,19 +23,10 @@ C_RENAMER = {
 }
 
 
-class CACountyData(CountyData, DatasetBaseNoDate):
-    def _insert_query(self, df, table_name, temp_name, pk):
-        out = f"""
-        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value
-        FROM {temp_name} tt
-        LEFT JOIN meta.us_fips us ON tt.name=us.name
-        LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        WHERE us.fips > 6000 AND us.fips < 7000
-        ON CONFLICT {pk} DO NOTHING
-        """
-
-        return textwrap.dedent(out)
+class CACountyData(DatasetBaseNoDate, CountyData):
+    source = CA_COUNTY_URL
+    state_fips = int(us.states.lookup("California").fips)
+    has_fips = False
 
     def get(self):
 
@@ -51,7 +44,7 @@ class CACountyData(CountyData, DatasetBaseNoDate):
         )
 
         df = df.melt(
-            id_vars=["vintage", "dt", "name"],
+            id_vars=["vintage", "dt", "county"],
             var_name="variable_name",
             value_name="value",
         )

@@ -1,27 +1,19 @@
 import textwrap
 import pandas as pd
+import us
 
 from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
 
 
-class Pennsylvania(ArcGIS, DatasetBaseNoDate):
+class Pennsylvania(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = "xtuWQvb2YQnp0z3F"
-
-    def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
-        out = f"""
-        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, mc.fips, mv.id as variable_id, tt.value
-        FROM {temp_name} tt
-        INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        FULL OUTER JOIN (
-            SELECT fips, name
-            FROM meta.us_fips where fips BETWEEN 42000 and 42999
-        ) mc on LOWER(mc.name) = LOWER(tt.county)   
-        ON CONFLICT {pk} DO NOTHING
-        """
-
-        return textwrap.dedent(out)
+    source = (
+        "https://www.arcgis.com/apps/opsdashboard/"
+        "index.html#/85054b06472e4208b02285b8557f24cf"
+    )
+    state_fips = int(us.states.lookup("Pennsylvania").fips)
+    has_fips: bool = False
 
     def get(self):
         df = self.get_all_sheet_to_df(
