@@ -14,6 +14,7 @@ class Indiana(DatasetBaseNoDate):
         renamed = df.rename(
             columns={
                 "date": "dt",
+                "district": "fips",
                 "m2b_hospitalized_icu_occupied_covid": "icu_beds_in_use_covid_confirmed",
                 "m2b_hospitalized_icu_supply": "icu_beds_capacity_count",
                 "m2b_hospitalized_icu_occupied_non_covid": "icu_beds_in_use_any",
@@ -25,10 +26,10 @@ class Indiana(DatasetBaseNoDate):
 
         renamed["dt"] = pd.to_datetime(renamed["dt"])
 
-        return renamed[
+        typed = renamed[
             [
                 "dt",
-                "district",
+                "fips",
                 "district_type",
                 "icu_beds_in_use_covid_confirmed",
                 "icu_beds_capacity_count",
@@ -47,3 +48,21 @@ class Indiana(DatasetBaseNoDate):
                 "ventilators_capacity_count": int,
             }
         )
+        # Set state-wide data fips code to Indiana's fips
+        typed.loc[typed.district_type == "s", "fips"] = 18
+
+        # Drop any district level rows
+        typed = typed[typed.district_type != "d"]
+
+        return typed[
+            [
+                "dt",
+                "fips",
+                "icu_beds_in_use_covid_confirmed",
+                "icu_beds_capacity_count",
+                "icu_beds_in_use_any",
+                "ventilators_in_use_covid_confirmed",
+                "ventilators_in_use_any",
+                "ventilators_capacity_count",
+            ]
+        ].melt(id_vars=["dt", "fips"], var_name="variable_name")
