@@ -24,6 +24,8 @@ from .official import (
     LA,
     Massachusetts,
     Maryland,
+    MinnesotaCountiesCasesDeaths,
+    Minnesota,
     Montana,
     Nebraska,
     NewJersey,

@@ -1,1 +1,1 @@
-from .data import Minnesotta
+from .data import Minnesota, MinnesotaCountiesCasesDeaths
