@@ -36,29 +36,29 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
                 "hosp_pui": "hospital_beds_in_use_covid_suspected",
             }
         )
-        hosp["hospital_beds_in_use_covid_total"] = (
-            hosp["hospital_beds_in_use_covid_confirmed"]
-            + hosp["hospital_beds_in_use_covid_suspected"]
-        )
 
+        # Convert to datetime -- Need to divide by 1000 to convert from ms
+        hosp["fips"] = self.state_fips
         hosp["dt"] = pd.to_datetime(
             hosp["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000).date())
         )
-        hosp["fips"] = 50
 
-        hosp = hosp[
-            [
-                "dt",
-                "fips",
-                "hospital_beds_in_use_covid_confirmed",
-                "hospital_beds_in_use_covid_suspected",
-                "hospital_beds_in_use_covid_total",
-            ]
+        hosp["hospital_beds_in_use_covid_total"] = hosp.eval(
+            "hospital_beds_in_use_covid_confirmed + hospital_beds_in_use_covid_suspected"
+        )
+
+        keepers = [
+            "dt",
+            "fips",
+            "hospital_beds_in_use_covid_confirmed",
+            "hospital_beds_in_use_covid_suspected",
+            "hospital_beds_in_use_covid_total",
         ]
-
-        return hosp.melt(
+        hosp = hosp.loc[:, keepers].melt(
             id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
         )
+
+        return hosp
 
     def _get_county_daily(self):
         county = self.get_all_sheet_to_df(
@@ -76,10 +76,11 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
         county["dt"] = pd.to_datetime(
             county["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000).date())
         )
-
-        return county[["dt", "fips", "cases_confirmed", "deaths_total"]].melt(
+        out = county.loc[:, ["dt", "fips", "cases_confirmed", "deaths_total"]].melt(
             id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
         )
+
+        return out
 
     def _get_daily_count(self):
         state = self.get_all_sheet_to_df(
@@ -101,7 +102,7 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
         state["dt"] = pd.to_datetime(
             state["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000).date())
         )
-        state["fips"] = 50
+        state["fips"] = self.state_fips
 
         state_keep = [
             "dt",
@@ -110,7 +111,7 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
             "deaths_total",
             "recovered_total",
         ]
-        state = state[state_keep]
+        state = state.loc[:, state_keep]
         state = state.melt(
             id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
         )
