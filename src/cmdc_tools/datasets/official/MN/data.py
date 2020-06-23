@@ -20,15 +20,14 @@ class MinnesotaCountiesCasesDeaths(DatasetBaseNoDate, CountyData):
             columns={
                 "County": "county",
                 "Cases": "cases_total",
-                "Deaths": "deaths_total"
+                "Deaths": "deaths_total",
             }
         )
 
         # Create datetime
         df["dt"] = pd.Timestamp.utcnow().tz_convert("US/Central").normalize()
         df = df.melt(
-            id_vars=["dt", "county"], var_name="variable_name",
-            value_name="value"
+            id_vars=["dt", "county"], var_name="variable_name", value_name="value"
         )
         df["vintage"] = pd.Timestamp.utcnow().normalize()
 
@@ -53,13 +52,17 @@ class Minnesota(DatasetBaseNoDate, CountyData):
 
         # Get case data
         cases = pd.concat(pd.read_html(self.URL, attrs={"id": "casetable"}))
-        cases = cases.rename(
-            columns={
-                "Specimen collection date": "dt",
-                # "Positive cases": "tests_positive_daily",
-                "Cumulative positive cases": "cases_total"
-            }
-        ).loc[:, ["dt", "cases_total"]].query("dt != 'Unknown/missing'")
+        cases = (
+            cases.rename(
+                columns={
+                    "Specimen collection date": "dt",
+                    # "Positive cases": "tests_positive_daily",
+                    "Cumulative positive cases": "cases_total",
+                }
+            )
+            .loc[:, ["dt", "cases_total"]]
+            .query("dt != 'Unknown/missing'")
+        )
 
         # Get death data
         deaths = pd.concat(pd.read_html(self.URL, attrs={"id": "deathtable"}))
@@ -75,7 +78,7 @@ class Minnesota(DatasetBaseNoDate, CountyData):
         hospkeep = [
             "dt",
             "hospital_bed_in_use_covid_total",
-            "icu_bed_in_use_covid_total"
+            "icu_bed_in_use_covid_total",
         ]
         hosp = pd.concat(pd.read_html(self.URL, attrs={"id": "hosptable"}))
         hosp = hosp.rename(
@@ -86,17 +89,12 @@ class Minnesota(DatasetBaseNoDate, CountyData):
             }
         ).loc[:, hospkeep]
 
-        df = cases.merge(
-            deaths, on="dt", how="outer"
-        ).merge(
-            hosp, on="dt", how="outer"
-        )
-        df["dt"] = pd.to_datetime(df["dt"].map(lambda x: x+"/2020"))
+        df = cases.merge(deaths, on="dt", how="outer").merge(hosp, on="dt", how="outer")
+        df["dt"] = pd.to_datetime(df["dt"].map(lambda x: x + "/2020"))
         df["fips"] = self.state_fips
 
         out = df.melt(
-            id_vars=["dt", "fips"], var_name="variable_name",
-            value_name="value"
+            id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
         )
         out["vintage"] = pd.Timestamp.utcnow().normalize()
 
