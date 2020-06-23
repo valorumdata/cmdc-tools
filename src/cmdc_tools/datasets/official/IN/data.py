@@ -6,6 +6,34 @@ from ...base import DatasetBaseNoDate
 
 class Indiana(DatasetBaseNoDate):
     def get(self):
+        hosp = self._get_hosp()
+        cd = self._get_case_deaths()
+
+        return pd.concat([hosp, cd])
+
+    def _get_case_deaths(self):
+        url = "https://www.coronavirus.in.gov/map/covid-19-indiana-daily-report-current.topojson"
+
+        res = requests.get(url)
+        ser = pd.Series(res.json()["objects"]["daily_statistics"])
+        df = ser.to_frame().transpose()
+
+        renamed = df.rename(
+            columns={
+                "total_case": "cases_confirmed",
+                "total_death": "deaths_confirmed",
+                "new_case_end_date": "dt",
+            }
+        )
+
+        renamed.dt = pd.to_datetime(renamed.dt)
+        renamed["fips"] = 18
+
+        return renamed[["dt", "fips", "cases_confirmed", "deaths_confirmed"]].melt(
+            id_vars=["dt", "fips"], var_name="variable_name"
+        )
+
+    def _get_hosp(self):
         url = "https://www.coronavirus.in.gov/map/covid-19-indiana-universal-report-current-public.json"
 
         res = requests.get(url)
