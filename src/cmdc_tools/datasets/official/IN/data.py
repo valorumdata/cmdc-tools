@@ -9,12 +9,17 @@ class Indiana(DatasetBaseNoDate):
         hosp = self._get_hosp()
         cd = self._get_case_deaths()
 
-        return pd.concat([hosp, cd])
+        return pd.concat([hosp, cd], sort=False).sort_values(["dt", "fips"])
 
-    def _get_case_deaths(self):
+    def _make_json_req(self):
         url = "https://www.coronavirus.in.gov/map/covid-19-indiana-daily-report-current.topojson"
 
         res = requests.get(url)
+
+        return res
+
+    def _get_case_deaths(self):
+        res = self._make_json_req()
         ser = pd.Series(res.json()["objects"]["daily_statistics"])
         df = ser.to_frame().transpose()
 
@@ -29,9 +34,27 @@ class Indiana(DatasetBaseNoDate):
         renamed.dt = pd.to_datetime(renamed.dt)
         renamed["fips"] = 18
 
-        return renamed[["dt", "fips", "cases_confirmed", "deaths_confirmed"]].melt(
-            id_vars=["dt", "fips"], var_name="variable_name"
+        keep = renamed[["dt", "fips", "cases_confirmed", "deaths_confirmed"]]
+        county = self._extract_county_case_deaths(res)
+
+        result = pd.concat([keep, county], sort=False)
+
+        return result.melt(id_vars=["dt", "fips"], var_name="variable_name")
+
+    def _extract_county_case_deaths(self, res):
+        json = res.json()["objects"]["cb_2015_indiana_county_20m"]["geometries"]
+        df = pd.DataFrame.from_records([x["properties"] for x in json])
+        renamed = df.rename(
+            columns={
+                "GEOID": "fips",
+                "COVID_DEATHS": "deaths_confirmed",
+                "COVID_COUNT": "cases_confirmed",
+            }
         )
+
+        renamed["dt"] = pd.to_datetime(res.json()["objects"]["update_timestamp"])
+
+        return renamed[["dt", "fips", "deaths_confirmed", "cases_confirmed"]]
 
     def _get_hosp(self):
         url = "https://www.coronavirus.in.gov/map/covid-19-indiana-universal-report-current-public.json"
