@@ -19,8 +19,9 @@ class KeystonePolicy(InsertWithTempTable, DatasetBaseNoDate):
     restriction then we assume that the county is under the state's
     restriction
     """
+
     table_name = "npi_interventions"
-    pk = '(vintage, dt, location, variable_id)'
+    pk = "(vintage, dt, location, variable_id)"
     data_type = "general"
     source = "https://github.com/Keystone-Strategy/covid19-intervention-data"
     url = (
@@ -48,15 +49,20 @@ class KeystonePolicy(InsertWithTempTable, DatasetBaseNoDate):
         # each fips/npi combination was active during that date
         dfs = pd.concat(
             [
-                pd.DataFrame({
-                    "dt": _date,
-                    "fips": sub_df["fips"],
-                    "variable_name": sub_df["npi"],
-                    "value": sub_df.eval(
-                        "(start_date <= @_date) & (end_date > @_date)"
-                    )
-                }) for _date in dates
-            ], axis=0, ignore_index=True
+                pd.DataFrame(
+                    {
+                        "dt": _date,
+                        "fips": sub_df["fips"],
+                        "variable_name": sub_df["npi"],
+                        "value": sub_df.eval(
+                            "(start_date <= @_date) & (end_date > @_date)"
+                        ),
+                    }
+                )
+                for _date in dates
+            ],
+            axis=0,
+            ignore_index=True,
         )
 
         # We need to groupby dt/fips/npi in case there were multiple
@@ -82,8 +88,9 @@ class KeystonePolicy(InsertWithTempTable, DatasetBaseNoDate):
 
         # Fetch data
         df = pd.read_csv(
-            self.url, usecols=["fips", "npi", "start_date", "end_date"],
-            parse_dates=["start_date", "end_date"]
+            self.url,
+            usecols=["fips", "npi", "start_date", "end_date"],
+            parse_dates=["start_date", "end_date"],
         )
         # Rename for consistency's sake
         df = df.rename(columns={"school closure": "school_closure"})
@@ -92,16 +99,22 @@ class KeystonePolicy(InsertWithTempTable, DatasetBaseNoDate):
         # the fact that there are stages of gathering limits, but for
         # others, we can simply determine whether
         simple_npis = [
-            "closing_of_public_venues", "lockdown", "school_closure",
-            "non-essential_services_closure", "shelter_in_place",
-            "social_distancing", "religious_gatherings_banned",
+            "closing_of_public_venues",
+            "lockdown",
+            "school_closure",
+            "non-essential_services_closure",
+            "shelter_in_place",
+            "social_distancing",
+            "religious_gatherings_banned",
         ]
         outs = self._reshape_npi(df, simple_npis, dates)
 
         # We now work with the gathering columns
         gathering_cols = [
-            "gathering_size_10_0", "gathering_size_25_11",
-            "gathering_size_100_25", "gathering_size_500_101"
+            "gathering_size_10_0",
+            "gathering_size_25_11",
+            "gathering_size_100_25",
+            "gathering_size_500_101",
         ]
         # First grab and determine whether any of the gathering
         # restrictions were imposed at a particular date
@@ -118,10 +131,7 @@ class KeystonePolicy(InsertWithTempTable, DatasetBaseNoDate):
         outg = (
             (outg_pivot.cumsum(axis=1) > 0)
             .reset_index()
-            .melt(
-                id_vars=["dt", "fips"], var_name="variable_name",
-                value_name="value"
-            )
+            .melt(id_vars=["dt", "fips"], var_name="variable_name", value_name="value")
         )
 
         out = pd.concat([outs, outg], axis=0, ignore_index=True)
