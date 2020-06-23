@@ -2,6 +2,7 @@ from .base import ArcGIS, CountyData
 from .AK import Alaska
 from .AR import Arkansas
 from .CA import LA, CACountyData, Imperial, SanDiego
+from .IN import Indiana
 from .KY import Kentucky
 from .MA import Massachusetts
 from .MD import Maryland
