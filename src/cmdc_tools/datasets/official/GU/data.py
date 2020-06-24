@@ -11,7 +11,6 @@ class Guam(ArcGIS, DatasetBaseNoDate):
     state_fips = int(us.states.lookup("Guam").fips)
     has_fips = True
 
-
     def get(self):
         nation = self._get_nationwide()
 
@@ -47,8 +46,7 @@ class Guam(ArcGIS, DatasetBaseNoDate):
             "active_total",
         ]
         out = df.loc[:, keepers].melt(
-            id_vars=["dt", "fips"], var_name="variable_name",
-            value_name="value"
+            id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
         )
         out["vintage"] = pd.Timestamp.utcnow().normalize()
 

@@ -1,79 +1,80 @@
 import pandas as pd
 import requests
+import us
 
+from ..base import CountyData
 from ...base import DatasetBaseNoDate
 
 
-class Tennessee(DatasetBaseNoDate):
+class Tennessee(DatasetBaseNoDate, CountyData):
+    source = "https://www.tn.gov/content/tn/health/cedep/ncov/data.html"
+    has_fips = True
+    state_fips = int(us.states.lookup("Tennessee").fips)
 
     def get(self):
-        daily_cases = self._get_daily_case_info()
-        county_data = self._get_county_data()
-
-        df = pd.concat([daily_cases, county_data], sort=False)
-        df.county = df.county.fillna("_STATE")
-        return (
-            df
-            .sort_values(['dt', 'county'])
-            .fillna(0)
-            .melt(
-                id_vars=['dt', 'county', 'fips'],
-                var_name="variable_name",
-                value_name="value"
-            )
-            .assign(
-                vintage=pd.Timestamp.utcnow().normalize()
-            )
+        # Save file url and read data in
+        url = (
+            "https://www.tn.gov/content/dam/tn/health/documents/cedep/"
+            "novel-coronavirus/datasets/Public-Dataset-Daily-Case-Info.XLSX"
         )
+        df = pd.read_excel(url, parse_dates=["DATE"])
 
-    def _get_county_data(self):
-        url = "https://www.tn.gov/content/dam/tn/health/documents/cedep/novel-coronavirus/datasets/Public-Dataset-County-New.XLSX"
-        df = pd.read_excel(url, parse_dates=True)
-        cols = {
+        # Rename columns, select subset, add fips
+        # Unused variables include: "NEW_CASES", "NEW_CONFIRMED",
+        # "NEW_PROBABLE", "NEW_DEATHS", "NEW_RECOVERED", "NEW_HOSP"...
+        crename = {
+            "DATE": "dt",
+            "TOTAL_CONFIRMED": "cases_confirmed",
+            "TOTAL_PROBABLE": "cases_suspected",
+            "TOTAL_CASES": "cases_total",
+            "TOTAL_DEATHS": "deaths_total",
+            "TOTAL_RECOVERED": "recovered_total",
+            "TOTAL_ACTIVE": "active_total",
+            "POS_TESTS": "positive_tests_total",
+            "NEG_TESTS": "negative_tests_total",
+            "TOTAL_HOSP": "hospital_beds_in_use_covid",
+        }
+        df = df.rename(columns=crename).loc[:, crename.values()]
+        df["fips"] = self.state_fips
+
+        out = df.melt(
+            id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
+        ).dropna()
+        out["vintage"] = pd.Timestamp.utcnow().normalize()
+
+        return out
+
+
+class TennesseeCounties(Tennessee):
+    has_fips = False
+
+    def get(self):
+        # Create url to excel file and read data
+        url = (
+            "https://www.tn.gov/content/dam/tn/health/documents/cedep/"
+            "novel-coronavirus/datasets/Public-Dataset-County-New.XLSX"
+        )
+        df = pd.read_excel(url, parse_dates=["DATE"])
+
+        crename = {
             "DATE": "dt",
             "COUNTY": "county",
-            "TOTAL_CASES": "cases_total", #cummulative
-            "TOTAL_CONFIRMED": "cases_confirmed", #cummulative
-            "NEW_CONFIRMED": "new_cases_confirmed", #daily
-            "POS_TESTS": "positive_tests_total", #cummulative
-            "NEG_TESTS": "negative_tests_total", #cummulative
-            "TOTAL_DEATHS": "deaths_total", #cummulative
-            "NEW_DEATHS": "new_deaths_total", #daily
-            "NEW_RECOVERED": "new_recovered_total", #daily
-            "TOTAL_RECOVERED": "recovered_total", #cummulative
-            "NEW_ACTIVE": "new_active_total", #daily
-            "TOTAL_ACTIVE": "active_total", #cummulative
-            "NEW_HOSPITALIZED": "hospital_beds_in_use_covid", #daily
-            "TOTAL_HOSPITALIZED": "new_hospital_beds_in_use_covid" #daily
+            "TOTAL_CONFIRMED": "cases_confirmed",
+            "TOTAL_PROBABLE": "cases_suspected",
+            "TOTAL_CASES": "cases_total",
+            "TOTAL_DEATHS": "deaths_total",
+            "NEG_TESTS": "negative_tests_total",
+            "POS_TESTS": "positive_tests_total",
+            "TOTAL_RECOVERED": "recovered_total",
+            "TOTAL_ACTIVE": "active_total",
+            "TOTAL_HOSPITALIZED": "hospital_beds_in_use_covid_total",
         }
-        renamed = df.rename(columns=cols)
+        df = df.rename(columns=crename)
 
-        return renamed[list(cols.values())]
+        # Reshape
+        out = df.melt(
+            id_vars=["dt", "county"], var_name="variable_name", value_name="value"
+        ).dropna()
+        out["vintage"] = pd.Timestamp.utcnow().normalize()
 
-    def _get_daily_case_info(self):
-        url = "https://www.tn.gov/content/dam/tn/health/documents/cedep/novel-coronavirus/datasets/Public-Dataset-Daily-Case-Info.XLSX"
-        # res = requests.get(url)
-        # return res
-        df = pd.read_excel(url, parse_dates=True)
-        cols = {
-            "DATE": "dt",
-            "TOTAL_CASES": "cases_total", #cummulative
-            "TOTAL_CONFIRMED": "cases_confirmed", #cummulative
-            "NEW_CONFIRMED": "new_cases_confirmed", #daily
-            "POS_TESTS": "positive_tests_total", #cummulative
-            "NEG_TESTS": "negative_tests_total", #cummulative
-            "TOTAL_DEATHS": "deaths_total", #cummulative
-            "NEW_DEATHS": "new_deaths_total", #daily
-            "NEW_RECOVERED": "new_recovered_total", #daily
-            "TOTAL_RECOVERED": "recovered_total", #cummulative
-            "NEW_ACTIVE": "new_active_total", #daily
-            "TOTAL_ACTIVE": "active_total", #cummulative
-            "NEW_HOSP": "hospital_beds_in_use_covid", #daily
-            "TOTAL_HOSP": "new_hospital_beds_in_use_covid" #daily
-        }
-        renamed = df.rename(columns=cols)
-        renamed['fips'] = 47
-        
-        keep_cols = list(cols.values())
-        keep_cols.append('fips')
-        return renamed[keep_cols]
+        return out
