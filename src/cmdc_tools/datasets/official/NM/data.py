@@ -1,10 +1,15 @@
 import pandas as pd
 import requests
+import us
 
+from .. import CountyData
 from ...base import DatasetBaseNoDate
 
 
-class NewMexico(DatasetBaseNoDate):
+class NewMexico(DatasetBaseNoDate, CountyData):
+    source = "https://cvprovider.nmhealth.org/public-dashboard.html"
+    state_fips = int(us.states.lookup("NM").fips)
+
     def get(self):
         url = "https://e7p503ngy5.execute-api.us-west-2.amazonaws.com/prod/GetCounties"
         res = requests.get(url)

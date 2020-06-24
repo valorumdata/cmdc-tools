@@ -32,6 +32,7 @@ from .official import (
     Montana,
     Nebraska,
     NewJersey,
+    NewMexico,
     Pennsylvania,
     RhodeIsland,
     SanDiego,
