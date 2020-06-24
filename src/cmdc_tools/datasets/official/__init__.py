@@ -1,6 +1,6 @@
-from .base import ArcGIS, CountyData
 from .AK import Alaska
 from .AR import Arkansas
+from .base import ArcGIS, CountyData
 from .CA import LA, CACountyData, Imperial, SanDiego
 from .CT import ConnecticutCounty, ConnecticutState
 from .DE import Delaware, DelawareKent, DelawareNewCastle, DelawareSussex
@@ -9,6 +9,7 @@ from .IN import Indiana
 from .KY import Kentucky
 from .MA import Massachusetts
 from .MD import Maryland
+from .MI import Michigan
 from .MN import Minnesota, MinnesotaCountiesCasesDeaths
 from .MT import Montana
 from .NE import Nebraska
