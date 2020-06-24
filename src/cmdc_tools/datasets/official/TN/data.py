@@ -45,8 +45,10 @@ class Tennessee(DatasetBaseNoDate, CountyData):
         return out
 
 
-class TennesseeCounties(Tennessee):
+class TennesseeCounties(DatasetBaseNoDate, CountyData):
+    source = "https://www.tn.gov/content/tn/health/cedep/ncov/data.html"
     has_fips = False
+    state_fips = int(us.states.lookup("Tennessee").fips)
 
     def get(self):
         # Create url to excel file and read data
