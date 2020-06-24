@@ -7,6 +7,7 @@ from .IN import Indiana
 from .KY import Kentucky
 from .MA import Massachusetts
 from .MD import Maryland
+from .MN import Minnesota, MinnesotaCountiesCasesDeaths
 from .MT import Montana
 from .NE import Nebraska
 from .NJ import NewJersey
