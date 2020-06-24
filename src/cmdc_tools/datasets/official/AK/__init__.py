@@ -1,10 +1,10 @@
-import pandas as pd
 import re
 
+import pandas as pd
 import us
 
-from ..base import CountyData
 from ... import DatasetBaseNoDate
+from ..base import CountyData
 
 __all__ = ["Alaska"]
 
@@ -32,7 +32,7 @@ DATE_RE = re.compile(r".+last updated on (\d{2}/\d{2}/\d{4}).*")
 
 def _find_col_by_prefix(df, col_prefix):
     cols = [x for x in list(df) if x.lower().startswith(col_prefix.lower())]
-    assert len(cols) == 1
+    assert len(cols) >= 1  # BUG: searching for `community` columns will return 2
     return cols[0]
 
 
@@ -47,9 +47,8 @@ class Alaska(DatasetBaseNoDate, CountyData):
         url = "https://www.arcgis.com/sharing/rest/content/items/"
         url += "867f802ce1624b46b40d2bd281490078/data"
         cases_df = pd.read_excel(url, sheet_name="Table 2", skiprows=2)
-
         bor_col = _find_col_by_prefix(cases_df, "borough")
-        comm_col = _find_col_by_prefix(cases_df, "community†")
+        comm_col = _find_col_by_prefix(cases_df, "community")
 
         # iterate row by row and collect the data we need...
         need_to_find = list(county_map.keys())
@@ -67,10 +66,10 @@ class Alaska(DatasetBaseNoDate, CountyData):
                     dict(
                         fips=county_map[finding],
                         cases_total=row["All Cases"],
-                        hospital_beds_in_use_covid_total=row["Hospitalizations"],
-                        deaths_total=row["Deaths"],
-                        recovered_total=row["Recovered"],
-                        active_total=row["Active"],
+                        hospital_beds_in_use_covid_total=row["Hospitalized\nCases"],
+                        deaths_total=row["Deceased\nCases"],
+                        recovered_total=row["Recovered\nCases"],
+                        active_total=row["Active Cases"],
                     )
                 )
                 need_to_find.remove(finding)
