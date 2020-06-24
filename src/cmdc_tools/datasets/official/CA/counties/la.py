@@ -1,5 +1,6 @@
 import asyncio
 import pandas as pd
+import us
 
 from ... import CountyData
 from ....puppet import with_page
@@ -73,7 +74,13 @@ async def test_data():
     ]
 
 
-class LA(CountyData, DatasetBaseNoDate):
+class LA(DatasetBaseNoDate, CountyData):
+    source = (
+        "http://dashboard.publichealth.lacounty.gov/covid19_surveillance_dashboard/"
+    )
+    state_fips = int(us.states.lookup("California").fips)
+    has_fips = True
+
     def get(self):
         df = asyncio.run(test_data())
         return (

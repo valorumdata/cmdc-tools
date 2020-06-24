@@ -7,3 +7,7 @@ Steps:
 3. Activate conda env `conda activate cmdc-tools`
 4. Install kedro `pip install kedro==0.15.8`
 5. Have kedro install everything else: `kedro install`
+
+Tests:
+
+Run `pytest src`
