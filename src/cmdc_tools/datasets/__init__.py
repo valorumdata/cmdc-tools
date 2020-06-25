@@ -31,6 +31,8 @@ from .official import (
     NewJersey,
     Pennsylvania,
     SanDiego,
+    Tennessee,
+    TennesseeCounties,
     Vermont,
 )
 from .usafacts import USAFactsDeaths, USAFactsCases
