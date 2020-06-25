@@ -7,9 +7,9 @@ from ..base import ArcGIS
 
 class Florida(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = "CY1LXxl9zlJeBuRZ"
-    self.state_fips = int(us.states.lookup("Florida").fips)
-    self.has_fips: bool = True
-    self.source = "https://fdoh.maps.arcgis.com/apps/opsdashboard/index.html#/8d0de33f260d444c852a615dc7837c86"
+    state_fips = int(us.states.lookup("Florida").fips)
+    has_fips: bool = True
+    source = "https://fdoh.maps.arcgis.com/apps/opsdashboard/index.html#/8d0de33f260d444c852a615dc7837c86"
 
     def get(self):
         df = self.get_all_sheet_to_df("Florida_COVID19_Cases_by_County_vw", 0, 1)
