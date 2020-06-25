@@ -13,19 +13,17 @@ from .dol import StateUIClaims
 from .jhu import JHUDailyReports, JHUDailyReportsUS, Locations
 from .nytimes import NYTimesState
 from .official import (
+    LA,
     Alaska,
     Arkansas,
     CACountyData,
+    Florida,
     Imperial,
-    LA,
-    Massachusetts,
-    Maryland,
     Kentucky,
-    LA,
-    Massachusetts,
     Maryland,
-    MinnesotaCountiesCasesDeaths,
+    Massachusetts,
     Minnesota,
+    MinnesotaCountiesCasesDeaths,
     Montana,
     Nebraska,
     NewJersey,
@@ -35,6 +33,6 @@ from .official import (
     TennesseeCounties,
     Vermont,
 )
-from .usafacts import USAFactsDeaths, USAFactsCases
+from .usafacts import USAFactsCases, USAFactsDeaths
 from .uscensus import ACS, ACSVariables
 from .wei import WEI
