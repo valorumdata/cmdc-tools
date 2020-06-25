@@ -13,5 +13,5 @@ from .NE import Nebraska
 from .NJ import NewJersey
 from .OK import OKTulsa
 from .PA import Pennsylvania
+from .TN import Tennessee, TennesseeCounties
 from .VT import Vermont
-
