@@ -15,9 +15,7 @@ class Michigan(DatasetBaseNoDate, CountyData):
         return cases
 
     def _get_urls(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        urls = loop.run_until_complete(self._get_urls_async())
+        urls = asyncio.run(self._get_urls_async())
         return urls
 
     async def _get_urls_async(self):
@@ -50,7 +48,3 @@ class Michigan(DatasetBaseNoDate, CountyData):
         return renamed[["dt", "county", "cases_total", "deaths_total",]].melt(
             id_vars=["dt", "county"], var_name="variable_name"
         )
-
-    # def _get_tests(self, url):
-    #     df = pd.read_excel(url)
-    #     return df
