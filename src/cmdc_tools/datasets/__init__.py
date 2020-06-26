@@ -24,11 +24,15 @@ from .official import (
     LA,
     Massachusetts,
     Maryland,
+    MinnesotaCountiesCasesDeaths,
+    Minnesota,
     Montana,
     Nebraska,
     NewJersey,
     Pennsylvania,
     SanDiego,
+    Tennessee,
+    TennesseeCounties,
     Vermont,
 )
 from .usafacts import USAFactsDeaths, USAFactsCases

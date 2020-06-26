@@ -1,5 +1,4 @@
 {
-    "python.pythonPath": "/home/sglyon/anaconda3/envs/cmdc-airflow/bin/python",
     "python.formatting.provider": "black",
     "peacock.remoteColor": "#022014",
     "workbench.colorCustomizations": {
