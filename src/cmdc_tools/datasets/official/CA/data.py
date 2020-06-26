@@ -27,7 +27,7 @@ class CACountyData(DatasetBaseNoDate, CountyData):
         return df
 
     def get_case_death_data(self):
-        url = base_url + "590188d5-8545-4c93-a9a0-e230f0db7290/resource/"
+        url = self.base_url + "590188d5-8545-4c93-a9a0-e230f0db7290/resource/"
         url += "926fd08f-cc91-4828-af38-bd45de97f8c3/download/"
         url += "statewide_cases.csv"
         df = pd.read_csv(url, parse_dates=["DATE"])
@@ -44,7 +44,7 @@ class CACountyData(DatasetBaseNoDate, CountyData):
         # Reshape
         out = df.melt(
             id_vars=["dt", "county"], var_name="variable_name", value_name="value"
-        )
+        ).dropna()
 
         return out
 
@@ -75,6 +75,6 @@ class CACountyData(DatasetBaseNoDate, CountyData):
         # Reshape
         out = df.melt(
             id_vars=["dt", "county"], var_name="variable_name", value_name="value"
-        )
+        ).dropna()
 
         return out
