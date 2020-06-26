@@ -63,21 +63,6 @@ class Delaware(DatasetBaseNoDate, CountyData):
                 "cases_suspected",
                 "recovered_total",
                 "negative_tests_total",
-                "tests_total",
+                # "tests_total",
             ]
         ]
-
-    # def _get_sussex_county(self):
-    #     df = self._get_from_source(self.source_map["sussex"])
-    #     df["county"] = "Sussex"
-    #     return df
-
-    # def _get_kent_county(self):
-    #     df = self._get_from_source(self.source_map["kent"])
-    #     df["county"] = "Kent"
-    #     return df
-
-    # def _get_new_castle_county(self):
-    #     df = self._get_from_source(self.source_map["new castle"])
-    #     df["county"] = "New Castle"
-    #     return df
