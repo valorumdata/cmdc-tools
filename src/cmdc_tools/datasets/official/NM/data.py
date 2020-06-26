@@ -48,7 +48,7 @@ class NewMexico(DatasetBaseNoDate, CountyData):
             columns={
                 "created": "dt",
                 "recovered": "recovered_total",
-                "currentHospitalizations": "hospital_beds_in_use_covid_confirmed",
+                "currentHospitalizations": "hospital_beds_in_use_covid_total",
                 "deaths": "deaths_total",
                 "cases": "cases_total",
             }
@@ -61,7 +61,7 @@ class NewMexico(DatasetBaseNoDate, CountyData):
                 "dt",
                 "fips",
                 "recovered_total",
-                "hospital_beds_in_use_covid_confirmed",
+                "hospital_beds_in_use_covid_total",
                 "deaths_total",
                 "cases_total",
             ]
