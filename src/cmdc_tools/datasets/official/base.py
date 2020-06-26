@@ -1,32 +1,47 @@
+from abc import ABC
+import textwrap
+
 import pandas as pd
 import requests
-import textwrap
 
 from .. import InsertWithTempTable
 
 
-class CountyData(InsertWithTempTable):
-    table_name = "us_covid"
-    pk = '("vintage", "dt", "fips", "variable_id")'
-
-    def __init__(self):
-        super(CountyData, self).__init__()
-
-        return None
+class CountyData(InsertWithTempTable, ABC):
+    table_name: str = "us_covid"
+    pk: str = '("vintage", "dt", "fips", "variable_id")'
+    data_type: str = "covid"
+    has_fips: bool
+    state_fips: int
 
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
-        out = f"""
-        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
-        FROM {temp_name} tt
-        LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        ON CONFLICT {pk} DO NOTHING
-        """
-
+        if self.has_fips:
+            out = f"""
+            INSERT INTO data.{table_name} (
+              vintage, dt, fips, variable_id, value
+            )
+            SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
+            FROM {temp_name} tt
+            INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name
+            ON CONFLICT {pk} DO UPDATE set value = excluded.value
+            """
+        else:
+            assert "county" in df.columns
+            out = f"""
+            INSERT INTO data.{table_name} (
+              vintage, dt, fips, variable_id, value
+            )
+            SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value
+            FROM {temp_name} tt
+            INNER JOIN meta.us_fips us on tt.county=us.name
+            INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name
+            WHERE us.state = LPAD({self.state_fips}::TEXT, 2, '0')
+            ON CONFLICT {pk} DO UPDATE SET value = excluded.value
+            """
         return textwrap.dedent(out)
 
 
-class ArcGIS(CountyData):
+class ArcGIS(CountyData, ABC):
     """
     Must define class variables:
 
@@ -35,6 +50,8 @@ class ArcGIS(CountyData):
 
     in order to use this class
     """
+
+    ARCGIS_ID: str
 
     def __init__(self, params=None):
         super(ArcGIS, self).__init__()
@@ -50,8 +67,6 @@ class ArcGIS(CountyData):
 
         self.params = params
 
-        return None
-
     def arcgis_query_url(self, service, sheet, srvid=1):
         out = f"https://services{srvid}.arcgis.com/{self.ARCGIS_ID}/"
         out += f"ArcGIS/rest/services/{service}/FeatureServer/{sheet}/query"
@@ -60,17 +75,13 @@ class ArcGIS(CountyData):
 
     def get_res_json(self, service, sheet, srvid, params):
         # Perform actual request
-        url = self.arcgis_query_url(
-            service=service, sheet=sheet, srvid=srvid
-        )
+        url = self.arcgis_query_url(service=service, sheet=sheet, srvid=srvid)
         res = requests.get(url, params=params)
 
         return res.json()
 
     def arcgis_json_to_df(self, res_json):
-        df = pd.DataFrame.from_records(
-            [x["attributes"] for x in res_json["features"]]
-        )
+        df = pd.DataFrame.from_records([x["attributes"] for x in res_json["features"]])
 
         return df
 
@@ -94,9 +105,7 @@ class ArcGIS(CountyData):
         total_offset = len(res_json["features"])
 
         # Use first response to create first DataFrame
-        _dfs = [
-            self.arcgis_json_to_df(res_json)
-        ]
+        _dfs = [self.arcgis_json_to_df(res_json)]
         unbroken_chain = res_json.get("exceededTransferLimit", False)
         while unbroken_chain:
             # Update parameters and make request

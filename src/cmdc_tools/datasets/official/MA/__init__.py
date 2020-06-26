@@ -1,43 +1,40 @@
+import io
+from typing import Optional
+import zipfile
+
 import pandas as pd
 import requests
-import io
-import zipfile
-from typing import Optional
+import us
 
 from .. import CountyData
 from ... import DatasetBaseNeedsDate
 
 
-class Massachusetts(CountyData, DatasetBaseNeedsDate):
+class Massachusetts(DatasetBaseNeedsDate, CountyData):
     start_date = "2020-04-29"
+    source = (
+        "https://www.mass.gov/info-details/"
+        "covid-19-response-reporting#covid-19-daily-dashboard-"
+    )
+    state_fips = int(us.states.lookup("Massachusetts").fips)
+    has_fips = False
 
-    def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
-        return f"""
-        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, uf.fips, cv.id, tt.value
-        FROM {temp_name} tt
-        INNER JOIN (
-            SELECT fips, name
-            FROM meta.us_fips
-            WHERE fips::TEXT LIKE '25___'
-        ) uf on uf.name = tt.county_name
-        LEFT JOIN meta.covid_variables cv on cv.name = tt.variable_name
-        ON CONFLICT {pk} DO UPDATE SET value = EXCLUDED.value;
-        """
+    def transform_date(self, date: pd.Timestamp) -> pd.Timestamp:
+        return date - pd.Timedelta(hours=12)
 
     def _get_cases_deaths(self, zf: zipfile.ZipFile) -> pd.DataFrame:
         with zf.open("County.csv") as csv_f:
             df = pd.read_csv(csv_f, parse_dates=["Date"])
 
         column_map = dict(
-            Date="dt", Count="cases_total", Deaths="deaths_total", County="county_name"
+            Date="dt", Count="cases_total", Deaths="deaths_total", County="county"
         )
         out = df.rename(columns=column_map)
         int_cols = ["cases_total", "deaths_total"]
         out[int_cols] = out[int_cols].fillna(0).astype(int)
-        melted = out.melt(id_vars=["dt", "county_name"], var_name="variable_name")
+        melted = out.melt(id_vars=["dt", "county"], var_name="variable_name")
         return melted.drop_duplicates(
-            subset=["dt", "county_name", "variable_name"], keep="first"
+            subset=["dt", "county", "variable_name"], keep="first"
         )
 
     def _get_hospital_data(
@@ -69,9 +66,9 @@ class Massachusetts(CountyData, DatasetBaseNeedsDate):
             df.groupby("Hospital County")[list(column_map.values())]
             .sum()
             .reset_index()
-            .rename(columns={"Hospital County": "county_name"})
+            .rename(columns={"Hospital County": "county"})
             .assign(dt=date)
-            .melt(id_vars=["dt", "county_name"], var_name="variable_name")
+            .melt(id_vars=["dt", "county"], var_name="variable_name")
         )
 
     def get(self, date: str) -> pd.DataFrame:

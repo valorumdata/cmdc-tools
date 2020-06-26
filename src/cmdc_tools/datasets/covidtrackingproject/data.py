@@ -39,7 +39,7 @@ class CTP(InsertWithTempTable, DatasetBaseNoDate):
         SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
         FROM {temp_name} tt
         LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        ON CONFLICT {pk} DO NOTHING
+        ON CONFLICT {pk} DO UPDATE SET value = excluded.value
         """
 
         return textwrap.dedent(out)

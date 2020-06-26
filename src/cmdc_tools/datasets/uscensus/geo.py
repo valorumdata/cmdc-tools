@@ -30,19 +30,11 @@ def _create_fips(geo: str, df: pd.DataFrame):
     """
     if geo == "state":
         df["fips"] = df["state"].astype(int)
-        df = df.drop(columns=["state"])
+        df["county"] = "000"
     elif geo == "county":
         df["fips"] = df["state"].astype(int) * 1_000 + df["county"].astype(int)
-        df = df.drop(columns=["state", "county"])
-    elif geo == "tract":
-        df["fips"] = (
-            df["state"].astype(int) * 1_000_000_000
-            + df["county"].astype(int) * 1_000_000
-            + df["tract"].astype(int)
-        )
-        df = df.drop(columns=["state", "county", "tract"])
     else:
-        raise ValueError("Only state/county/tract are supported")
+        raise ValueError("Only state/county are supported")
 
     return df
 
@@ -87,23 +79,12 @@ def download_shape_files(geo: str, year: int):
     geo = geo.lower()
     url = BASE_GEO_URL + f"TIGER{year}/{geo.upper()}/"
 
-    if geo == "tract":
-        dfs = []
+    datafile = f"tl_{year}_us_{geo}"
+    gdf = _download_shape_file(url, datafile)
+    gdf = _create_fips(geo, gdf)
 
-        for state_fips in STATE_FIPS[:3]:
-            datafile = f"tl_{year}_{state_fips}_tract"
-            _df = _download_shape_file(url, datafile)
-            dfs.append(_df)
-        gdf = pd.concat(dfs, axis="index")
-        gdf = _create_fips(geo, gdf)
-        gdf["name"] = gdf["fips"].map(lambda x: "tract_" + str(x))
-
-    elif (geo == "state") or (geo == "county"):
-        datafile = f"tl_{year}_us_{geo}"
-        gdf = _download_shape_file(url, datafile)
-        gdf = _create_fips(geo, gdf)
-
-    gdf = gdf.loc[:, ["fips", "name", "aland", "intptlat", "intptlon"]]
+    keep = ["fips", "state", "county", "name", "aland", "intptlat", "intptlon"]
+    gdf = gdf.loc[:, keep]
 
     # Convert land area to square miles (m^2 -> km^2 -> mi^2
     gdf["aland"] = (gdf["aland"] / 1_000_000) / 2.5899
@@ -117,6 +98,7 @@ def download_shape_files(geo: str, year: int):
 class USGeoBaseAPI(InsertWithTempTable, DatasetBaseNoDate):
     table_name = "us_fips"
     pk = '("id")'
+    autodag = False
 
     def __init__(self, geo: str = "state", year: int = 2019):
         self.geo = geo
@@ -124,8 +106,8 @@ class USGeoBaseAPI(InsertWithTempTable, DatasetBaseNoDate):
 
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         _sql_geo_insert = f"""
-        INSERT INTO meta.{table_name} (fips, name, area, latitude, longitude)
-        SELECT fips, name, area, latitude, longitude FROM {temp_name}
+        INSERT INTO meta.{table_name} (fips, state, county, name, area, latitude, longitude)
+        SELECT fips, state, county, name, area, latitude, longitude FROM {temp_name}
         ON CONFLICT (fips) DO NOTHING;
         """
 
