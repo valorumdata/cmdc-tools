@@ -40,6 +40,6 @@ class Florida(DatasetBaseNoDate, ArcGIS):
                 "negative_tests_total",
                 "deaths_total",
                 "cases_total",
-                "cumulative_hospitalized",
+                # "cumulative_hospitalized",
             ]
         ].melt(id_vars=["dt", "fips"], var_name="variable_name")
