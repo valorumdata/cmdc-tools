@@ -1,3 +1,5 @@
+import textwrap
+
 import pandas as pd
 import re
 
@@ -28,6 +30,19 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
         "https://www.arcgis.com/apps/opsdashboard/"
         "index.html#/83c63cfec8b24397bdf359f49b11f218"
     )
+
+    def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
+        out = f"""
+        INSERT INTO data.{table_name} (
+          vintage, dt, fips, variable_id, value
+        )
+        SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
+        FROM {temp_name} tt
+        INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name
+        INNER JOIN meta.us_fips using (fips)
+        ON CONFLICT {pk} DO UPDATE set value = excluded.value
+        """
+        return textwrap.dedent(out)
 
     def get(self):
         # Retrieve each of the datasets
