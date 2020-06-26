@@ -30,6 +30,7 @@ from .official import (
     Nebraska,
     NewJersey,
     Pennsylvania,
+    PuertoRico,
     SanDiego,
     Tennessee,
     TennesseeCounties,
