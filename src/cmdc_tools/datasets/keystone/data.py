@@ -113,7 +113,7 @@ class KeystonePolicy(InsertWithTempTable, DatasetBaseNoDate):
         gathering_cols = [
             "gathering_size_10_0",
             "gathering_size_25_11",
-            "gathering_size_100_25",
+            "gathering_size_100_26",
             "gathering_size_500_101",
         ]
         # First grab and determine whether any of the gathering

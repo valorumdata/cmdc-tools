@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS meta.npi_variables;
+DROP TABLE IF EXISTS meta.npi_variables CASCADE;
 CREATE TABLE meta.npi_variables (
     id serial primary key,
     name text UNIQUE
@@ -14,7 +14,7 @@ COMMENT ON TABLE meta.npi_variables IS E'This table contains a list of variables
 * social_distancing
 * gathering_size_10_0
 * gathering_size_25_11
-* gathering_size_100_25
+* gathering_size_100_26
 * gathering_size_500_101
 ';
 
@@ -27,7 +27,7 @@ INSERT INTO meta.npi_variables (name) VALUES
   ('social_distancing'),
   ('gathering_size_10_0'),
   ('gathering_size_25_11'),
-  ('gathering_size_100_25'),
+  ('gathering_size_100_26'),
   ('gathering_size_500_101');
 
 
