@@ -30,14 +30,14 @@ class CACountyData(DatasetBaseNoDate, CountyData):
         url = self.base_url + "590188d5-8545-4c93-a9a0-e230f0db7290/resource/"
         url += "926fd08f-cc91-4828-af38-bd45de97f8c3/download/"
         url += "statewide_cases.csv"
-        df = pd.read_csv(url, parse_dates=["DATE"])
+        df = pd.read_csv(url, parse_dates=["date"])
 
         # Rename columns and subset data
         crename = {
-            "DATE": "dt",
-            "COUNTY": "county",
-            "TOTALCOUNTCONFIRMED": "cases_total",
-            "TOTALCOUNTDEATHS": "deaths_total",
+            "date": "dt",
+            "county": "county",
+            "totalcountconfirmed": "cases_total",
+            "totalcountdeaths": "deaths_total",
         }
         df = df.rename(columns=crename).loc[:, crename.values()]
 
