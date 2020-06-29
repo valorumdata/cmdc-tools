@@ -12,15 +12,19 @@ class Connecticut(DatasetBaseNoDate, CountyData):
 
     def get(self):
         tests = self._get_tests_data()
-        return tests
+
+        out = pd.concat([tests], axis=0, ignore_index=True)
+        out["vintage"] = pd.Timestamp.now().normalize()
+
+        return out
 
     def _get_tests_data(self):
         tests_url = (
             "https://data.ct.gov/api/views/qfkt-uahj/rows.csv?accessType=DOWNLOAD"
         )
 
-        df = pd.read_csv(tests_url, parse_dates=True)
-        renamed = df.rename(
+        df = pd.read_csv(tests_url, parse_dates=["Date"])
+        df = df.rename(
             columns={
                 "Date": "dt",
                 "County": "county",
@@ -31,12 +35,16 @@ class Connecticut(DatasetBaseNoDate, CountyData):
             }
         )
 
-        return renamed[
-            [
-                "dt",
-                "county",
-                "tests_total",
-                "positive_tests_total",
-                "negative_tests_total",
-            ]
-        ].melt(id_vars=["dt", "county"], var_name="variable_name")
+        # Don't currently have tests_total variable in database
+        keep = [
+            "dt",
+            "county",
+            "positive_tests_total",
+            "negative_tests_total",
+            # "tests_total",
+        ]
+        out = df.loc[:, keep].melt(
+            id_vars=["dt", "county"], var_name="variable_name"
+        ).dropna()
+
+        return out
