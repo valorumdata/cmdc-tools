@@ -17,6 +17,7 @@ from .official import (
     Alaska,
     Arkansas,
     CACountyData,
+    DC,
     Imperial,
     LA,
     Massachusetts,
