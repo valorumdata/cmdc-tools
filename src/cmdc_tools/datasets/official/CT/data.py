@@ -9,6 +9,10 @@ from ..base import CountyData
 class Connecticut(DatasetBaseNoDate, CountyData):
     has_fips = False
     state_fips = int(us.states.lookup("Connecticut").fips)
+    source = (
+        "https://data.ct.gov/Health-and-Human-Services/"
+        "COVID-19-PCR-Based-Test-Results-by-Date-of-Specime/qfkt-uahj"
+    )
 
     def get(self):
         tests = self._get_tests_data()
@@ -43,8 +47,10 @@ class Connecticut(DatasetBaseNoDate, CountyData):
             "negative_tests_total",
             # "tests_total",
         ]
-        out = df.loc[:, keep].melt(
-            id_vars=["dt", "county"], var_name="variable_name"
-        ).dropna()
+        out = (
+            df.loc[:, keep]
+            .melt(id_vars=["dt", "county"], var_name="variable_name")
+            .dropna()
+        )
 
         return out
