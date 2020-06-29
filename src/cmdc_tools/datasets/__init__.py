@@ -20,6 +20,7 @@ from .official import (
     Connecticut,
     Imperial,
     LA,
+    NewYork,
     Massachusetts,
     Maryland,
     Kentucky,

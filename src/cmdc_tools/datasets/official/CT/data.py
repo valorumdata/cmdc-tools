@@ -45,7 +45,7 @@ class Connecticut(DatasetBaseNoDate, CountyData):
             "county",
             "positive_tests_total",
             "negative_tests_total",
-            # "tests_total",
+            "tests_total",
         ]
         out = (
             df.loc[:, keep]
