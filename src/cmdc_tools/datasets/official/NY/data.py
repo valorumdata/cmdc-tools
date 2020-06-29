@@ -45,8 +45,6 @@ class NewYork(DatasetBaseNoDate, CountyData):
             # "negative_tests_total",
         ]
 
-        out = df.loc[:, keep].melt(
-            id_vars=["dt", "county"], var_name="variable_name"
-        )
+        out = df.loc[:, keep].melt(id_vars=["dt", "county"], var_name="variable_name")
 
         return out
