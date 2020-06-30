@@ -10,6 +10,7 @@ class Connecticut(DatasetBaseNoDate, SODA):
     baseurl = "https://data.ct.gov"
     has_fips = True
     state_fips = int(us.states.lookup("Connecticut").fips)
+    source = "https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc/"
 
     def get(self):
         df_state = self.get_state_data()
