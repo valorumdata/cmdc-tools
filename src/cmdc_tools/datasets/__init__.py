@@ -31,6 +31,7 @@ from .official import (
     Nebraska,
     NewJersey,
     Pennsylvania,
+    RhodeIsland,
     SanDiego,
     Tennessee,
     TennesseeCounties,
