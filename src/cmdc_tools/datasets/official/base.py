@@ -151,4 +151,3 @@ class SODA(CountyData, ABC):
         df = pd.DataFrame(res.json())
 
         return df
-

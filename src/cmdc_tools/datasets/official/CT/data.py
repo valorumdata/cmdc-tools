@@ -8,8 +8,8 @@ from ..base import SODA
 
 class Connecticut(DatasetBaseNoDate, SODA):
     baseurl = "https://data.ct.gov"
-    has_fips=True
-    state_fips=int(us.states.lookup("Connecticut").fips)
+    has_fips = True
+    state_fips = int(us.states.lookup("Connecticut").fips)
 
     def get(self):
         df_state = self.get_state_data()
@@ -31,12 +31,12 @@ class Connecticut(DatasetBaseNoDate, SODA):
             "confirmedcases": "positive_tests_total",
             "totaldeaths": "deaths_total",
             "totalcases": "cases_total",
-            "hospitalizedcases": "hospital_beds_in_use_covid_total"
+            "hospitalizedcases": "hospital_beds_in_use_covid_total",
         }
         df = df.rename(columns=crename).loc[:, crename.values()]
         df["dt"] = pd.to_datetime(df["dt"])
         df["fips"] = self.state_fips
-        for c in [_num for _num in crename.values() if _num!="dt"]:
+        for c in [_num for _num in crename.values() if _num != "dt"]:
             df[c] = pd.to_numeric(df.loc[:, c])
 
         out = df.melt(id_vars=["dt", "fips"], var_name="variable_name")
@@ -78,17 +78,18 @@ class Connecticut(DatasetBaseNoDate, SODA):
         tests = tests.loc[~tests["dt"].isna(), :]
         tests = tests.query("county != 'Pending address validation'")
 
-        tests = tests.set_index(
-            ["dt", "county"]
-        ).unstack(
-            level="county"
-        ).sort_index().cumsum().stack(
-            level="county"
-        ).reset_index()
+        tests = (
+            tests.set_index(["dt", "county"])
+            .unstack(level="county")
+            .sort_index()
+            .cumsum()
+            .stack(level="county")
+            .reset_index()
+        )
 
         df = cdh.merge(tests, on=["dt", "county"], how="left")
         df = df.drop(["county"], axis=1)
-        df["fips"] = df["fips"].astype(int) + self.state_fips*1000
+        df["fips"] = df["fips"].astype(int) + self.state_fips * 1000
 
         out = df.melt(id_vars=["dt", "fips"], var_name="variable_name")
 
