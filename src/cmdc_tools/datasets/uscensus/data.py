@@ -7,7 +7,6 @@ import os
 from .census import ACSAPI
 from .geo import _create_fips
 from .. import InsertWithTempTable, DatasetBaseNoDate
-from ..db_util import TempTable
 
 
 _VARIABLES_ACS = {
