@@ -17,7 +17,7 @@ from .official import (
     Alaska,
     Arkansas,
     CACountyData,
-    Connecticut,
+    ConnecticutCounty, ConnecticutState,
     Imperial,
     LA,
     NewYork,

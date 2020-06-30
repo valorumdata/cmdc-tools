@@ -6,7 +6,7 @@ from ...base import DatasetBaseNoDate
 from ..base import SODA
 
 
-class Connecticut(DatasetBaseNoDate, SODA):
+class ConnecticutState(DatasetBaseNoDate, SODA):
     baseurl = "https://data.ct.gov"
     has_fips = True
     state_fips = int(us.states.lookup("Connecticut").fips)
@@ -14,9 +14,8 @@ class Connecticut(DatasetBaseNoDate, SODA):
 
     def get(self):
         df_state = self.get_state_data()
-        df_county = self.get_county_data()
 
-        out = pd.concat([df_state, df_county], axis=0, ignore_index=True)
+        out = pd.concat([df_state], axis=0, ignore_index=True)
         out["vintage"] = pd.Timestamp.now().normalize()
 
         return out
@@ -44,11 +43,25 @@ class Connecticut(DatasetBaseNoDate, SODA):
 
         return out
 
+
+class ConnecticutCounty(DatasetBaseNoDate, SODA):
+    baseurl = "https://data.ct.gov"
+    has_fips = False
+    state_fips = int(us.states.lookup("Connecticut").fips)
+    source = "https://data.ct.gov/stories/s/COVID-19-data/wa3g-tfvc/"
+
+    def get(self):
+        df_county = self.get_county_data()
+
+        out = pd.concat([df_county], axis=0, ignore_index=True)
+        out["vintage"] = pd.Timestamp.now().normalize()
+
+        return out
+
     def get_county_data(self):
         # Get raw dataframe
         cdh_rename = {
             "dateupdated": "dt",
-            "cnty_cod": "fips",
             "county": "county",
             "totalcases": "cases_total",
             "totaldeaths": "deaths_total",
@@ -89,9 +102,7 @@ class Connecticut(DatasetBaseNoDate, SODA):
         )
 
         df = cdh.merge(tests, on=["dt", "county"], how="left")
-        df = df.drop(["county"], axis=1)
-        df["fips"] = df["fips"].astype(int) + self.state_fips * 1000
 
-        out = df.melt(id_vars=["dt", "fips"], var_name="variable_name")
+        out = df.melt(id_vars=["dt", "county"], var_name="variable_name")
 
         return out.dropna()

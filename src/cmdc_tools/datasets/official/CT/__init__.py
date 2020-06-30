@@ -1,1 +1,1 @@
-from .data import Connecticut
+from .data import ConnecticutCounty, ConnecticutState
