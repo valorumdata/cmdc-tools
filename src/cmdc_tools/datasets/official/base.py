@@ -123,3 +123,32 @@ class ArcGIS(CountyData, ABC):
         df = pd.concat(_dfs)
 
         return df
+
+
+class SODA(CountyData, ABC):
+    """
+    Must define class variables:
+
+    * `baseurl`
+
+    in order to use this class
+    """
+
+    baseurl: str
+
+    def __init__(self, params=None):
+        super(SODA, self).__init__()
+
+    def soda_query_url(self, data_id, resource="resource", ftype="json"):
+        out = self.baseurl + f"/{resource}/{data_id}.{ftype}"
+
+        return out
+
+    def get_dataset(self, data_id, resource="resource", ftype="json"):
+        url = self.soda_query_url(data_id, resource, ftype)
+        res = requests.get(url)
+
+        df = pd.DataFrame(res.json())
+
+        return df
+
