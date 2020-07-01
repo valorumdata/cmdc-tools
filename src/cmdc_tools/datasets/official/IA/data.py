@@ -7,7 +7,7 @@ from ..base import ArcGIS
 
 class Iowa(ArcGIS, DatasetBaseNoDate):
     ARCGIS_ID = "vPD5PVLI6sfkZ5E4"
-    fips = int(us.states.lookup("Iowa").fips)
+    state_fips = int(us.states.lookup("Iowa").fips)
     has_fips = False
     source = "https://coronavirus.iowa.gov/pages/rmcc-data"
 
