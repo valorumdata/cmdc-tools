@@ -14,6 +14,7 @@ COMMENT ON TABLE meta.covid_variables IS E'This table contains a list of variabl
 * deaths_total: Total number of deaths including both suspected and confirmed
 * positive_tests_total: The total number of tests that have returned positive for COVID
 * negative_tests_total: The total number of tests that have returned negative for COVID
+* tests_total: The total number of tests administered
 * recovered_total: The total number of individuals who have recovered from COVID, to date
 * active_total: The number of currently active COVID cases
 * icu_beds_capacity_count: The number of ICU beds available in a particular geography
@@ -67,7 +68,8 @@ INSERT INTO meta.covid_variables (name) VALUES
   ('ventilators_in_use_covid_total'),
   ('ventilators_in_use_covid_new'),
   ('recovered_total'),
-  ('active_total');
+  ('active_total'),
+  ('tests_total');
 
 DROP TABLE IF EXISTS data.covid;
 
