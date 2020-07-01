@@ -2,12 +2,17 @@ import asyncio
 
 import pandas as pd
 import pyppeteer
+import us
 
 from ...base import DatasetBaseNoDate
 from ..base import CountyData
 
 
 class Michigan(DatasetBaseNoDate, CountyData):
+    has_fips = False
+    source = "https://www.michigan.gov/coronavirus/0,9753,7-406-98163_98173---,00.html"
+    state_fips = int(us.states.lookup("Michigan").fips)
+
     def get(self):
         urls = self._get_urls()
         cases = self._get_cases(urls[0])
