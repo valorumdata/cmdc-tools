@@ -3,7 +3,6 @@ import requests
 import textwrap
 
 from .. import InsertWithTempTable, DatasetBaseNoDate
-from ..uscensus.geo import FIPS_RESTRICT_QUERY
 
 
 CURRENT_URL = "https://covidtracking.com/api/v1/states/current.json"
@@ -73,6 +72,5 @@ class CTP(InsertWithTempTable, DatasetBaseNoDate):
             var_name="variable_name",
             value_name="value",
         ).dropna()
-        df = df.query(FIPS_RESTRICT_QUERY)
 
         return df
