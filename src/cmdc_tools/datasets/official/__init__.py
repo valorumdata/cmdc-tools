@@ -15,5 +15,6 @@ from .NY import NewYork
 from .NJ import NewJersey
 from .OK import OKTulsa
 from .PA import Pennsylvania
+from .PR import PuertoRico
 from .TN import Tennessee, TennesseeCounties
 from .VT import Vermont
