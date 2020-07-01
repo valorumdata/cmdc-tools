@@ -49,7 +49,6 @@ def _download_shape_file(apiurl: str, filename: str):
     gdf["INTPTLAT"] = pd.to_numeric(gdf["INTPTLAT"])
     gdf["INTPTLON"] = pd.to_numeric(gdf["INTPTLON"])
     gdf.columns = [c.lower() for c in gdf.columns]
-    gdf.columns = [c.lower() for c in gdf.columns]
 
     return gdf
 
