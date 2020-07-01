@@ -13,6 +13,7 @@ from ..base import CountyData
 class DC(DatasetBaseNoDate, CountyData):
     has_fips = True
     state_fips = int(us.states.lookup("DC").fips)
+    source = "https://coronavirus.dc.gov/page/coronavirus-data"
 
     def _get_urls(self):
         link = asyncio.run(self._get_urls_async())
