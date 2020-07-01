@@ -6,6 +6,7 @@ CREATE TABLE meta.us_fips (
     "state" TEXT,
     "county" TEXT,
     "name" TEXT,
+    "fullname" TEXT,
     "area" REAL,
     "latitude" REAL,
     "longitude" REAL
