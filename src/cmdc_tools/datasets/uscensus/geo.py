@@ -7,10 +7,6 @@ from .census import STATE_FIPS
 
 BASE_GEO_URL = "https://www2.census.gov/geo/tiger/"
 
-FIPS_RESTRICT_QUERY = "(fips < 60) | "
-FIPS_RESTRICT_QUERY += "((fips >= 1000) & (fips < 60_000)) | "
-FIPS_RESTRICT_QUERY += "((fips >= 1_000_000_000) & (fips < 60_000_000_000))"
-
 
 def _create_fips(geo: str, df: pd.DataFrame):
     """
@@ -53,6 +49,7 @@ def _download_shape_file(apiurl: str, filename: str):
     gdf["INTPTLAT"] = pd.to_numeric(gdf["INTPTLAT"])
     gdf["INTPTLON"] = pd.to_numeric(gdf["INTPTLON"])
     gdf.columns = [c.lower() for c in gdf.columns]
+    gdf.columns = [c.lower() for c in gdf.columns]
 
     return gdf
 
@@ -83,13 +80,23 @@ def download_shape_files(geo: str, year: int):
     gdf = _download_shape_file(url, datafile)
     gdf = _create_fips(geo, gdf)
 
-    keep = ["fips", "state", "county", "name", "aland", "intptlat", "intptlon"]
-    gdf = gdf.loc[:, keep]
+    keep = ["fips", "state", "county", "aland", "intptlat", "intptlon"]
+    if geo == "county":
+        keep.append("namelsad")
+        gdf = gdf.loc[:, keep].rename(columns={"namelsad": "name"})
+        gdf["name"] = gdf["name"].str.replace(" County", "")
+    else:
+        keep.append("name")
+        gdf = gdf.loc[:, keep]
 
     # Convert land area to square miles (m^2 -> km^2 -> mi^2
     gdf["aland"] = (gdf["aland"] / 1_000_000) / 2.5899
+
+    # Remove 'County' from the county names -- We need namelsad because
+    # it allows us to differentiate between places like St. Louis county
+    # and St. Louis City county...
     gdf = gdf.rename(
-        columns={"aland": "area", "intptlat": "latitude", "intptlon": "longitude"}
+        columns={"aland": "area", "intptlat": "latitude", "intptlon": "longitude",}
     )
 
     return gdf
