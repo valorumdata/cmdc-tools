@@ -1,8 +1,10 @@
+import asyncio
 import os
 import time
 
 import numpy as np
 import pandas as pd
+import pyppeteer
 import us
 
 from ...base import DatasetBaseNoDate
@@ -15,15 +17,13 @@ class RhodeIsland(DatasetBaseNoDate, CountyData):
     # ARCGIS_ID = "dkWT1XL4nglP5MLP"
     state_fips = int(us.states.lookup("Rhode Island").fips)
     has_fips: bool = False
-
-    def __init__(self, params=None):
-        super().__init__(params=params)
+    source = "https://docs.google.com/spreadsheets/d/1n-zMS9Al94CPj_Tc3K7Adin-tN9x1RSjjx2UzJ4SV7Q/edit#gid=1225599023"
 
     def get(self):
         state_stats = self._get_trends()
         counties = self._get_municipality()
-
-        return pd.concat([state_stats, counties], sort=False)
+        counties_test = self._get_citytown_testing()
+        return pd.concat([state_stats, counties, counties_test], sort=False)
 
     def _get_summary(self):
         summary_stats = "https://docs.google.com/spreadsheets/d/1n-zMS9Al94CPj_Tc3K7Adin-tN9x1RSjjx2UzJ4SV7Q/export?format=csv&gid=1225599023"
@@ -120,6 +120,54 @@ class RhodeIsland(DatasetBaseNoDate, CountyData):
         agged["dt"] = pd.Timestamp.utcnow()
         return agged.melt(id_vars=["dt", "county"], var_name="variable_name").assign(
             vintage=pd.Timestamp.utcnow()
+        )
+
+    async def _get_table_async(self):
+        browser = await pyppeteer.launch()
+        page = await browser.newPage()
+        await page.goto("https://datawrapper.dwcdn.net/udDUY/4/")
+        graphHeader = "Number of People COVID-19 Tested and Number of People with Positive Tests in Rhode Island Cities and Towns"
+        # wait for table to load
+        await page.waitForXPath("//table")
+        # Get raw html of table
+        raw_table = await page.Jeval("table", "el => el.outerHTML")
+        return raw_table
+
+    def _get_table(self):
+        return asyncio.run(self._get_table_async())
+
+    def _get_citytown_testing(self):
+        raw_table = self._get_table()
+
+        df = pd.concat(pd.read_html(raw_table))
+        # Prepare county list
+        dir_path = os.path.dirname(os.path.realpath(__file__))
+        counties = pd.read_csv(f"{dir_path}/RI_counties.csv")
+        counties.city = counties.city.str.upper()
+
+        df["City/Town"] = df["City/Town"].str.upper()
+
+        joined = (
+            df.set_index("City/Town")
+            .join(counties.set_index("city"), how="left")
+            .reset_index()
+        )
+
+        renamed = joined.rename(
+            columns={
+                "Total Number of People Tested": "tests_total",
+                "Number of People who Tested Positive": "positive_tests_total",
+            }
+        )
+        agged = (
+            renamed[["county", "tests_total", "positive_tests_total"]]
+            .groupby("county")
+            .agg(sum)
+        ).reset_index()
+        return (
+            agged.melt(id_vars=["county"], var_name="variable_name")
+            .assign(vintage=pd.Timestamp.utcnow().normalize())
+            .assign(dt=pd.Timestamp.utcnow())
         )
 
     # NOTE: This set of code is used for Rhode Island's ArcGIS server. It is currently
