@@ -14,11 +14,16 @@ from .jhu import JHUDailyReports, JHUDailyReportsUS, Locations
 from .keystone import KeystonePolicy
 from .nytimes import NYTimesState
 from .official import (
-    LA,
     Alaska,
     Arkansas,
     CACountyData,
+    ConnecticutCounty,
+    ConnecticutState,
     Imperial,
+    LA,
+    NewYork,
+    Massachusetts,
+    Maryland,
     Kentucky,
     Maryland,
     Massachusetts,
