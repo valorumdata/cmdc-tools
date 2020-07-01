@@ -11,14 +11,18 @@ from .covidtrackingproject import CTP
 from .db_util import TempTable, fast_to_sql
 from .dol import StateUIClaims
 from .jhu import JHUDailyReports, JHUDailyReportsUS, Locations
+from .keystone import KeystonePolicy
 from .nytimes import NYTimesState
 from .official import (
     Alaska,
     Arkansas,
     CACountyData,
+    ConnecticutCounty,
+    ConnecticutState,
     Delaware,
     Imperial,
     LA,
+    NewYork,
     Massachusetts,
     Maryland,
     Kentucky,
