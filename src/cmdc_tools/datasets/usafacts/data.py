@@ -40,8 +40,15 @@ class USAFactsCases(InsertWithTempTable, DatasetBaseNoDate):
         # Load data from site and move dates from column names to
         # a new variable
         df = pd.read_csv(BASEURL + self.filename)
-        df = df.drop(["County Name", "State"], axis=1).melt(
-            id_vars=["countyFIPS", "stateFIPS"], var_name="dt", value_name="value"
+        cols = ["countyFIPS", "County Name", "State", "stateFIPS"]
+        cols = cols + [c for c in df.columns if c[-2:] == "20"]
+
+        df = (
+            df.loc[:, cols]
+            .drop(["County Name", "State"], axis=1)
+            .melt(
+                id_vars=["countyFIPS", "stateFIPS"], var_name="dt", value_name="value"
+            )
         )
         df["dt"] = pd.to_datetime(df["dt"])
 

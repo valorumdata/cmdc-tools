@@ -14,6 +14,15 @@ class OKTulsa(DatasetBaseNoDate, ArcGIS):
     https://tcchd.maps.arcgis.com/apps/opsdashboard/index.html#/ebb119cd215b4c57933b7fbe477e7c30
 
     This retrieves the data from the ArcGIS API
+
+    Notes:
+
+        * On 25 June 2020, noticed that the `COVID19_Regions_V3_View`
+          now included hospital data of relevance... Thus we will use
+          the data for hospitalizations from `COVID19_Regions_V3_View`
+          rather than from the `COVID19Hospitalizations_View`. The code
+          was left in the class though in case there are future changes
+          that require us to change it back.
     """
 
     ARCGIS_ID = "yHSoWow4TMdKqS8y"
@@ -31,7 +40,7 @@ class OKTulsa(DatasetBaseNoDate, ArcGIS):
             columns=["FID", "Latitude", "Longitude"]
         )
         df_hosp = self.get_all_sheet_to_df("COVID19Hospitalizations_View", 0, 3).drop(
-            columns=["FID", "Latitude", "Longitude"]
+            columns=["FID", "Latitude", "Longitude", "In_Hospital", "Admissions"]
         )
         df = df_cd.merge(df_hosp, on=["Date", "County"], how="outer")
 
