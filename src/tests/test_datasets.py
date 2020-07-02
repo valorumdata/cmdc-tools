@@ -1,3 +1,4 @@
+from numpy.lib.arraysetops import isin
 from cmdc_tools import datasets
 import pytest
 import pandas as pd
@@ -24,7 +25,8 @@ def _covid_dataset_tests(cls, df):
 
 def _test_data_structure(cls, df):
     if getattr(cls, "data_type", None) == "covid":
-        _covid_dataset_tests(cls, df)
+        if not isinstance(cls, datasets.JHUDailyReportsUS):
+            _covid_dataset_tests(cls, df)
 
 
 @pytest.mark.parametrize("cls", nodates)
