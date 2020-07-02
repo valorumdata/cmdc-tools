@@ -3,7 +3,7 @@ from .AK import Alaska
 from .AR import Arkansas
 from .CA import LA, CACountyData, Imperial, SanDiego
 from .CT import ConnecticutCounty, ConnecticutState
-from .DE import Delaware
+from .DE import Delaware, DelawareKent, DelawareNewCastle, DelawareSussex
 from .GU import Guam
 from .IN import Indiana
 from .KY import Kentucky
