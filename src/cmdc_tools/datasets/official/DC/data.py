@@ -50,7 +50,6 @@ class DC(DatasetBaseNoDate, CountyData):
             "Total Positives": "cases_total",
             "Number of Deaths": "deaths_total",
             "Total Overall Tested": "tests_total",
-            "Total Number Recovered": "recovered_total",
             # ICU
             "Total ICU Beds in Hospitals": "icu_beds_capacity_count",
             "ICU Beds Available": "icu_beds_available",
