@@ -26,8 +26,8 @@ class Florida(DatasetBaseNoDate, ArcGIS):
             }
         )
 
-        renamed["fips"] = "12" + renamed.fips_prefix
-        renamed.fips = renamed.fips.astype(int)
+        renamed["fips"] = (self.state_fips * 1000) + renamed.fips_prefix.astype(int)
+        # renamed.fips = renamed.fips.astype(int)
         renamed["dt"] = pd.Timestamp.utcnow().normalize()
         renamed["cumulative_hospitalized"] = (
             renamed.hospital_res + renamed.hosptial_nonres
