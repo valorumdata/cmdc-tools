@@ -38,9 +38,7 @@ class DC(DatasetBaseNoDate, CountyData):
 
     def get(self):
         df = self._get_df()
-        df = df.rename(
-            columns={"Unnamed: 1": "variable_name"}
-        ).drop(
+        df = df.rename(columns={"Unnamed: 1": "variable_name"}).drop(
             "Unnamed: 0", axis=1
         )
 
