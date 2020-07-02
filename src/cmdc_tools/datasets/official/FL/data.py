@@ -16,8 +16,9 @@ class Florida(DatasetBaseNoDate, ArcGIS):
         renamed = df.rename(
             columns={
                 "COUNTY": "fips_prefix",
-                "TPositive": "positive_tests_total",
-                "TNegative": "negative_tests_total",
+                "T_Positive": "positive_tests_total",
+                "T_Negative": "negative_tests_total",
+                "T_Total": "tests_total",
                 "Deaths": "deaths_total",
                 "CasesAll": "cases_total",
                 "C_HospYes_Res": "hospital_res",
