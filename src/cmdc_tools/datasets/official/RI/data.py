@@ -5,13 +5,12 @@ import time
 
 import numpy as np
 import pandas as pd
-import pyppeteer
-import requests
 import us
+
+from cmdc_tools.datasets.puppet import with_page
 
 from ...base import DatasetBaseNoDate
 
-# from ..base import ArcGIS
 from ..base import CountyData
 
 
@@ -102,16 +101,13 @@ class RhodeIsland(DatasetBaseNoDate, CountyData):
         return out
 
     async def _get_table_async(self):
-        browser = await pyppeteer.launch()
-        page = await browser.newPage()
-        await page.goto("https://datawrapper.dwcdn.net/udDUY/4/")
-        graphHeader = "Number of People COVID-19 Tested and Number of People with Positive Tests in Rhode Island Cities and Towns"
+        async with with_page() as page:
+            await page.goto("https://datawrapper.dwcdn.net/udDUY/4/")
+            # wait for table to load
+            await page.waitForXPath("//table")
 
-        # wait for table to load
-        await page.waitForXPath("//table")
-
-        # Get raw html of table
-        raw_table = await page.Jeval("table", "el => el.outerHTML")
+            # Get raw html of table
+            raw_table = await page.Jeval("table", "el => el.outerHTML")
 
         return raw_table
 
