@@ -28,6 +28,7 @@ from .official import (
     Kentucky,
     Maryland,
     Massachusetts,
+    Michigan,
     Minnesota,
     MinnesotaCountiesCasesDeaths,
     Montana,
