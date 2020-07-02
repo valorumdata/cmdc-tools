@@ -44,5 +44,5 @@ from .official import (
     Vermont,
 )
 from .usafacts import USAFactsCases, USAFactsDeaths
-from .uscensus import ACS, ACSVariables
+from .uscensus import ACS, ACSVariables, USGeoBaseAPI
 from .wei import WEI
