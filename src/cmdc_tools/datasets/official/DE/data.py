@@ -6,16 +6,16 @@ from ...base import DatasetBaseNoDate
 from ..base import CountyData
 
 
-class Delaware(DatasetBaseNoDate, CountyData):
-    has_fips = True
+class DelawareBase(CountyData):
+    has_fips = False
     state_fips = int(us.states.lookup("Delaware").fips)
-    source = "https://myhealthycommunity.dhss.delaware.gov/locations/state"
-    data_url = "https://myhealthycommunity.dhss.delaware.gov/locations/state/download_covid_19_data"
 
-    def get(self):
-        df = self._get_from_source(self.data_url).drop("Location", axis=1)
+    def _get_county(self):
+        df = self._get_from_source(self.data_url)
+        df["county"] = df["Location"].str.replace("County", "").str.strip()
+        df = df.drop("Location", axis=1)
+
         df["vintage"] = pd.Timestamp.utcnow().normalize()
-        df["fips"] = self.state_fips
 
         return df
 
@@ -49,26 +49,41 @@ class Delaware(DatasetBaseNoDate, CountyData):
         return df
 
 
-class DelawareKent(DatasetBaseNoDate, Delaware):
+class Delaware(DatasetBaseNoDate, DelawareBase):
+    has_fips = True
+    source = "https://myhealthycommunity.dhss.delaware.gov/locations/state"
+    data_url = "https://myhealthycommunity.dhss.delaware.gov/locations/state/download_covid_19_data"
+
+    def get(self):
+        df = self._get_from_source(self.data_url).drop("Location", axis=1)
+        df["vintage"] = pd.Timestamp.utcnow().normalize()
+        df["fips"] = self.state_fips
+
+        return df
+
+
+class DelawareKent(DatasetBaseNoDate, DelawareBase):
     has_fips = False
     source = "https://myhealthycommunity.dhss.delaware.gov/locations/county-kent"
     data_url = "https://myhealthycommunity.dhss.delaware.gov/locations/county-kent/download_covid_19_data"
 
     def get(self):
-        df = self._get_from_source(self.data_url)
-        df["county"] = df["Location"].str.replace("County", "").str.strip()
-        df = df.drop("Location", axis=1)
-
-        df["vintage"] = pd.Timestamp.utcnow().normalize()
-
-        return df
+        return self._get_county()
 
 
-class DelawareNewCastle(DatasetBaseNoDate, DelawareKent):
+class DelawareNewCastle(DatasetBaseNoDate, DelawareBase):
+    has_fips = False
     source = "https://myhealthycommunity.dhss.delaware.gov/locations/county-new-castle"
     data_url = "https://myhealthycommunity.dhss.delaware.gov/locations/county-new-castle/download_covid_19_data"
 
+    def get(self):
+        return self._get_county()
 
-class DelawareSussex(DatasetBaseNoDate, DelawareKent):
+
+class DelawareSussex(DatasetBaseNoDate, DelawareBase):
+    has_fips = False
     source = "https://myhealthycommunity.dhss.delaware.gov/locations/county-sussex"
     data_url = "https://myhealthycommunity.dhss.delaware.gov/locations/county-sussex/download_covid_19_data"
+
+    def get(self):
+        return self._get_county()
