@@ -19,6 +19,7 @@ from .official import (
     CACountyData,
     ConnecticutCounty,
     ConnecticutState,
+    DC,
     Imperial,
     NewYork,
     Massachusetts,
