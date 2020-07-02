@@ -8,6 +8,25 @@ yesdates = datasets.DatasetBaseNeedsDate.__subclasses__()
 all_ds = nodates + yesdates
 
 
+def _covid_dataset_tests(cls, df):
+    want_cols = ["vintage", "dt", "variable_name", "value"]
+    cols = list(df)
+    assert all(c in cols for c in want_cols)
+
+    has_fips = getattr(cls, "has_fips", None)
+    if has_fips is None:
+        return
+    if has_fips:
+        assert "fips" in cols
+    else:
+        assert "county" in cols
+
+
+def _test_data_structure(cls, df):
+    if getattr(cls, "data_type", None) == "covid":
+        _covid_dataset_tests(cls, df)
+
+
 @pytest.mark.parametrize("cls", nodates)
 def test_no_date_datasets(cls):
     if cls is datasets.WEI:
@@ -27,6 +46,7 @@ def test_no_date_datasets(cls):
     out = d.get()
     assert isinstance(out, pd.DataFrame)
     assert out.shape[0] > 0
+    _test_data_structure(d, out)
 
 
 @pytest.mark.parametrize("cls", yesdates)
@@ -35,6 +55,7 @@ def test_need_date_datasets(cls):
     out = d.get("2020-05-25")
     assert isinstance(out, pd.DataFrame)
     assert out.shape[0] > 0
+    _test_data_structure(d, out)
 
 
 @pytest.mark.parametrize("cls", all_ds)
