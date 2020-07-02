@@ -14,7 +14,7 @@ class NewMexico(DatasetBaseNoDate, CountyData):
     def get(self):
         return pd.concat(
             [self._get_county(), self._get_state()], ignore_index=True, sort=False
-        )
+        ).assign(vintage=pd.Timestamp.utcnow().normalize())
 
     def _get_county(self):
         url = "https://e7p503ngy5.execute-api.us-west-2.amazonaws.com/prod/GetCounties"
