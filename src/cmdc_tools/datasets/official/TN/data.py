@@ -2,8 +2,8 @@ import pandas as pd
 import requests
 import us
 
-from ..base import CountyData
 from ...base import DatasetBaseNoDate
+from ..base import CountyData
 
 
 class Tennessee(DatasetBaseNoDate, CountyData):
