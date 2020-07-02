@@ -1,7 +1,6 @@
-import asyncio
-
+import requests
+import lxml.html
 import pandas as pd
-import pyppeteer
 import us
 
 from ...base import DatasetBaseNoDate
@@ -19,49 +18,36 @@ class Michigan(DatasetBaseNoDate, CountyData):
         cases_county = self._get_county_cases(urls[1])
         tests = self._get_tests(urls[2])
         result = pd.concat([cases, cases_county, tests], sort=False)
-        return result
+        return result.assign(vintage=pd.Timestamp.utcnow().normalize())
 
     def _get_urls(self):
-        urls = asyncio.run(self._get_urls_async())
-        return urls
+        res = requests.get(self.source)
+        if not res.ok:
+            raise ValueError("Error requesting html source of Michigan dashboard")
+        tree = lxml.html.fromstring(res.content)
 
-    async def _get_urls_async(self):
-        browser = await pyppeteer.launch()
-        page = await browser.newPage()
-        await page.goto(
-            "https://www.michigan.gov/coronavirus/0,9753,7-406-98163_98173---,00.html"
-        )
-        # get link to cases
-        cases_url_raw = await page.Jx("//a[text()='Cases by County by Date']/..")
-        cases_url = await cases_url_raw[0].Jeval("a", "node => node.href")
-        # tests_url_raw = await page.Jx("//a[text()='COVID-19 Tests by County']/..")
-        # tests_url = await tests_url_raw[0].Jeval("a", "node => node.href")
-        cases_county_url_raw = await page.Jx(
-            "//a[text()='Cases and Deaths by County']/.."
-        )
-        cases_county_url = await cases_county_url_raw[0].Jeval("a", "node => node.href")
-        tests_url_raw = await page.Jx(
-            "//a[text()='Diagnostic Tests by Result and County']/.."
-        )
-        tests_url = await tests_url_raw[0].Jeval("a", "node => node.href")
+        def _get_url(link_text: str) -> str:
+            path = tree.xpath(f"//a[text()='{link_text}']")[0].attrib["href"]
+            return "https://www.michigan.gov" + path
+
+        cases_url = _get_url("Cases by County by Date")
+        tests_url = _get_url("Diagnostic Tests by Result and County")
+        cases_county_url = _get_url("Cases and Deaths by County")
 
         return [cases_url, cases_county_url, tests_url]
-        # return [cases_url]
 
     def _get_cases(self, url):
-        df = pd.read_excel(url)
-
-        renamed = df.rename(
-            columns={
-                "Date": "dt",
-                "COUNTY": "county",
-                "Cases.Cumulative": "cases_total",
-                "Deaths.Cumulative": "deaths_total",
-            }
-        )
-
-        return renamed[["dt", "county", "cases_total", "deaths_total",]].melt(
-            id_vars=["dt", "county"], var_name="variable_name"
+        column_names = {
+            "Date": "dt",
+            "COUNTY": "county",
+            "Cases.Cumulative": "cases_total",
+            "Deaths.Cumulative": "deaths_total",
+        }
+        return (
+            pd.read_excel(url)
+            .rename(columns=column_names)
+            .loc[:, list(column_names.values())]
+            .melt(id_vars=["dt", "county"], var_name="variable_name")
         )
 
     def _get_county_cases(self, url):
@@ -96,16 +82,15 @@ class Michigan(DatasetBaseNoDate, CountyData):
         return result.fillna(0).melt(id_vars=["dt", "county"], var_name="variable_name")
 
     def _get_tests(self, url):
-        df = pd.read_excel(url)
-        renamed = df.rename(
-            columns={
-                "COUNTY": "county",
-                "MessageDate": "dt",
-                "Negative": "negative_tests_total",
-                "Positive": "positive_tests_total",
-            }
+        column_names = {
+            "COUNTY": "county",
+            "MessageDate": "dt",
+            "Negative": "negative_tests_total",
+            "Positive": "positive_tests_total",
+        }
+        return (
+            pd.read_excel(url)
+            .rename(columns=column_names)
+            .loc[:, list(column_names.values())]
+            .melt(id_vars=["dt", "county"], var_name="variable_name")
         )
-
-        return renamed[
-            ["county", "dt", "negative_tests_total", "positive_tests_total",]
-        ].melt(id_vars=["dt", "county"], var_name="variable_name")
