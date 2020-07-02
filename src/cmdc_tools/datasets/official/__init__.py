@@ -3,6 +3,7 @@ from .AR import Arkansas
 from .base import ArcGIS, CountyData
 from .CA import LA, CACountyData, Imperial, SanDiego
 from .CT import ConnecticutCounty, ConnecticutState
+from .DC import DC
 from .DE import Delaware, DelawareKent, DelawareNewCastle, DelawareSussex
 from .GU import Guam
 from .IN import Indiana

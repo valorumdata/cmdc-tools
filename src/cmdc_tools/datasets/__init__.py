@@ -20,6 +20,7 @@ from .official import (
     CACountyData,
     ConnecticutCounty,
     ConnecticutState,
+    DC,
     Delaware,
     DelawareKent,
     DelawareNewCastle,
