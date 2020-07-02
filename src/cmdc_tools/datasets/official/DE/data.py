@@ -49,7 +49,7 @@ class Delaware(DatasetBaseNoDate, CountyData):
         return df
 
 
-class DelawareKent(Delaware):
+class DelawareKent(DatasetBaseNoDate, Delaware):
     has_fips = False
     source = "https://myhealthycommunity.dhss.delaware.gov/locations/county-kent"
     data_url = "https://myhealthycommunity.dhss.delaware.gov/locations/county-kent/download_covid_19_data"
@@ -64,11 +64,11 @@ class DelawareKent(Delaware):
         return df
 
 
-class DelawareNewCastle(DelawareKent):
+class DelawareNewCastle(DatasetBaseNoDate, DelawareKent):
     source = "https://myhealthycommunity.dhss.delaware.gov/locations/county-new-castle"
     data_url = "https://myhealthycommunity.dhss.delaware.gov/locations/county-new-castle/download_covid_19_data"
 
 
-class DelawareSussex(DelawareKent):
+class DelawareSussex(DatasetBaseNoDate, DelawareKent):
     source = "https://myhealthycommunity.dhss.delaware.gov/locations/county-sussex"
     data_url = "https://myhealthycommunity.dhss.delaware.gov/locations/county-sussex/download_covid_19_data"
