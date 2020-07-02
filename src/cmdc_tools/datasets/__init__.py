@@ -14,6 +14,7 @@ from .jhu import JHUDailyReports, JHUDailyReportsUS, Locations
 from .keystone import KeystonePolicy
 from .nytimes import NYTimesState
 from .official import (
+    LA,
     Alaska,
     Arkansas,
     CACountyData,
@@ -24,10 +25,6 @@ from .official import (
     DelawareNewCastle,
     DelawareSussex,
     Imperial,
-    LA,
-    NewYork,
-    Massachusetts,
-    Maryland,
     Kentucky,
     Maryland,
     Massachusetts,
@@ -36,6 +33,8 @@ from .official import (
     Montana,
     Nebraska,
     NewJersey,
+    NewMexico,
+    NewYork,
     Pennsylvania,
     RhodeIsland,
     SanDiego,
