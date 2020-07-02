@@ -29,20 +29,20 @@ from .official import (
     Massachusetts,
     Maryland,
     Kentucky,
-    LA,
-    Massachusetts,
     Maryland,
-    MinnesotaCountiesCasesDeaths,
+    Massachusetts,
     Minnesota,
+    MinnesotaCountiesCasesDeaths,
     Montana,
     Nebraska,
     NewJersey,
     Pennsylvania,
+    RhodeIsland,
     SanDiego,
     Tennessee,
     TennesseeCounties,
     Vermont,
 )
-from .usafacts import USAFactsDeaths, USAFactsCases
+from .usafacts import USAFactsCases, USAFactsDeaths
 from .uscensus import ACS, ACSVariables
 from .wei import WEI
