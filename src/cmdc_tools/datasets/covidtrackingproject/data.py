@@ -15,7 +15,7 @@ class CTP(InsertWithTempTable, DatasetBaseNoDate):
     by schema.sql
     """
 
-    table_name = "us_covid"
+    table_name = "ctp_covid"
     pk = '("vintage", "dt", "fips", "variable_id")'
 
     def __init__(self):

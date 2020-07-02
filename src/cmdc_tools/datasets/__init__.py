@@ -14,31 +14,36 @@ from .jhu import JHUDailyReports, JHUDailyReportsUS, Locations
 from .keystone import KeystonePolicy
 from .nytimes import NYTimesState
 from .official import (
+    LA,
     Alaska,
     Arkansas,
     CACountyData,
     ConnecticutCounty,
     ConnecticutState,
     DC,
+    Delaware,
+    DelawareKent,
+    DelawareNewCastle,
+    DelawareSussex,
     Imperial,
-    NewYork,
-    Massachusetts,
-    Maryland,
     Kentucky,
-    LA,
-    Massachusetts,
     Maryland,
-    MinnesotaCountiesCasesDeaths,
+    Massachusetts,
+    Michigan,
     Minnesota,
+    MinnesotaCountiesCasesDeaths,
     Montana,
     Nebraska,
     NewJersey,
+    NewMexico,
+    NewYork,
     Pennsylvania,
+    RhodeIsland,
     SanDiego,
     Tennessee,
     TennesseeCounties,
     Vermont,
 )
-from .usafacts import USAFactsDeaths, USAFactsCases
-from .uscensus import ACS, ACSVariables
+from .usafacts import USAFactsCases, USAFactsDeaths
+from .uscensus import ACS, ACSVariables, USGeoBaseAPI
 from .wei import WEI
