@@ -3,10 +3,10 @@ name: Test
 on:
   push:
     branches:
-    - master
+      - master
   pull_request:
     branches:
-    - master
+      - master
 
 env:
   BEA_KEY: ${{ secrets.BEA_KEY }}
@@ -15,6 +15,18 @@ env:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:12
+        env:
+          POSTGRES_PASSWORD: postgres
+        volumes:
+          - ${{ github.workspace }}/db/schemas:/docker-entrypoint-initdb.d
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v2
       - name: Setup Python
@@ -27,4 +39,7 @@ jobs:
           pip install kedro==0.15.8
           kedro install
       - run: black --check ./src
-      - run: pytest src
+      - name: run tests
+        run: pytest src --maxfail=2
+        env:
+          PG_CONN_STR: "postgresql://postgres:postgres@localhost:5432"
