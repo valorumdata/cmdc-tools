@@ -26,8 +26,8 @@ class Kentucky(DatasetBaseNoDate, ArcGIS):
         column_map = {
             "County": "county",
             "FIPS": "fips",
-            "Hospitalized": "hospital_beds_in_use_covid_confirmed",
-            "ICU": "icu_beds_in_use_covid_confirmed",
+            # "Hospitalized": "hospital_beds_in_use_covid_confirmed",
+            # "ICU": "icu_beds_in_use_covid_confirmed",
             "Deceased": "deaths_confirmed",
             "Confirmed": "cases_confirmed",
         }
