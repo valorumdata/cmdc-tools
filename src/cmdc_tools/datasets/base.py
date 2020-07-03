@@ -91,8 +91,8 @@ class DatasetBase:
         from {temp_table} tt
         {join_locs}
         {join_covid}
-        ON CONFLICT (date_accessed, location, variable_id) DO UPDATE 
-        set source=EXCLUDED.source, 
+        ON CONFLICT (date_accessed, location, variable_id) DO UPDATE
+        set source=EXCLUDED.source,
             table_name=EXCLUDED.table_name;
         """
 
