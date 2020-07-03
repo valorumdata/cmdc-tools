@@ -11,4 +11,4 @@ CREATE TABLE data.ctp_covid (
 
 COMMENT ON TABLE data.ctp_covid IS E'This table contains the data collected by COVID Tracking Project';
 
-CREATE INDEX dt_idx on data.ctp_covid (dt);
+CREATE INDEX ctp_dt_idx on data.ctp_covid (dt);

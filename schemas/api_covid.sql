@@ -8,7 +8,7 @@ CREATE OR REPLACE VIEW api.covidtrackingproject AS
   SELECT ctp.dt, ctp.fips, cv.name as variable, ctp.value
   FROM last_vintage lv
   LEFT JOIN data.ctp_covid ctp using (dt, fips, variable_id, vintage)
-  LEFT JOIN meta.covid_variables cv ON cv.id = nyt.variable_id;
+  LEFT JOIN meta.covid_variables cv ON cv.id = ctp.variable_id;
 
 COMMENT ON VIEW api.covidtrackingproject IS E'This table contains the data from the COVID Tracking Project COVID data
 
