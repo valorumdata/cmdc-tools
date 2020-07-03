@@ -28,14 +28,14 @@ class Pennsylvania(DatasetBaseNoDate, ArcGIS):
             "COVID19Hospitalized": "hospital_beds_in_use_covid_total",
             "TotalVents": "ventilators_capacity_count",
             "VentsInUse": "ventilators_in_use_any",
-            "COVID19onVents": "ventilators_in_use_covid_",
+            "COVID19onVents": "ventilators_in_use_covid_total",
         }
 
         renamed = df.rename(columns=column_map)
 
         # the column we used was non-covid, need to add covid to get total
         renamed["ventilators_in_use_any"] += renamed[
-            "ventilators_in_use_covid_confirmed"
+            "ventilators_in_use_covid_total"
         ]
 
         renamed = renamed.loc[:, list(column_map.values())]
