@@ -40,4 +40,4 @@ jobs:
       - name: run tests
         run: pytest src --maxfail=2
         env:
-          PG_CONN_STR: "postgresql://postgres:postgres@localhost:5432"
+          PG_CONN_STR: "postgresql://postgres:postgres@postgres:5432"
