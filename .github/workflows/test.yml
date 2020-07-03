@@ -25,6 +25,8 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+        ports:
+          - 5432:5432
     steps:
       - uses: actions/checkout@v2
       - name: Setup Python
@@ -40,4 +42,4 @@ jobs:
       - name: run tests
         run: pytest src --maxfail=2
         env:
-          PG_CONN_STR: "postgresql://postgres:postgres@postgres:5432"
+          PG_CONN_STR: "postgresql://postgres:postgres@localhost:5432"
