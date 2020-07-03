@@ -14,10 +14,9 @@ class Michigan(DatasetBaseNoDate, CountyData):
 
     def get(self):
         urls = self._get_urls()
-        cases = self._get_cases(urls[0])
-        cases_county = self._get_county_cases(urls[1])
-        tests = self._get_tests(urls[2])
-        result = pd.concat([cases, cases_county, tests], sort=False)
+        cases_county = self._get_county_cases(urls["cases"])
+        tests = self._get_tests(urls["tests"])
+        result = pd.concat([cases_county, tests], sort=False)
         return result.assign(vintage=pd.Timestamp.utcnow().normalize())
 
     def _get_urls(self):
@@ -30,25 +29,10 @@ class Michigan(DatasetBaseNoDate, CountyData):
             path = tree.xpath(f"//a[text()='{link_text}']")[0].attrib["href"]
             return "https://www.michigan.gov" + path
 
-        cases_url = _get_url("Cases by County by Date")
-        tests_url = _get_url("Diagnostic Tests by Result and County")
-        cases_county_url = _get_url("Cases and Deaths by County")
-
-        return [cases_url, cases_county_url, tests_url]
-
-    def _get_cases(self, url):
-        column_names = {
-            "Date": "dt",
-            "COUNTY": "county",
-            "Cases.Cumulative": "cases_total",
-            "Deaths.Cumulative": "deaths_total",
+        return {
+            "cases": _get_url("Cases and Deaths by County"),
+            "tests": _get_url("Diagnostic Tests by Result and County"),
         }
-        return (
-            pd.read_excel(url)
-            .rename(columns=column_names)
-            .loc[:, list(column_names.values())]
-            .melt(id_vars=["dt", "county"], var_name="variable_name")
-        )
 
     def _get_county_cases(self, url):
         df = pd.read_excel(url)
@@ -78,6 +62,7 @@ class Michigan(DatasetBaseNoDate, CountyData):
             .join(probable.set_index(["dt", "county"]))
             .reset_index()
         )
+        result["dt"] = result["dt"].dt.normalize()
 
         return result.fillna(0).melt(id_vars=["dt", "county"], var_name="variable_name")
 
