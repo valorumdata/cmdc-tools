@@ -17,11 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:12
+        image: valorumdata/cmdc-tools-pg:latest
         env:
           POSTGRES_PASSWORD: postgres
-        volumes:
-          - ${{ github.workspace }}/db/schemas:/docker-entrypoint-initdb.d
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
