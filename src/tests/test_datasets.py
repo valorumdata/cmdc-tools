@@ -1,4 +1,5 @@
-from numpy.lib.arraysetops import isin
+import os
+
 from cmdc_tools import datasets
 import pytest
 import pandas as pd
@@ -7,6 +8,8 @@ import pandas as pd
 nodates = datasets.DatasetBaseNoDate.__subclasses__()
 yesdates = datasets.DatasetBaseNeedsDate.__subclasses__()
 all_ds = nodates + yesdates
+
+CONN_STR = os.environ.get("PG_CONN_STR", None)
 
 
 def _covid_dataset_tests(cls, df):
@@ -49,6 +52,14 @@ def test_no_date_datasets(cls):
     assert isinstance(out, pd.DataFrame)
     assert out.shape[0] > 0
     _test_data_structure(d, out)
+
+    if cls in (datasets.ACS, datasets.ACSVariables):
+        print("Skip put method for ACS scrapers")
+        return
+
+    if CONN_STR is not None:
+        d.put(CONN_STR, out)
+        assert True
 
 
 @pytest.mark.parametrize("cls", yesdates)
