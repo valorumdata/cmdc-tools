@@ -96,6 +96,13 @@ class Minnesota(DatasetBaseNoDate, CountyData):
         out = df.melt(
             id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
         )
+
+        # Make sure the values are integers by forcing a numeric
+        # convert and then dropping missing and setting as int
+        out["value"] = pd.to_numeric(out["value"], errors="coerce")
+        out = out.dropna()
+        out["value"] = out["value"].astype(int)
+
         out["vintage"] = pd.Timestamp.utcnow().normalize()
 
         return out
