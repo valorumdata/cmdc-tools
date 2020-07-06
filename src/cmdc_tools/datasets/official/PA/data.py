@@ -34,9 +34,7 @@ class Pennsylvania(DatasetBaseNoDate, ArcGIS):
         renamed = df.rename(columns=column_map)
 
         # the column we used was non-covid, need to add covid to get total
-        renamed["ventilators_in_use_any"] += renamed[
-            "ventilators_in_use_covid_total"
-        ]
+        renamed["ventilators_in_use_any"] += renamed["ventilators_in_use_covid_total"]
 
         renamed = renamed.loc[:, list(column_map.values())]
         dt = pd.Timestamp.utcnow().normalize()
