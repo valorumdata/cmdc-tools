@@ -27,6 +27,7 @@ class CTP(InsertWithTempTable, DatasetBaseNoDate):
             "death": "deaths_total",
             "positive": "positive_tests_total",
             "negative": "negative_tests_total",
+            "totalTestResults": "tests_total",
             "hospitalizedCurrently": "hospital_beds_in_use_covid_total",
             "inIcuCurrently": "icu_beds_in_use_covid_total",
             "onVentilatorCurrently": "ventilators_in_use_covid_total",

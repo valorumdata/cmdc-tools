@@ -41,6 +41,7 @@ class Arkansas(DatasetBaseNoDate, ArcGIS):
             "county_nam": "county",
             "positive": "positive_tests_total",
             "negative": "negative_tests_total",
+            "total_tests": "tests_total",
             "Recoveries": "recovered_total",
             "deaths": "deaths_total",
             "active_cases": "active_total",

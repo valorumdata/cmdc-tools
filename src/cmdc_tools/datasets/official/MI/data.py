@@ -72,6 +72,7 @@ class Michigan(DatasetBaseNoDate, CountyData):
             "MessageDate": "dt",
             "Negative": "negative_tests_total",
             "Positive": "positive_tests_total",
+            "Total": "tests_total",
         }
         return (
             pd.read_excel(url)

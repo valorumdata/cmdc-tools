@@ -107,4 +107,5 @@ class Minnesota(DatasetBaseNoDate, CountyData):
                 value=lambda x: x["value"].astype(int),
             )
         )
+
         return out
