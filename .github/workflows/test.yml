@@ -14,7 +14,9 @@ env:
 
 jobs:
   prep_pg_docker:
-    runs-on: ubuntu-latest      
+    runs-on: ubuntu-latest
+    outputs:
+      docker_tag: ${{ steps.docker_tag.outputs.value }}      
     steps:
       - uses: actions/checkout@v2
       - uses: haya14busa/action-cond@v1
@@ -35,7 +37,7 @@ jobs:
     needs: prep_pg_docker
     services:
       postgres:
-        image: valorumdata/cmdc-tools-pg:${{ needs.prep_pg_docker.outputs.value }}
+        image: valorumdata/cmdc-tools-pg:${{ needs.prep_pg_docker.outputs.docker_tag }}
         env:
           POSTGRES_PASSWORD: postgres
         options: >-
