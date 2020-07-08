@@ -45,6 +45,7 @@ from .official import (
     TennesseeCounties,
     Vermont,
 )
+from .owid import OWID
 from .usafacts import USAFactsCases, USAFactsDeaths
 from .uscensus import ACS, ACSVariables, USGeoBaseAPI
 from .wei import WEI
