@@ -58,7 +58,7 @@ async def test_data():
         await page.waitForXPath("//div[@id='test_plot']/div")
         test = await find_chart_data(page, "test_plot", "tests", "cumulative tests")
         pos = await find_chart_data(
-            page, "test_plot", "positive_tests_total", "cumulative positive tests"
+            page, "test_plot", "positive_tests_total", "cumulative "
         )
 
     data = (
