@@ -44,7 +44,7 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
         )
 
         # Create dt
-        tests["dt"] = tests["dt"].map(lambda x: self._esri_ts_to_dt(x))
+        tests["dt"] = tests["dt"].map(self._esri_ts_to_dt)
 
         # Make sure to get cumulative counts
         tests = (
