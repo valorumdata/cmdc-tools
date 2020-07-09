@@ -5,7 +5,7 @@ from .. import InsertWithTempTable, DatasetBaseNeedsDate, DatasetBaseNoDate
 
 
 class NYTimesState(InsertWithTempTable, DatasetBaseNoDate):
-    table_name = "nyt_covid"
+    table_name = "us_covid"
     pk = "(vintage, dt, fips, variable_id)"
     data_type = "covid"
     source = "https://github.com/nytimes/covid-19-data"
@@ -17,11 +17,11 @@ class NYTimesState(InsertWithTempTable, DatasetBaseNoDate):
 
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         out = f"""
-        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
+        INSERT INTO data.us_covid (vintage, dt, fips, variable_id, value, provider)
+        SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value, 'nyt'
         FROM {temp_name} tt
         LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        ON CONFLICT {pk} DO NOTHING
+        ON CONFLICT {pk} DO UPDATE SET value = excluded.value where excluded.provider < data.us_covid.provider;
         """
 
         return textwrap.dedent(out)

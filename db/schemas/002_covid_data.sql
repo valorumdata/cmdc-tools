@@ -72,6 +72,8 @@ INSERT INTO meta.covid_variables (name) VALUES
   ('tests_total');
 
 DROP TABLE IF EXISTS data.covid;
+drop table if exists data.us_covid;
+CREATE TYPE covid_provider as ENUM ('valorum', 'ctp', 'usafacts', 'nyt', 'cds');
 
 CREATE TABLE data.us_covid (
     vintage DATE,
@@ -79,6 +81,7 @@ CREATE TABLE data.us_covid (
     fips INT references meta.us_fips(fips),
     variable_id SMALLINT REFERENCES meta.covid_variables(id),
     value INT,
+    provider covid_provider not null default 'valorum',
     PRIMARY KEY (fips, dt, vintage, variable_id)
 );
 
