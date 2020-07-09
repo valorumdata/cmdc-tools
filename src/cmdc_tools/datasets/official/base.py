@@ -10,6 +10,7 @@ from .. import InsertWithTempTable
 class CountyData(InsertWithTempTable, ABC):
     table_name: str = "us_covid"
     pk: str = '("vintage", "dt", "fips", "variable_id")'
+    provider = "state"
     data_type: str = "covid"
     has_fips: bool
     state_fips: int
@@ -67,6 +68,9 @@ class ArcGIS(CountyData, ABC):
             }
 
         self.params = params
+
+    def _esri_ts_to_dt(self, ts):
+        return pd.Timestamp.fromtimestamp(ts / 1000)
 
     def arcgis_query_url(self, service, sheet, srvid=1):
         out = f"https://services{srvid}.arcgis.com/{self.ARCGIS_ID}/"
