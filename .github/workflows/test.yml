@@ -24,7 +24,7 @@ jobs:
         with:
           cond: ${{ github.event_name == 'pull_request' }}
           if_true: ${{ github.head_ref }}
-          if_false: ${{ github.ref }}
+          if_false: master
       - uses: docker/build-push-action@v1.1.0
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
