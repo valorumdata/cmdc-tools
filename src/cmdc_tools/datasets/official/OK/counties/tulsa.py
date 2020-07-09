@@ -32,6 +32,7 @@ class OKTulsa(DatasetBaseNoDate, ArcGIS):
     )
     state_fips = int(us.states.lookup("OK").fips)
     has_fips = False
+    provider = "county"
 
     def get(self):
         # Note: Service=Covid19Coronavirusdata_V3_View seems to have caser by

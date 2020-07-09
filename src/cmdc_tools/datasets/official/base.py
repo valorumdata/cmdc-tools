@@ -13,14 +13,15 @@ class CountyData(InsertWithTempTable, ABC):
     data_type: str = "covid"
     has_fips: bool
     state_fips: int
+    provider: str = "state"
 
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         if self.has_fips:
             out = f"""
             INSERT INTO data.{table_name} (
-              vintage, dt, fips, variable_id, value
+              vintage, dt, fips, variable_id, value, provider
             )
-            SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
+            SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value, '{self.provider}'
             FROM {temp_name} tt
             INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name
             ON CONFLICT {pk} DO UPDATE set value = excluded.value
@@ -29,9 +30,9 @@ class CountyData(InsertWithTempTable, ABC):
             assert "county" in df.columns
             out = f"""
             INSERT INTO data.{table_name} (
-              vintage, dt, fips, variable_id, value
+              vintage, dt, fips, variable_id, value, provider
             )
-            SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value
+            SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value, '{self.provider}'
             FROM {temp_name} tt
             INNER JOIN meta.us_fips us on tt.county=us.name
             INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name

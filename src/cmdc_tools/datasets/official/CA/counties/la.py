@@ -79,6 +79,7 @@ class LA(DatasetBaseNoDate, CountyData):
     )
     state_fips = int(us.states.lookup("California").fips)
     has_fips = True
+    provider = "county"
 
     def get(self):
         df = asyncio.run(test_data())

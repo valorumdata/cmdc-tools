@@ -17,6 +17,7 @@ class CTP(InsertWithTempTable, DatasetBaseNoDate):
 
     table_name = "ctp_covid"
     pk = '("vintage", "dt", "fips", "variable_id")'
+    source = "https://covidtracking.com/"
 
     def __init__(self):
         super(CTP, self).__init__()
