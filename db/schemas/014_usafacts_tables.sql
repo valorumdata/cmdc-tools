@@ -13,3 +13,8 @@ COMMENT ON TABLE data.usafacts_covid IS E'This table contains the data collected
 
 CREATE INDEX usafacts_covid_dt_idx ON data.usafacts_covid (dt);
 
+CREATE TRIGGER trig_usafacts_to_us_covid
+    AFTER INSERT ON data.usafacts_covid
+    FOR EACH ROW
+    EXECUTE PROCEDURE copy_to_us_covid_table ('usafacts');
+

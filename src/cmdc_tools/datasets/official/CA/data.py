@@ -68,7 +68,7 @@ class CACountyData(DatasetBaseNoDate, CountyData):
             # "icu_available_beds": "icu_beds_capacity_count", Unsure if this is capacity
         }
         df = df.rename(columns=crename).loc[:, crename.values()]
-        df["icu_beds_in_use_total"] = df.eval(
+        df["icu_beds_in_use_covid_total"] = df.eval(
             "icu_beds_in_use_covid_confirmed + icu_beds_in_use_covid_suspected"
         )
 
