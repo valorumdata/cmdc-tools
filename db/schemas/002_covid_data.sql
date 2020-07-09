@@ -1,8 +1,9 @@
 DROP TABLE IF EXISTS meta.covid_variables;
 
-CREATE TABLE meta.covid_variables (
-  id serial PRIMARY KEY,
-  name text UNIQUE
+CREATE TABLE meta.covid_variables
+(
+    id   serial PRIMARY KEY,
+    name text UNIQUE
 );
 
 COMMENT ON TABLE meta.covid_variables IS E'This table contains a list of variables and their corresponding identifiers used in `data.us_covid`. The variables include:
@@ -43,28 +44,58 @@ COMMENT ON COLUMN meta.covid_variables.id IS E'The variable id used in `data.us_
 COMMENT ON COLUMN meta.covid_variables.name IS E'The variable name as described in the table description';
 
 INSERT INTO meta.covid_variables (name)
-  VALUES ('cases_suspected'), ('cases_confirmed'), ('cases_total'), ('deaths_suspected'), ('deaths_confirmed'), ('deaths_total'), ('positive_tests_total'), ('negative_tests_total'), ('icu_beds_capacity_count'), ('icu_beds_in_use_any'), ('icu_beds_in_use_covid_suspected'), ('icu_beds_in_use_covid_confirmed'), ('icu_beds_in_use_covid_total'), ('icu_beds_in_use_covid_new'), ('hospital_beds_capacity_count'), ('hospital_beds_in_use_any'), ('hospital_beds_in_use_covid_suspected'), ('hospital_beds_in_use_covid_confirmed'), ('hospital_beds_in_use_covid_total'), ('hospital_beds_in_use_covid_new'), ('ventilators_capacity_count'), ('ventilators_in_use_any'), ('ventilators_in_use_covid_suspected'), ('ventilators_in_use_covid_confirmed'), ('ventilators_in_use_covid_total'), ('ventilators_in_use_covid_new'), ('recovered_total'), ('active_total'), ('tests_total');
+VALUES ('cases_suspected'),
+       ('cases_confirmed'),
+       ('cases_total'),
+       ('deaths_suspected'),
+       ('deaths_confirmed'),
+       ('deaths_total'),
+       ('positive_tests_total'),
+       ('negative_tests_total'),
+       ('icu_beds_capacity_count'),
+       ('icu_beds_in_use_any'),
+       ('icu_beds_in_use_covid_suspected'),
+       ('icu_beds_in_use_covid_confirmed'),
+       ('icu_beds_in_use_covid_total'),
+       ('icu_beds_in_use_covid_new'),
+       ('hospital_beds_capacity_count'),
+       ('hospital_beds_in_use_any'),
+       ('hospital_beds_in_use_covid_suspected'),
+       ('hospital_beds_in_use_covid_confirmed'),
+       ('hospital_beds_in_use_covid_total'),
+       ('hospital_beds_in_use_covid_new'),
+       ('ventilators_capacity_count'),
+       ('ventilators_in_use_any'),
+       ('ventilators_in_use_covid_suspected'),
+       ('ventilators_in_use_covid_confirmed'),
+       ('ventilators_in_use_covid_total'),
+       ('ventilators_in_use_covid_new'),
+       ('recovered_total'),
+       ('active_total'),
+       ('tests_total');
 
 DROP TABLE IF EXISTS data.covid;
 
 DROP TABLE IF EXISTS data.us_covid;
 
 CREATE TYPE covid_provider AS ENUM (
-  'valorum',
-  'ctp',
-  'usafacts',
-  'nyt',
-  'cds'
-);
+    'county',
+    'state',
+    'ctp',
+    'usafacts',
+    'nyt',
+    'cds'
+    );
 
-CREATE TABLE data.us_covid (
-  vintage date,
-  dt date,
-  fips int REFERENCES meta.us_fips (fips),
-  variable_id smallint REFERENCES meta.covid_variables (id),
-  value int,
-  provider covid_provider NOT NULL DEFAULT 'valorum',
-  PRIMARY KEY (fips, dt, vintage, variable_id)
+CREATE TABLE data.us_covid
+(
+    vintage     date,
+    dt          date,
+    fips        int REFERENCES meta.us_fips (fips),
+    variable_id smallint REFERENCES meta.covid_variables (id),
+    value       int,
+    provider    covid_provider NOT NULL DEFAULT 'state',
+    PRIMARY KEY (fips, dt, vintage, variable_id)
 );
 
 COMMENT ON TABLE data.us_covid IS E'Contains key count data for tracking COVID-19 cases across regions in the US.';
@@ -80,22 +111,22 @@ COMMENT ON COLUMN data.us_covid.variable_id IS E'The id of the variable in this 
 
 COMMENT ON COLUMN data.us_covid.value IS E'The value of the variable for the given region, on a date, and a vintage';
 
-CREATE OR REPLACE FUNCTION copy_to_us_covid_table ()
-  RETURNS TRIGGER
-  AS $$
+CREATE OR REPLACE FUNCTION copy_to_us_covid_table()
+    RETURNS TRIGGER
+AS
+$$
 DECLARE
-  provider_arg covid_provider;
+    provider_arg covid_provider;
 BEGIN
-  provider_arg = TG_ARGV[0]::covid_provider;
-  INSERT INTO data.us_covid (vintage, dt, fips, variable_id, value, provider)
+    provider_arg = TG_ARGV[0]::covid_provider;
+    INSERT INTO data.us_covid (vintage, dt, fips, variable_id, value, provider)
     VALUES (NEW.vintage, NEW.dt, NEW.fips, NEW.variable_id, NEW.value, provider_arg)
-  ON CONFLICT (fips, dt, vintage, variable_id)
-    DO UPDATE SET
-      value = excluded.value, provider = provider_arg
-    WHERE
-      provider_arg < data.us_covid.provider;
-  RETURN NEW;
+    ON CONFLICT (fips, dt, vintage, variable_id)
+        DO UPDATE SET value    = excluded.value,
+                      provider = provider_arg
+    WHERE provider_arg < data.us_covid.provider;
+    RETURN NEW;
 END;
 $$
-LANGUAGE plpgsql;
+    LANGUAGE plpgsql;
 
