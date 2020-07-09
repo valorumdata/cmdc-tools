@@ -8,6 +8,7 @@ from .DE import Delaware, DelawareKent, DelawareNewCastle, DelawareSussex
 from .GU import Guam
 from .IN import Indiana
 from .KY import Kentucky
+from .LA import Louisiana
 from .MA import Massachusetts
 from .MD import Maryland
 from .MI import Michigan
