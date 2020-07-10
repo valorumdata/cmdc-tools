@@ -22,7 +22,7 @@ The data begins on March 1, 2020 and covers approximately 650 different US geogr
 * social_distancing: Social distancing mandate of at least 6 ft between people
 * gathering_size_10_0: Gatherings are limited to between 0 and 10 people
 * gathering_size_25_11: Gatherings are limited to between 11 and 25 people
-* gathering_size_100_25: Gatherings are limited to between 26 and 100 people
+* gathering_size_100_26: Gatherings are limited to between 26 and 100 people
 * gathering_size_500_101: Gatherings are limited to between 101 and 500 people
 
 The original data was collected by Keystone Strategy and is distributed under the Creative Commons Attribution 4.0 International Public License.
