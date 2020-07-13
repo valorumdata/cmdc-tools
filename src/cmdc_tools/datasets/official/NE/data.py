@@ -26,15 +26,11 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
             }
         super().__init__(params)
 
-    def arcgis_query_url(self, service="Covid19_Update_service", sheet=0, srvid=1):
-        out = (
-            f"https://gis.ne.gov/Agency/rest/services/{service}/MapServer/{sheet}/query"
-        )
+    def arcgis_query_url(
+        self, service="Covid19_Update_service", sheet=0, srvid="Agency"
+    ):
+        out = f"https://gis.ne.gov/{srvid}/rest/services/{service}/MapServer/{sheet}/query"
 
-        return out
-
-    def arcgis_query_url_enterprise(self, service="Covid19MapV5", sheet=0):
-        out = f"https://gis.ne.gov/enterprise/rest/services/{service}/MapServer/{sheet}/query"
         return out
 
     def get(self):
@@ -104,7 +100,7 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
 
     def get_county(self):
         res = requests.get(
-            self.arcgis_query_url_enterprise(service="Covid19MapV5", sheet=0),
+            self.arcgis_query_url(service="Covid19MapV5", sheet=0, srvid="enterprise"),
             params=self.params,
         )
         df = pd.DataFrame.from_records(
