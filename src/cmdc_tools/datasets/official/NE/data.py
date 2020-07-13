@@ -105,9 +105,11 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
     def get_county(self):
         res = requests.get(
             self.arcgis_query_url_enterprise(service="Covid19MapV5", sheet=0),
-            params=self.params
+            params=self.params,
         )
-        df = pd.DataFrame.from_records([x["attributes"] for x in res.json()["features"]])
+        df = pd.DataFrame.from_records(
+            [x["attributes"] for x in res.json()["features"]]
+        )
         # Rename columns
         colmap = {
             "totalCountyPosFin": "positive_tests_total",
