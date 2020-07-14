@@ -81,7 +81,7 @@ class KeystonePolicy(InsertWithTempTable, DatasetBaseNoDate):
             location on that day
         """
         # Get dates between March 1, 2020 and today
-        dates = pd.date_range("2020-03-01", pd.datetime.now(), freq="D")
+        dates = pd.date_range("2020-03-01", "2020-06-15", freq="D")
 
         # Fetch data
         df = pd.read_csv(
@@ -91,6 +91,10 @@ class KeystonePolicy(InsertWithTempTable, DatasetBaseNoDate):
         )
         # Rename for consistency's sake
         df = df.rename(columns={"school closure": "school_closure"})
+
+        # If there has been no end date, add an end date far into the future
+        # We need to do this because we'll compare against end_date
+        df["end_date"] = df["end_date"].fillna(pd.to_datetime("2021-12-31"))
 
         # We must work with "gathering" size limits separately due to
         # the fact that there are stages of gathering limits, but for
