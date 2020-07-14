@@ -34,6 +34,7 @@ from .official import (
     Michigan,
     Minnesota,
     MinnesotaCountiesCasesDeaths,
+    Missouri,
     Montana,
     Nebraska,
     NewJersey,

@@ -13,6 +13,7 @@ from .MA import Massachusetts
 from .MD import Maryland
 from .MI import Michigan
 from .MN import Minnesota, MinnesotaCountiesCasesDeaths
+from .MO import Missouri
 from .MT import Montana
 from .NE import Nebraska
 from .NY import NewYork
