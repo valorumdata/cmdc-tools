@@ -1,4 +1,5 @@
 import pandas as pd
+import pytz
 import us
 
 from ...base import DatasetBaseNoDate
@@ -49,6 +50,10 @@ class Missouri(DatasetBaseNoDate, ArcGIS):
         renamed["dt"] = pd.to_datetime(
             renamed["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000).date())
         )
+
+        renamed.dt = renamed.dt.dt.tz_localize("US/Indiana-Starke")
+        renamed = renamed.set_index("dt").tz_convert("UTC").reset_index()
+
         gbc = renamed[
             [
                 "dt",
@@ -92,7 +97,8 @@ class Missouri(DatasetBaseNoDate, ArcGIS):
         renamed["dt"] = pd.to_datetime(
             renamed["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000).date())
         )
-
+        renamed.dt = renamed.dt.dt.tz_localize("US/Indiana-Starke")
+        renamed = renamed.set_index("dt").tz_convert("UTC").reset_index()
         return (
             renamed[["dt", "deaths_total"]]
             .melt(id_vars=["dt"], var_name="variable_name")
@@ -104,9 +110,9 @@ class Missouri(DatasetBaseNoDate, ArcGIS):
         renamed = df.rename(
             columns={
                 "test_date2": "dt",
-                "Negative": "negative_tests_daily",
-                "Positive": "positive_tests_daily",
-                "Total": "tests_total_daily",
+                "Negative": "negative_tests_total",
+                "Positive": "positive_tests_total",
+                "Total": "tests_total",
             }
         )
 
@@ -114,14 +120,14 @@ class Missouri(DatasetBaseNoDate, ArcGIS):
             renamed["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000).date())
         )
 
+        renamed.dt = renamed.dt.dt.tz_localize("US/Indiana-Starke")
+        renamed = renamed.set_index("dt").tz_convert("UTC").reset_index()
+
+        cumulative = renamed.sort_values("dt").set_index("dt").cumsum().reset_index()
+
         return (
-            renamed[
-                [
-                    "dt",
-                    "negative_tests_daily",
-                    "positive_tests_daily",
-                    "tests_total_daily",
-                ]
+            cumulative[
+                ["dt", "negative_tests_total", "positive_tests_total", "tests_total",]
             ]
             .melt(id_vars=["dt"], var_name="variable_name")
             .assign(fips=self.state_fips, vintage=pd.Timestamp.utcnow())
