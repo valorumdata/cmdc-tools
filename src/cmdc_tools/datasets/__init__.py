@@ -39,6 +39,7 @@ from .official import (
     NewJersey,
     NewMexico,
     NewYork,
+    NVHospitalPdf,
     Pennsylvania,
     RhodeIsland,
     SanDiego,

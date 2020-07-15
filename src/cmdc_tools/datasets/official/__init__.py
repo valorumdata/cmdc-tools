@@ -15,6 +15,7 @@ from .MI import Michigan
 from .MN import Minnesota, MinnesotaCountiesCasesDeaths
 from .MT import Montana
 from .NE import Nebraska
+from .NV import NVHospitalPdf
 from .NY import NewYork
 from .NJ import NewJersey
 from .NM import NewMexico
