@@ -32,8 +32,6 @@ class NewYork(DatasetBaseNoDate, CountyData):
                 "County": "county",
                 "Cumulative Number of Tests Performed": "tests_total",
                 "Cumulative Number of Positives": "positive_tests_total",
-                # "Number of negatives": "negative_tests_total",
-                # "Number of intedterminates": "unknown_tests_total"
             }
         )
 
@@ -42,7 +40,6 @@ class NewYork(DatasetBaseNoDate, CountyData):
             "county",
             "tests_total",
             "positive_tests_total",
-            # "negative_tests_total",
         ]
 
         out = df.loc[:, keep].melt(id_vars=["dt", "county"], var_name="variable_name")

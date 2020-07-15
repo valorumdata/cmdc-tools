@@ -31,6 +31,7 @@ class Imperial(DatasetBaseNoDate, ArcGIS):
     )
     state_fips = int(us.states.lookup("California").fips)
     has_fips = True
+    provider = "county"
 
     def __init__(self):
         self.hospitaloutfields = {

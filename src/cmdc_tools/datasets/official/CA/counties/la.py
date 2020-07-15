@@ -35,9 +35,8 @@ async def find_chart_data(page, div_id, colname="y", name_search="number of"):
 
             return out
 
+    print("Column names:", [t["name"].lower() for t in data])
     raise ValueError(f"Could not find trace with data {div_id}")
-
-    return dict(data=data, layout=layout)
 
 
 async def test_data():
@@ -57,9 +56,9 @@ async def test_data():
 
         # wait for chart to appear -- now we know we can change to Daily
         await page.waitForXPath("//div[@id='test_plot']/div")
-        test = await find_chart_data(page, "test_plot", "tests", "tested")
+        test = await find_chart_data(page, "test_plot", "tests", "cumulative tests")
         pos = await find_chart_data(
-            page, "test_plot", "positive_tests_total", "cumulative positive"
+            page, "test_plot", "positive_tests_total", "cumulative "
         )
 
     data = (
@@ -80,6 +79,7 @@ class LA(DatasetBaseNoDate, CountyData):
     )
     state_fips = int(us.states.lookup("California").fips)
     has_fips = True
+    provider = "county"
 
     def get(self):
         df = asyncio.run(test_data())

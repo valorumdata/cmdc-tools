@@ -65,7 +65,6 @@ class ConnecticutCounty(DatasetBaseNoDate, SODA):
             "county": "county",
             "totalcases": "cases_total",
             "totaldeaths": "deaths_total",
-            # "confirmedcases": "positive_tests_total",
             "hospitalization": "hospital_beds_in_use_covid_total",
         }
         cdh = self.get_dataset("bfnu-rgqt").rename(columns=cdh_rename)

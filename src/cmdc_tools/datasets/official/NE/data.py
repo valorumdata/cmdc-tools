@@ -12,8 +12,8 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
         "https://nebraska.maps.arcgis.com/apps/opsdashboard/"
         "index.html#/4213f719a45647bc873ffb58783ffef3"
     )
-    state_fips: int = int(us.states.lookup("Nebraska").fips)
-    has_fips: bool = True
+    state_fips = int(us.states.lookup("Nebraska").fips)
+    has_fips = True
 
     def __init__(self, params=None):
 
@@ -26,12 +26,11 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
             }
         super().__init__(params)
 
-    def arcgis_query_url(self, service="Covid19_Update_service", sheet=0, srvid=1):
-        # "https://gis.ne.gov/Agency/rest/services/Covid19_Update_service/MapServer/0/query?f=json&where=1%3D1&returnGeometry=false&outFields=*"
-        out = (
-            f"https://gis.ne.gov/Agency/rest/services/{service}/MapServer/{sheet}/query"
-        )
-        # https://gis.ne.gov/Agency/rest/services/{service}/MapServer/{sheet}/query
+    def arcgis_query_url(
+        self, service="Covid19_Update_service", sheet=0, srvid="Agency"
+    ):
+        out = f"https://gis.ne.gov/{srvid}/rest/services/{service}/MapServer/{sheet}/query"
+
         return out
 
     def get(self):
@@ -101,7 +100,8 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
 
     def get_county(self):
         res = requests.get(
-            self.arcgis_query_url(service="COVID19_County_Layer"), params=self.params
+            self.arcgis_query_url(service="Covid19MapV5", sheet=0, srvid="enterprise"),
+            params=self.params,
         )
         df = pd.DataFrame.from_records(
             [x["attributes"] for x in res.json()["features"]]

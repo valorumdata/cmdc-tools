@@ -15,8 +15,9 @@ class CTP(InsertWithTempTable, DatasetBaseNoDate):
     by schema.sql
     """
 
-    table_name = "us_covid"
+    table_name = "ctp_covid"
     pk = '("vintage", "dt", "fips", "variable_id")'
+    source = "https://covidtracking.com/"
 
     def __init__(self):
         super(CTP, self).__init__()
@@ -27,6 +28,7 @@ class CTP(InsertWithTempTable, DatasetBaseNoDate):
             "death": "deaths_total",
             "positive": "positive_tests_total",
             "negative": "negative_tests_total",
+            "totalTestResults": "tests_total",
             "hospitalizedCurrently": "hospital_beds_in_use_covid_total",
             "inIcuCurrently": "icu_beds_in_use_covid_total",
             "onVentilatorCurrently": "ventilators_in_use_covid_total",

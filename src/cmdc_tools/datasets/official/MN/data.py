@@ -1,5 +1,5 @@
+import numpy as np
 import pandas as pd
-import requests
 import us
 
 from ..base import CountyData
@@ -81,21 +81,31 @@ class Minnesota(DatasetBaseNoDate, CountyData):
             "icu_bed_in_use_covid_total",
         ]
         hosp = pd.concat(pd.read_html(self.URL, attrs={"id": "hosptable"}))
-        hosp = hosp.rename(
-            columns={
-                "Date reported": "dt",
-                "Hospitalized, not in ICU (daily)": "hospital_bed_in_use_covid_total",
-                "Hospitalized in ICU (daily)": "icu_bed_in_use_covid_total",
-            }
-        ).loc[:, hospkeep]
+        hosp = (
+            hosp.rename(
+                columns={
+                    "Date reported": "dt",
+                    "Hospitalized, not in ICU (daily)": "hospital_bed_in_use_covid_total",
+                    "Hospitalized in ICU (daily)": "icu_bed_in_use_covid_total",
+                }
+            )
+            .loc[:, hospkeep]
+            .replace("-", np.nan)
+        )
 
         df = cases.merge(deaths, on="dt", how="outer").merge(hosp, on="dt", how="outer")
         df["dt"] = pd.to_datetime(df["dt"].map(lambda x: x + "/2020"))
         df["fips"] = self.state_fips
 
-        out = df.melt(
-            id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
+        out = (
+            df.melt(
+                id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
+            )
+            .dropna()
+            .assign(
+                vintage=pd.Timestamp.utcnow().normalize(),
+                value=lambda x: x["value"].astype(int),
+            )
         )
-        out["vintage"] = pd.Timestamp.utcnow().normalize()
 
         return out

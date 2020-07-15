@@ -121,7 +121,7 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
             "Date_": "dt",
             "daily_positive": "positive_tests_total",
             "daily_negative": "negative_tests_total",
-            # "daily_tests": "tests_total",
+            "daily_tests": "tests_total",
         }
         df = df.rename(columns=crename).loc[:, crename.values()]
         df["dt"] = df["dt"].map(
@@ -132,6 +132,7 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
 
         df["positive_tests_total"] = df["positive_tests_total"].cumsum()
         df["negative_tests_total"] = df["negative_tests_total"].cumsum()
+        df["tests_total"] = df["tests_total"].cumsum()
 
         out = df.melt(
             id_vars=["dt", "fips"], var_name="variable_name", value_name="value"

@@ -9,17 +9,6 @@ CREATE TABLE data.covid_sources (
 );
 
 
-CREATE OR REPLACE VIEW meta.latest_covid_source as
-    with max_date as (
-    select location, variable_id, max(date_accessed) as date_accessed
-    from data.covid_sources
-    group by location, variable_id
-    )
-    select location, variable_id, date_accessed, source
-from max_date
-left join data.covid_sources using (location, variable_id, date_accessed);
-
-
 alter table data.covid_sources add column table_name text not null default 'us_covid';
 
 update data.covid_sources set table_name='jhu_daily_reports'
@@ -36,3 +25,13 @@ update data.covid_sources set table_name = 'nyt_covid'
 
 create index covid_sources__table_name_idx
 	on data.covid_sources (table_name);
+
+CREATE OR REPLACE VIEW meta.latest_covid_source as
+with max_date as (
+    select location, variable_id, table_name, max(date_accessed) as date_accessed
+    from data.covid_sources
+    group by location, variable_id, table_name
+)
+select location, variable_id, date_accessed, source, table_name
+from max_date
+         left join data.covid_sources using (location, variable_id, date_accessed, table_name);
