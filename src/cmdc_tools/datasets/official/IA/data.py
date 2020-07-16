@@ -34,8 +34,10 @@ class Iowa(ArcGIS, DatasetBaseNoDate):
         df = self.get_all_sheet_to_df("IA_COVID19_Cases", 0, "")
         df = df.rename(columns=crename).loc[:, crename.values()]
 
-        # Set date
-        df["dt"] = df["dt"].map(self._esri_ts_to_dt)
+        # Set date and make sure fips and other number columns
+        # are integers
+        df = df.apply(lambda x: pd.to_numeric(x, errors="ignore"))
+        df["dt"] = df["dt"].map(self._esri_ts_to_dt).map(lambda x: x.date())
 
         # Reshape
         out = df.melt(id_vars=["dt", "fips"], var_name="variable_name")
