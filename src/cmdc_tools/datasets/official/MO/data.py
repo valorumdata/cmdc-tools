@@ -6,13 +6,20 @@ from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
 
 
-class Missouri(DatasetBaseNoDate, ArcGIS):
+class MissouriFips(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = "Bd4MACzvEukoZ9mR"
     state_fips = int(us.states.lookup("Missouri").fips)
     source = "http://mophep.maps.arcgis.com/apps/MapSeries/index.html?appid=8e01a5d8d8bd4b4f85add006f9e14a9d"
-    has_fips = False
+    has_fips = True
 
     def get(self):
+        df = self._get()
+        df.value = df.value.astype(int)
+        # Filter out fips==null
+        # Drop county column
+        return df.dropna(subset=["fips"]).drop("county", axis=1)
+
+    def _get(self):
         cases = self._get_county_cases()
         hosp = self._get_hosp()
         county_deaths = self._get_county_deaths()
@@ -132,3 +139,16 @@ class Missouri(DatasetBaseNoDate, ArcGIS):
             .melt(id_vars=["dt"], var_name="variable_name")
             .assign(fips=self.state_fips, vintage=pd.Timestamp.utcnow())
         )
+
+
+class MissouriCounty(MissouriFips, DatasetBaseNoDate):
+    has_fips = False
+    state_fips = int(us.states.lookup("Missouri").fips)
+    source = "http://mophep.maps.arcgis.com/apps/MapSeries/index.html?appid=8e01a5d8d8bd4b4f85add006f9e14a9d"
+
+    def get(self):
+        df = self._get()
+        df.value = df.value.astype(int)
+        # Filter out county==null
+        # Drop fips column
+        return df.dropna(subset=["county"]).drop("fips", axis=1)
