@@ -8,32 +8,43 @@ from ..base import ArcGIS
 class Iowa(ArcGIS, DatasetBaseNoDate):
     ARCGIS_ID = "vPD5PVLI6sfkZ5E4"
     state_fips = int(us.states.lookup("Iowa").fips)
-    has_fips = False
+    has_fips = True
     source = "https://coronavirus.iowa.gov/pages/rmcc-data"
 
     def get(self):
-        pass
+        cdt = self._get_cases()
+
+        out = pd.concat([cdt], axis=0, ignore_index=True)
+        out["vintage"] = pd.Timestamp.utcnow().normalize()
+
+        return out
 
     def _get_cases(self):
+        # Renamers
+        crename = {
+            "FIPS": "fips",
+            "Confirmed": "cases_confirmed",
+            "Recovered": "recovered_total",
+            "Deaths": "deaths_total",
+            "individuals_tested": "tests_total",
+            "last_updated": "dt",
+        }
+
+        # Get DataFrame and rename cols
         df = self.get_all_sheet_to_df("IA_COVID19_Cases", 0, "")
+        df = df.rename(columns=crename).loc[:, crename.values()]
 
-        renamed = df.rename(
-            columns={
-                "FIPS": "fips",
-                "Confirmed": "cases_confirmed",
-                "Recovered": "recovered_total",
-                "Deaths": "deaths_total",
-                "last_updated": "dt",
-            }
-        )
+        # Set date
+        df["dt"] = df["dt"].map(self._esri_ts_to_dt)
 
-        renamed["dt"] = renamed["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000))
+        # Reshape
+        out = df.melt(id_vars=["dt", "fips"], var_name="variable_name")
 
-        return renamed[
-            ["dt", "fips", "cases_confirmed", "recovered_total", "deaths_total"]
-        ].sort_values(["dt", "fips"])
+        return out
 
     def _get_hosp(self):
+        # TODO: Once we decide how to treat hospital regions, return to
+        # this getter and add it
         df = self.get_all_sheet_to_df("COVID19_RMCC_Hospitalization", 0, "")
         reanmed = df.rename(
             columns={
