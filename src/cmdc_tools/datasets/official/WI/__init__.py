@@ -48,6 +48,8 @@ class Wisconsin(DatasetBaseNoDate, ArcGIS):
 
         # Reshape data
         out = df.melt(id_vars=["dt", "fips"], var_name="variable_name")
+        out = out.dropna(subset=["value"])
+        out["value"] = out["value"].astype(int)
         out["vintage"] = pd.Timestamp.now().normalize()
 
-        return df
+        return out

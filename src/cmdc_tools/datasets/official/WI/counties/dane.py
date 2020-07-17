@@ -11,6 +11,7 @@ class WIDane(DatasetBaseNoDate, ArcGIS):
         "https://cityofmadison.maps.arcgis.com/apps/opsdashboard/"
         "index.html#/e22f5ba4f1f94e0bb0b9529dc82db6a3"
     )
+    provider = "county"
     county_fips = 25  # Dane County	025
     state_fips = int(us.states.lookup("Wisconsin").fips)
     has_fips = True
