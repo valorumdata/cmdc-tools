@@ -26,6 +26,7 @@ from .official import (
     DelawareKent,
     DelawareNewCastle,
     DelawareSussex,
+    Hawaii,
     Iowa,
     Imperial,
     Kentucky,
