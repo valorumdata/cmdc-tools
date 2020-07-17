@@ -1,9 +1,19 @@
 import pandas as pd
-import pytz
 import us
 
 from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
+
+
+def _convert_dt_col(df):
+    df["dt"] = (
+        pd.to_datetime(
+            df["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000).date())
+        )
+        .dt.tz_localize("US/Indiana-Starke")
+        .dt.tz_convert("UTC")
+        .dt.normalize()
+    )
 
 
 class MissouriFips(DatasetBaseNoDate, ArcGIS):
@@ -11,6 +21,10 @@ class MissouriFips(DatasetBaseNoDate, ArcGIS):
     state_fips = int(us.states.lookup("Missouri").fips)
     source = "http://mophep.maps.arcgis.com/apps/MapSeries/index.html?appid=8e01a5d8d8bd4b4f85add006f9e14a9d"
     has_fips = True
+
+    @property
+    def _vintage(self):
+        return pd.Timestamp.utcnow().normalize()
 
     def get(self):
         df = self._get()
@@ -38,7 +52,7 @@ class MissouriFips(DatasetBaseNoDate, ArcGIS):
         renamed = renamed[["county", "cases_total"]]
 
         return renamed.melt(id_vars=["county"], var_name="variable_name").assign(
-            dt=pd.Timestamp.utcnow(), vintage=pd.Timestamp.utcnow()
+            dt=self._vintage, vintage=self._vintage
         )
 
     def _get_hosp(self):
@@ -54,13 +68,7 @@ class MissouriFips(DatasetBaseNoDate, ArcGIS):
                 "County": "county",
             }
         )
-        renamed["dt"] = pd.to_datetime(
-            renamed["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000).date())
-        )
-
-        renamed.dt = renamed.dt.dt.tz_localize("US/Indiana-Starke")
-        renamed = renamed.set_index("dt").tz_convert("UTC").reset_index()
-
+        _convert_dt_col(renamed)
         gbc = renamed[
             [
                 "dt",
@@ -84,7 +92,7 @@ class MissouriFips(DatasetBaseNoDate, ArcGIS):
         return (
             agged.sort_values(["dt", "fips"])
             .melt(id_vars=["dt", "fips", "county"], var_name="variable_name")
-            .assign(vintage=pd.Timestamp.utcnow())
+            .assign(vintage=self._vintage)
         )
 
     def _get_county_deaths(self):
@@ -93,7 +101,7 @@ class MissouriFips(DatasetBaseNoDate, ArcGIS):
         return (
             renamed[["county", "deaths_total"]]
             .melt(id_vars=["county"], var_name="variable_name")
-            .assign(dt=pd.Timestamp.utcnow(), vintage=pd.Timestamp.utcnow())
+            .assign(dt=self._vintage, vintage=self._vintage)
         )
 
     def _get_deaths_timeseries(self):
@@ -101,15 +109,14 @@ class MissouriFips(DatasetBaseNoDate, ArcGIS):
         renamed = df.rename(
             columns={"Date_of_Death": "dt", "Cumulative_Cases": "deaths_total"}
         )
-        renamed["dt"] = pd.to_datetime(
-            renamed["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000).date())
-        )
-        renamed.dt = renamed.dt.dt.tz_localize("US/Indiana-Starke")
-        renamed = renamed.set_index("dt").tz_convert("UTC").reset_index()
+        _convert_dt_col(renamed)
         return (
             renamed[["dt", "deaths_total"]]
             .melt(id_vars=["dt"], var_name="variable_name")
-            .assign(vintage=pd.Timestamp.utcnow(), fips=self.state_fips)
+            .assign(
+                vintage=self._vintage,
+                fips=self.state_fips
+            )
         )
 
     def _get_tests(self):
@@ -122,14 +129,7 @@ class MissouriFips(DatasetBaseNoDate, ArcGIS):
                 "Total": "tests_total",
             }
         )
-
-        renamed["dt"] = pd.to_datetime(
-            renamed["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000).date())
-        )
-
-        renamed.dt = renamed.dt.dt.tz_localize("US/Indiana-Starke")
-        renamed = renamed.set_index("dt").tz_convert("UTC").reset_index()
-
+        _convert_dt_col(renamed)
         cumulative = renamed.sort_values("dt").set_index("dt").cumsum().reset_index()
 
         return (
@@ -137,7 +137,7 @@ class MissouriFips(DatasetBaseNoDate, ArcGIS):
                 ["dt", "negative_tests_total", "positive_tests_total", "tests_total",]
             ]
             .melt(id_vars=["dt"], var_name="variable_name")
-            .assign(fips=self.state_fips, vintage=pd.Timestamp.utcnow())
+            .assign(fips=self.state_fips, vintage=self._vintage)
         )
 
 
