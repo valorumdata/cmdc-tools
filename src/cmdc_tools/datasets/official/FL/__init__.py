@@ -1,8 +1,9 @@
 import pyppeteer
 import us
-from cmdc_tools.datasets import DatasetBaseNoDate
 
-from ..base import CountyData
+
+from ..base import CountyData, ArcGIS
+from ...base import DatasetBaseNoDate
 from ...puppet import TableauNeedsClick
 
 import pandas as pd
@@ -63,4 +64,36 @@ class FloridaHospital(DatasetBaseNoDate, CountyData):
         today = pd.Timestamp.utcnow().normalize()
         return pd.concat([fhu.get(), fhc.get()], ignore_index=True, sort=True).assign(
             dt=today, vintage=today
+        )
+
+
+class Florida(DatasetBaseNoDate, ArcGIS):
+    ARCGIS_ID = "CY1LXxl9zlJeBuRZ"
+    state_fips = int(us.states.lookup("Florida").fips)
+    has_fips: bool = True
+    source = "https://fdoh.maps.arcgis.com/apps/opsdashboard/index.html#/8d0de33f260d444c852a615dc7837c86"
+
+    def get(self):
+        df = self.get_all_sheet_to_df("Florida_COVID19_Cases_by_County_vw", 0, 1)
+        df.columns = [x.lower() for x in list(df)]
+        column_rename = {
+            "county": "fips",
+            "t_positive": "positive_tests_total",
+            "t_negative": "negative_tests_total",
+            "t_total": "tests_total",
+            "deaths": "deaths_total",
+            "casesall": "cases_total",
+        }
+        renamed = df.rename(columns=column_rename)
+        today = pd.Timestamp.utcnow().normalize()
+        renamed["fips"] = renamed["fips"].astype(int) + (self.state_fips * 1000)
+        # 12025 is the OLD (retired in 1997) fips code for Date county. It is now known
+        # as Miami-Dade county with fips code 12086
+        renamed["fips"] = renamed["fips"].replace(12025, 12086)
+
+        return (
+            renamed.loc[:, list(column_rename.values())]
+            .query("fips not in (12998, 12999)")  # 998: state, 999: unknown
+            .melt(id_vars=["fips"], var_name="variable_name")
+            .assign(dt=today, vintage=today)
         )
