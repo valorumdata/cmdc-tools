@@ -5,6 +5,7 @@ from .CA import LA, CACountyData, Imperial, SanDiego
 from .CT import ConnecticutCounty, ConnecticutState
 from .DC import DC
 from .DE import Delaware, DelawareKent, DelawareNewCastle, DelawareSussex
+from .FL import FloridaHospital
 from .GU import Guam
 from .IN import Indiana
 from .KY import Kentucky

@@ -1,61 +1,66 @@
-import asyncio
-import glob
-import io
-import os
-import tempfile
-from cmdc_tools.datasets.puppet import with_page
+import pyppeteer
+import us
+from cmdc_tools.datasets import DatasetBaseNoDate
+
+from ..base import CountyData
+from ...puppet import TableauNeedsClick
 
 import pandas as pd
 
 
-async def get_file():
-    async with with_page(headless=True) as page:
-        await page.goto(
-            "https://bi.ahca.myflorida.com/t/ABICC/views/Public/ICUBedsHospital?:isGuestRedirectFromVizportal=y&:embed=y"
+class FloridaHospitalUsage(TableauNeedsClick):
+
+    url = "https://bi.ahca.myflorida.com/t/ABICC/views/Public/ICUBedsHospital?:isGuestRedirectFromVizportal=y&:embed=y"
+
+    async def _pre_click(self, page: pyppeteer.page.Page):
+        await page.waitForSelector(".tabCanvas")
+
+    def _clean_df(self, df: pd.DataFrame) -> pd.DataFrame:
+        str_cols = ["County", "FileNumber", "ProviderName"]
+        for col in list(df):
+            for bad in (r",", r"%", "nan"):
+                df[col] = df[col].astype(str).str.replace(bad, "")
+            if col not in str_cols:
+                df[col] = pd.to_numeric(df[col])
+
+        df["icu_beds_in_use_any"] = df["Adult ICU Census"] + df["Pediatric ICU Census"]
+        df["icu_beds_capacity_count"] = (
+            df["Total AdultICU Capacity"] + df["Total PediatricICU Capacity"]
+        )
+        return (
+            df.rename(columns={"County": "county"})
+            .query("county != 'Grand Total'")
+            .loc[:, ["county", "icu_beds_capacity_count", "icu_beds_in_use_any"]]
+            .groupby("county")
+            .sum()
+            .reset_index()
+            .melt(id_vars=["county"], var_name="variable_name")
         )
 
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            await page._client.send(
-                "Page.setDownloadBehavior",
-                {"behavior": "allow", "downloadPath": tmpdirname},
-            )
-            await page.waitForSelector(".tabCanvas")
-            table = await page.waitForSelector(".tabCanvas")
-            print(table)
-            await table.click()
 
-            # TODO: better way to ensure click happened? Perhaps check css class for cell highlighting?
-            for i in range(4):
-                print("attempt ", i)
-                await asyncio.sleep(2)
-                await page.mouse.click(570, 477, options={"delay": 100})
+class FloridaHospitalCovid(TableauNeedsClick):
+    url = "https://bi.ahca.myflorida.com/t/ABICC/views/Public/COVIDHospitalizationsCounty?:isGuestRedirectFromVizportal=y&:embed=y"
 
-            button = await page.waitForSelector("#download-ToolbarButton")
-            await button.click()
-            crosstab = await page.waitForXPath(
-                "//button[@data-tb-test-id = 'DownloadCrosstab-Button']"
-            )
-            await crosstab.click()
-
-            # TODO: better way to wait for download?
-            await asyncio.sleep(5)
-            fns = glob.glob(os.path.join(tmpdirname, "*.csv"))
-            assert len(fns) == 1
-            print(fns[0])
-            with open(fns[0], "rb") as f:
-                tsv = io.BytesIO(f.read().decode("UTF-16").encode("UTF-8"))
-                df = pd.read_csv(tsv, sep="\t")
-
-    return df
+    def _clean_df(self, df: pd.DataFrame) -> pd.DataFrame:
+        column_name = "hospital_beds_in_use_covid_total"
+        df.columns = ["county", column_name]
+        df = df.query("county != 'Grand Total'")
+        df.loc[:, column_name] = (
+            df.loc[:, column_name].astype(str).str.replace(",", "").astype(int)
+        )
+        return df.melt(id_vars=["county"], var_name="variable_name")
 
 
-def main():
-    df = asyncio.run(get_file())
-    str_cols = ["County", "FileNumber", "ProviderName"]
-    for col in list(df):
-        for bad in (r",", r"%", "nan"):
-            df[col] = df[col].astype(str).str.replace(bad, "")
-        if col not in str_cols:
-            df[col] = pd.to_numeric(df[col])
+class FloridaHospital(DatasetBaseNoDate, CountyData):
+    source = FloridaHospitalUsage.url
+    provider = "county"
+    has_fips = False
+    state_fips = int(us.states.lookup("Florida").fips)
 
-    return df
+    def get(self):
+        fhu = FloridaHospitalUsage()
+        fhc = FloridaHospitalCovid()
+        today = pd.Timestamp.utcnow().normalize()
+        return pd.concat([fhu.get(), fhc.get()], ignore_index=True, sort=True).assign(
+            dt=today, vintage=today
+        )
