@@ -113,10 +113,7 @@ class MissouriFips(DatasetBaseNoDate, ArcGIS):
         return (
             renamed[["dt", "deaths_total"]]
             .melt(id_vars=["dt"], var_name="variable_name")
-            .assign(
-                vintage=self._vintage,
-                fips=self.state_fips
-            )
+            .assign(vintage=self._vintage, fips=self.state_fips)
         )
 
     def _get_tests(self):
