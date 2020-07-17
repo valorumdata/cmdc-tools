@@ -1,7 +1,7 @@
 from .AK import Alaska
 from .AR import Arkansas
 from .base import ArcGIS, CountyData
-from .CA import LA, CACountyData, Imperial, SanDiego
+from .CA import LosAngeles, CACountyData, Imperial, SanDiego
 from .CT import ConnecticutCounty, ConnecticutState
 from .DC import DC
 from .DE import Delaware, DelawareKent, DelawareNewCastle, DelawareSussex

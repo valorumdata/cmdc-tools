@@ -73,7 +73,7 @@ async def test_data():
     ]
 
 
-class LA(DatasetBaseNoDate, CountyData):
+class LosAngeles(DatasetBaseNoDate, CountyData):
     source = (
         "http://dashboard.publichealth.lacounty.gov/covid19_surveillance_dashboard/"
     )
