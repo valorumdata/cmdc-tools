@@ -15,7 +15,7 @@ from .jhu import JHUDailyReports, JHUDailyReportsUS, Locations
 from .keystone import KeystonePolicy
 from .nytimes import NYTimesState
 from .official import (
-    LA,
+    LosAngeles,
     Alaska,
     Arkansas,
     CACountyData,
@@ -35,6 +35,8 @@ from .official import (
     Michigan,
     Minnesota,
     MinnesotaCountiesCasesDeaths,
+    MissouriCounty,
+    MissouriFips,
     Montana,
     Nebraska,
     NewJersey,
