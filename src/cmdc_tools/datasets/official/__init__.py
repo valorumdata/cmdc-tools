@@ -7,6 +7,7 @@ from .DC import DC
 from .DE import Delaware, DelawareKent, DelawareNewCastle, DelawareSussex
 from .FL import FloridaHospital
 from .GU import Guam
+from .IA import Iowa
 from .IN import Indiana
 from .KY import Kentucky
 from .LA import Louisiana
