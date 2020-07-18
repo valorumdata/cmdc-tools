@@ -48,6 +48,8 @@ from .official import (
     Tennessee,
     TennesseeCounties,
     Vermont,
+    Wisconsin,
+    WIDane,
 )
 from .owid import OWID
 from .usafacts import USAFactsCases, USAFactsDeaths

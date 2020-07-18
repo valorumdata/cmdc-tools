@@ -25,3 +25,4 @@ from .PA import Pennsylvania
 from .RI import RhodeIsland
 from .TN import Tennessee, TennesseeCounties
 from .VT import Vermont
+from .WI import Wisconsin, WIDane
