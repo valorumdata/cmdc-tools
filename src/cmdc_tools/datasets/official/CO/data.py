@@ -7,7 +7,7 @@ from ..base import ArcGIS
 
 class Colorado(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = "66aUo8zsujfVXRIT"
-    source = "https://services3.arcgis.com/66aUo8zsujfVXRIT/arcgis/rest/services/"
+    source = "https://covid19.colorado.gov/covid-19-data"
     has_fips = True
     state_fips = int(us.states.lookup("Colorado").fips)
 
