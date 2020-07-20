@@ -7,7 +7,41 @@ import os
 from .census import ACSAPI
 from .geo import _create_fips
 from .. import InsertWithTempTable, DatasetBaseNoDate
-from ..db_util import TempTable
+
+
+_VARIABLES_ACS = {
+    "DP05_0001E": "Total population",
+    "DP05_0018E": "Median age",
+    "DP05_0024PE": "Fraction of population over 65",
+    "DP05_0037PE": "Percent white",
+    "DP05_0038PE": "Percent black",
+    "DP05_0039PE": "Percent Native American or Alaska Native",
+    "DP05_0044PE": "Percent Asian",
+    "DP05_0052PE": "Percent Native Hawaiian or other Pacific Islander",
+    "DP05_0057PE": "Percent other race",
+    "DP05_0058PE": "Percent two or more races",
+    "DP05_0071PE": "Percent Hispanic/Latino (any race)",
+    "DP02_0059PE": "Percent of 25+ with less than 9th grade education",
+    "DP02_0060PE": "Percent of 25+ with some HS but no HS degree",
+    "DP02_0061PE": "Percent of 25+ with HS degree but no college",
+    "DP02_0062PE": "Percent of 25+ with some college but no degree",
+    "DP02_0063PE": "Percent of 25+ with Associate's degree",
+    "DP02_0064PE": "Percent of 25+ with Bachelor's degree",
+    "DP02_0065PE": "Percent of 25+ with professional degree",
+    "DP03_0019PE": "Percent of 16+ commute driving alone",
+    "DP03_0020PE": "Percent of 16+ commute carpool",
+    "DP03_0021PE": "Percent of 16+ commute public transit",
+    "DP03_0022PE": "Percent of 16+ commute walk",
+    "DP03_0023PE": "Percent of 16+ commute other way",
+    "DP03_0024PE": "Percent of 16+ commute work at home",
+    "DP03_0025E": "Mean travel time to work (minutes)",
+    # TODO: Add industries
+    "DP03_0062E": "Median household income",
+    "DP03_0063E": "Mean household income",
+    "DP03_0096PE": "Percent of civilian population with health insurance",
+    "DP03_0099PE": "Percent of civilian population with no health insurance",
+    "DP03_0119PE": "Percent of families w/ income < poverty lvl in last year",
+}
 
 
 class ACS(ACSAPI, InsertWithTempTable, DatasetBaseNoDate):

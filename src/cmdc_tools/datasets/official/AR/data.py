@@ -2,12 +2,17 @@ import textwrap
 
 import pandas as pd
 import requests
+import us
 
 from ..base import ArcGIS
+from ...base import DatasetBaseNoDate
 
 
-class Arkansas(ArcGIS):
+class Arkansas(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = "PwY9ZuZRDiI5nXUB"
+    source = "https://experience.arcgis.com/experience/c2ef4a4fcbe5458fbf2e48a21e4fece9"
+    state_fips = int(us.states.lookup("Arkansas").fips)
+    has_fips = False
 
     def __init__(self, params=None):
 
@@ -20,19 +25,6 @@ class Arkansas(ArcGIS):
             }
 
         super(Arkansas, self).__init__(params)
-
-    def _insert_query(self, df, table_name, temp_name, pk):
-        out = f"""
-        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value
-        FROM {temp_name} tt
-        LEFT JOIN meta.us_fips us ON tt.county=us.name
-        LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        WHERE us.fips > 5000 AND us.fips < 6000
-        ON CONFLICT {pk} DO NOTHING
-        """
-
-        return textwrap.dedent(out)
 
     def get(self):
         url = self.arcgis_query_url(
@@ -49,6 +41,7 @@ class Arkansas(ArcGIS):
             "county_nam": "county",
             "positive": "positive_tests_total",
             "negative": "negative_tests_total",
+            "total_tests": "tests_total",
             "Recoveries": "recovered_total",
             "deaths": "deaths_total",
             "active_cases": "active_total",

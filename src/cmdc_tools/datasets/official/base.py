@@ -1,32 +1,49 @@
+from abc import ABC
+import textwrap
+
 import pandas as pd
 import requests
-import textwrap
 
 from .. import InsertWithTempTable
 
 
-class CountyData(InsertWithTempTable):
-    table_name = "us_covid"
-    pk = '("vintage", "dt", "fips", "variable_id")'
-
-    def __init__(self):
-        super(CountyData, self).__init__()
-
-        return None
+class CountyData(InsertWithTempTable, ABC):
+    table_name: str = "us_covid"
+    pk: str = '("vintage", "dt", "fips", "variable_id")'
+    provider = "state"
+    data_type: str = "covid"
+    has_fips: bool
+    state_fips: int
+    provider: str = "state"
 
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
-        out = f"""
-        INSERT INTO data.{table_name} (vintage, dt, fips, variable_id, value)
-        SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
-        FROM {temp_name} tt
-        LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        ON CONFLICT {pk} DO NOTHING
-        """
-
+        if self.has_fips:
+            out = f"""
+            INSERT INTO data.{table_name} (
+              vintage, dt, fips, variable_id, value, provider
+            )
+            SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value, '{self.provider}'
+            FROM {temp_name} tt
+            INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name
+            ON CONFLICT {pk} DO UPDATE set value = excluded.value
+            """
+        else:
+            assert "county" in df.columns
+            out = f"""
+            INSERT INTO data.{table_name} (
+              vintage, dt, fips, variable_id, value, provider
+            )
+            SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value, '{self.provider}'
+            FROM {temp_name} tt
+            INNER JOIN meta.us_fips us on tt.county=us.name
+            INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name
+            WHERE us.state = LPAD({self.state_fips}::TEXT, 2, '0')
+            ON CONFLICT {pk} DO UPDATE SET value = excluded.value
+            """
         return textwrap.dedent(out)
 
 
-class ArcGIS(CountyData):
+class ArcGIS(CountyData, ABC):
     """
     Must define class variables:
 
@@ -35,6 +52,8 @@ class ArcGIS(CountyData):
 
     in order to use this class
     """
+
+    ARCGIS_ID: str
 
     def __init__(self, params=None):
         super(ArcGIS, self).__init__()
@@ -50,7 +69,8 @@ class ArcGIS(CountyData):
 
         self.params = params
 
-        return None
+    def _esri_ts_to_dt(self, ts):
+        return pd.Timestamp.fromtimestamp(ts / 1000)
 
     def arcgis_query_url(self, service, sheet, srvid=1):
         out = f"https://services{srvid}.arcgis.com/{self.ARCGIS_ID}/"
@@ -106,5 +126,33 @@ class ArcGIS(CountyData):
 
         # Stack these up
         df = pd.concat(_dfs)
+
+        return df
+
+
+class SODA(CountyData, ABC):
+    """
+    Must define class variables:
+
+    * `baseurl`
+
+    in order to use this class
+    """
+
+    baseurl: str
+
+    def __init__(self, params=None):
+        super(SODA, self).__init__()
+
+    def soda_query_url(self, data_id, resource="resource", ftype="json"):
+        out = self.baseurl + f"/{resource}/{data_id}.{ftype}"
+
+        return out
+
+    def get_dataset(self, data_id, resource="resource", ftype="json"):
+        url = self.soda_query_url(data_id, resource, ftype)
+        res = requests.get(url)
+
+        df = pd.DataFrame(res.json())
 
         return df

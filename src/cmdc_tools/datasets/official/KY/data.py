@@ -1,11 +1,18 @@
 import pandas as pd
+import us
 
 from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
 
 
-class Kentucky(ArcGIS, DatasetBaseNoDate):
+class Kentucky(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = ""
+    source = (
+        "https://kygeonet.maps.arcgis.com/apps/opsdashboard/"
+        "index.html#/543ac64bc40445918cf8bc34dc40e334"
+    )
+    state_fips = int(us.states.lookup("Kentucky").fips)
+    has_fips = True
 
     def arcgis_query_url(self, service, sheet, srvid=1):
         out = f"https://kygisserver.ky.gov/arcgis/rest/services/WGS84WM_Services/{service}/FeatureServer/{sheet}/query"
@@ -19,8 +26,8 @@ class Kentucky(ArcGIS, DatasetBaseNoDate):
         column_map = {
             "County": "county",
             "FIPS": "fips",
-            "Hospitalized": "hospital_beds_in_use_covid_confirmed",
-            "ICU": "icu_beds_in_use_covid_confirmed",
+            # "Hospitalized": "hospital_beds_in_use_covid_confirmed",
+            # "ICU": "icu_beds_in_use_covid_confirmed",
             "Deceased": "deaths_confirmed",
             "Confirmed": "cases_confirmed",
         }

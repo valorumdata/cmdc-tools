@@ -5,9 +5,12 @@ from .. import InsertWithTempTable, DatasetBaseNeedsDate, DatasetBaseNoDate
 
 
 class NYTimesState(InsertWithTempTable, DatasetBaseNoDate):
-    table_name = "covid_nytimes"
+    table_name = "nyt_covid"
     pk = "(vintage, dt, fips, variable_id)"
+    data_type = "covid"
+    source = "https://github.com/nytimes/covid-19-data"
     url = "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv"
+    has_fips = True
 
     def __init__(self):
         pass
@@ -18,7 +21,7 @@ class NYTimesState(InsertWithTempTable, DatasetBaseNoDate):
         SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
         FROM {temp_name} tt
         LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        ON CONFLICT {pk} DO NOTHING
+        ON CONFLICT {pk} DO UPDATE SET value = excluded.value
         """
 
         return textwrap.dedent(out)

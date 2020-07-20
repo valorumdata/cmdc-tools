@@ -1,0 +1,7 @@
+pep8:
+    disable:
+        - F401
+
+pyflakes:
+    disable:
+        - F401
