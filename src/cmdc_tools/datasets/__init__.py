@@ -15,20 +15,22 @@ from .jhu import JHUDailyReports, JHUDailyReportsUS, Locations
 from .keystone import KeystonePolicy
 from .nytimes import NYTimesState
 from .official import (
-    LosAngeles,
+    DC,
+    AlabamaCounty,
+    AlabamaFips,
     Alaska,
     Arkansas,
     CACountyData,
     ConnecticutCounty,
     ConnecticutState,
-    DC,
     Delaware,
     DelawareKent,
     DelawareNewCastle,
     DelawareSussex,
-    Iowa,
     Imperial,
+    Iowa,
     Kentucky,
+    LosAngeles,
     Louisiana,
     Maryland,
     Massachusetts,
@@ -48,8 +50,8 @@ from .official import (
     Tennessee,
     TennesseeCounties,
     Vermont,
-    Wisconsin,
     WIDane,
+    Wisconsin,
 )
 from .owid import OWID
 from .usafacts import USAFactsCases, USAFactsDeaths

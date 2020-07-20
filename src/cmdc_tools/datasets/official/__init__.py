@@ -1,5 +1,5 @@
 from .AK import Alaska
-from .AL import Alabama
+from .AL import AlabamaCounty, AlabamaFips
 from .AR import Arkansas
 from .base import ArcGIS, CountyData
 from .CA import CACountyData, Imperial, LosAngeles, SanDiego

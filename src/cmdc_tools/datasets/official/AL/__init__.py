@@ -1,1 +1,1 @@
-from .data import Alabama
+from .data import AlabamaFips, AlabamaCounty
