@@ -10,7 +10,7 @@ class Hawaii(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = "HQ0xoN0EzDPBOEci"
     state_fips = int(us.states.lookup("Hawaii").fips)
     has_fips = False
-    source = "https://services.arcgis.com/HQ0xoN0EzDPBOEci/arcgis/rest/services/"
+    source = "https://experience.arcgis.com/experience/eb56a98b71324152a918e72d3ccdfc20"
 
     def get(self):
         df = self.get_all_sheet_to_df("covid_county_counts", 0, "")
