@@ -38,7 +38,7 @@ def test_no_date_datasets(cls):
         print("Skipping!")
         assert True
         return
-    if cls is datasets.LA:
+    if cls is datasets.LosAngeles:
         print("Skipping the flaky LA test!")
         assert True
         return

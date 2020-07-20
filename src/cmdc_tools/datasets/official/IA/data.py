@@ -42,7 +42,7 @@ class Iowa(ArcGIS, DatasetBaseNoDate):
         # Reshape
         out = df.melt(id_vars=["dt", "fips"], var_name="variable_name")
 
-        return out
+        return out.query("fips != 0")
 
     def _get_hosp(self):
         # TODO: Once we decide how to treat hospital regions, return to
