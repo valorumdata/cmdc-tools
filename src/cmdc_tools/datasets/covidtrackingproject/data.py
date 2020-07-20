@@ -3,7 +3,6 @@ import requests
 import textwrap
 
 from .. import InsertWithTempTable, DatasetBaseNoDate
-from ..uscensus.geo import FIPS_RESTRICT_QUERY
 
 
 CURRENT_URL = "https://covidtracking.com/api/v1/states/current.json"
@@ -16,8 +15,9 @@ class CTP(InsertWithTempTable, DatasetBaseNoDate):
     by schema.sql
     """
 
-    table_name = "us_covid"
+    table_name = "ctp_covid"
     pk = '("vintage", "dt", "fips", "variable_id")'
+    source = "https://covidtracking.com/"
 
     def __init__(self):
         super(CTP, self).__init__()
@@ -28,6 +28,7 @@ class CTP(InsertWithTempTable, DatasetBaseNoDate):
             "death": "deaths_total",
             "positive": "positive_tests_total",
             "negative": "negative_tests_total",
+            "totalTestResults": "tests_total",
             "hospitalizedCurrently": "hospital_beds_in_use_covid_total",
             "inIcuCurrently": "icu_beds_in_use_covid_total",
             "onVentilatorCurrently": "ventilators_in_use_covid_total",
@@ -39,7 +40,7 @@ class CTP(InsertWithTempTable, DatasetBaseNoDate):
         SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
         FROM {temp_name} tt
         LEFT JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-        ON CONFLICT {pk} DO NOTHING
+        ON CONFLICT {pk} DO UPDATE SET value = excluded.value
         """
 
         return textwrap.dedent(out)
@@ -73,6 +74,5 @@ class CTP(InsertWithTempTable, DatasetBaseNoDate):
             var_name="variable_name",
             value_name="value",
         ).dropna()
-        df = df.query(FIPS_RESTRICT_QUERY)
 
         return df
