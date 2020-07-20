@@ -23,6 +23,7 @@ from .NM import NewMexico
 from .OK import OKTulsa
 from .PA import Pennsylvania
 from .RI import RhodeIsland
+from .SC import SouthCarolina
 from .TN import Tennessee, TennesseeCounties
 from .VT import Vermont
 from .WI import Wisconsin, WIDane
