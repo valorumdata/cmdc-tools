@@ -1,5 +1,6 @@
 import pandas as pd
 import requests
+import us
 
 from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
@@ -7,6 +8,9 @@ from ..base import ArcGIS
 
 class Alabama(ArcGIS, DatasetBaseNoDate):
     ARCGIS_ID = "4RQmZZ0yaZkGR1zy"
+    has_fips = True
+    state_fips = int(us.states.lookup("Alabama").fips)
+    source = "https://alpublichealth.maps.arcgis.com/apps/opsdashboard/index.html#/6d2771faa9da4a2786a509d82c8cf0f7"
 
     def __init__(self, params=None):
         if params is None:
