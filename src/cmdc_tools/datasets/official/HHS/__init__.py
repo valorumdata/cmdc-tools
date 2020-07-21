@@ -78,6 +78,7 @@ class HHS(DatasetBaseNoDate, ArcGIS):
             [self._get_percent_reporting(), self._get_hospital_census()],
             axis=0, ignore_index=True
         )
+
         df["dt"] = (
             pd.Timestamp.utcnow()
                 .tz_convert("US/Eastern")
@@ -86,4 +87,7 @@ class HHS(DatasetBaseNoDate, ArcGIS):
         )
         df["vintage"] = pd.Timestamp.utcnow().normalize()
 
+        # We are storing everything as integers so we need to convert
+        # the numbers from estimated floats to integers...
+        df["value"] = df["value"].astype(int)
         return df.dropna()
