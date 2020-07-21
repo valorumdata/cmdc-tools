@@ -44,7 +44,8 @@ with open("requirements.txt", "r", encoding="utf-8") as f:
 
 setup(
     name="cmdc_tools",
-    version="0.1",
+    version="0.2",
+    url="https://github.com/valorumdata/cmdc-tools",
     packages=find_packages(exclude=["tests"]),
     entry_points={"console_scripts": [entry_point]},
     install_requires=requires,
