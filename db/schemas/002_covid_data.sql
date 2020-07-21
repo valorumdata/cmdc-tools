@@ -82,6 +82,7 @@ CREATE TYPE covid_provider AS ENUM (
     'county',
     'state',
     'ctp',
+    'hhs',
     'usafacts',
     'nyt',
     'cds'
