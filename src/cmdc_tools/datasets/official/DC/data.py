@@ -16,6 +16,9 @@ class DC(DatasetBaseNeedsDate, CountyData):
     source = "https://coronavirus.dc.gov/page/coronavirus-data"
     start_date = pd.to_datetime("2020-04-07")
 
+    def transform_date(self, date: pd.Timestamp) -> pd.Timestamp:
+        return date - pd.Timedelta(days=1)
+
     def _get_url(self, date: pd.Timestamp):
         # fetch source page and get lxml tree
         res = requests.get(self.source)
