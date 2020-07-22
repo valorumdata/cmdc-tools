@@ -16,7 +16,7 @@ class Indiana(DatasetBaseNoDate, CountyData):
         cd = self._get_case_deaths()
 
         out = pd.concat([hosp, cd], sort=False).sort_values(["dt", "fips"])
-        out["vintage"] = pd.Timestamp.utcnow().normalize()
+        out["vintage"] = self._retrieve_vintage()
 
         return out
 
