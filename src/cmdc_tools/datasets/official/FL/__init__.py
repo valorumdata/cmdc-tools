@@ -100,10 +100,9 @@ class FloridaHospital(DatasetBaseNoDate, CountyData):
         fiu = FloridaICUUsage()
         fhu = FloridaHospitalUsage()
         fhc = FloridaHospitalCovid()
-        today = (
-            pd.Timestamp.utcnow().tz_convert("US/Eastern").tz_localize(None).normalize()
-        )
-        vintage = pd.Timestamp.utcnow().normalize()
+        today = self._retrieve_dt("US/Eastern")
+        vintage = self._retrieve_vintage()
+
         return pd.concat(
             [fiu.get(), fhu.get(), fhc.get()], ignore_index=True, sort=True
         ).assign(dt=today, vintage=vintage)
@@ -127,7 +126,6 @@ class Florida(DatasetBaseNoDate, ArcGIS):
             "casesall": "cases_total",
         }
         renamed = df.rename(columns=column_rename)
-        today = pd.Timestamp.utcnow().normalize()
         renamed["fips"] = renamed["fips"].astype(int) + (self.state_fips * 1000)
         # 12025 is the OLD (retired in 1997) fips code for Date county. It is now known
         # as Miami-Dade county with fips code 12086
@@ -137,5 +135,8 @@ class Florida(DatasetBaseNoDate, ArcGIS):
             renamed.loc[:, list(column_rename.values())]
             .query("fips not in (12998, 12999)")  # 998: state, 999: unknown
             .melt(id_vars=["fips"], var_name="variable_name")
-            .assign(dt=today, vintage=today)
+            .assign(
+                dt=self._retrieve_dt("US/Eastern"),
+                vintage=self._retrieve_vintage()
+            )
         )
