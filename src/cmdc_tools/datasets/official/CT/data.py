@@ -16,7 +16,7 @@ class ConnecticutState(DatasetBaseNoDate, SODA):
         df_state = self.get_state_data()
 
         out = pd.concat([df_state], axis=0, ignore_index=True)
-        out["vintage"] = pd.Timestamp.now().normalize()
+        out["vintage"] = self._retrieve_vintage()
 
         return out
 
@@ -54,7 +54,8 @@ class ConnecticutCounty(DatasetBaseNoDate, SODA):
         df_county = self.get_county_data()
 
         out = pd.concat([df_county], axis=0, ignore_index=True)
-        out["vintage"] = pd.Timestamp.now().normalize()
+        out["vintage"] = self._retrieve_vintage()
+        out["value"] = out["value"].astype(int)
 
         return out
 
