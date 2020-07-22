@@ -15,17 +15,6 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
     state_fips = int(us.states.lookup("Nebraska").fips)
     has_fips = True
 
-    def __init__(self, params=None):
-
-        if params is None:
-            params = {
-                "f": "json",
-                "where": "1=1",
-                "outFields": "*",
-                "returnGeometry": "false",
-            }
-        super().__init__(params)
-
     def arcgis_query_url(
         self, service="Covid19_Update_service", sheet=0, srvid="Agency"
     ):
@@ -40,17 +29,13 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
 
         return (
             pd.concat([state, county], ignore_index=True, sort=True)
-            .assign(vintage=pd.Timestamp.utcnow().normalize())
+            .assign(vintage=self._retrieve_vintage())
             .drop_duplicates(subset=["dt", "vintage", "fips", "variable_name"])
         )
 
     def get_state(self):
-        res = requests.get(self.arcgis_query_url(), params=self.params)
+        df = self.get_all_sheet_to_df("Covid19_Update_service", 0, "Agency")
 
-        # Parse into PD df
-        df = pd.DataFrame.from_records(
-            [x["attributes"] for x in res.json()["features"]]
-        )
         df["hospital_beds_in_use_any"] = df.beds_total - df.beds_avail
         df["icu_beds_in_use_any"] = df.icu_beds_total - df.icu_beds_avail
         df["ventilators_in_use_any"] = df.vent_equip_total - df.vent_equip_avail
@@ -92,25 +77,20 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
         ]
 
         # Convert timestamps
-        keep["dt"] = keep["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000))
+        keep["dt"] = keep["dt"].map(lambda x: self._esri_ts_to_dt(x))
 
         keep["fips"] = self.state_fips
 
         return keep.melt(["dt", "fips"], var_name="variable_name")
 
     def get_county(self):
-        res = requests.get(
-            self.arcgis_query_url(service="Covid19MapV5", sheet=0, srvid="enterprise"),
-            params=self.params,
-        )
-        df = pd.DataFrame.from_records(
-            [x["attributes"] for x in res.json()["features"]]
-        )
+        df = self.get_all_sheet_to_df("Covid19MapV5", 0, "enterprise")
+
         # Rename columns
         colmap = {
             "totalCountyPosFin": "positive_tests_total",
             "totalCountyNotDetFin": "negative_tests_total",
-            "totalCountyDeathsFin": "deaths_confirmed",
+            "totalCountyDeathsFin": "deaths_total",
             "COUNTYFP": "fips",
         }
 
