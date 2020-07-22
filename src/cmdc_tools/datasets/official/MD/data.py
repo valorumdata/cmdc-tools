@@ -39,18 +39,6 @@ class Maryland(DatasetBaseNoDate, ArcGIS):
     state_fips = int(us.states.lookup("Maryland").fips)
     has_fips = True
 
-    def __init__(self, params=None):
-
-        if params is None:
-            params = {
-                "f": "json",
-                "where": "1=1",
-                "outFields": "*",
-                "returnGeometry": "false",
-            }
-
-        super().__init__(params)
-
     def get(self):
         # Get main DataFrame
         df = self.get_all_sheet_to_df("MASTERCaseTracker", 0, "")
@@ -62,11 +50,9 @@ class Maryland(DatasetBaseNoDate, ArcGIS):
         sdf = self.separate_state_specific_data(df)
 
         # Convert timestamps
-        result = pd.concat([cdf, sdf], sort=False)
-        result["dt"] = result["dt"].map(
-            lambda x: pd.datetime.fromtimestamp(x / 1000).date()
-        )
-        result["vintage"] = pd.datetime.today().date()
+        out = pd.concat([cdf, sdf], sort=False, ignore_index=True, axis=0)
+        out["dt"] = out["dt"].map(lambda x: self._esri_ts_to_dt(x))
+        result["vintage"] = self._retrieve_vintage()
 
         return result.sort_values("dt").dropna()
 
@@ -82,6 +68,7 @@ class Maryland(DatasetBaseNoDate, ArcGIS):
             "bedsTotal": "hospital_beds_in_use_covid_total",
             "bedsICU": "icu_beds_in_use_covid_total",
             "NegativeTests": "negative_tests_total",
+            "TotalTests": "tests_total",
             "TotalCases": "cases_total",
             "deaths": "deaths_confirmed",
             "pDeaths": "deaths_suspected",
@@ -98,6 +85,7 @@ class Maryland(DatasetBaseNoDate, ArcGIS):
             "icu_beds_in_use_covid_total",
             "negative_tests_total",
             "positive_tests_total",
+            "tests_total"
         ]
 
         # Rename and create additional variables
