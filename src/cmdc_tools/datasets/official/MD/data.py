@@ -52,9 +52,9 @@ class Maryland(DatasetBaseNoDate, ArcGIS):
         # Convert timestamps
         out = pd.concat([cdf, sdf], sort=False, ignore_index=True, axis=0)
         out["dt"] = out["dt"].map(lambda x: self._esri_ts_to_dt(x))
-        result["vintage"] = self._retrieve_vintage()
+        out["vintage"] = self._retrieve_vintage()
 
-        return result.sort_values("dt").dropna()
+        return out.sort_values("dt").dropna()
 
     def separate_state_specific_data(self, fulldf):
         """
@@ -68,7 +68,6 @@ class Maryland(DatasetBaseNoDate, ArcGIS):
             "bedsTotal": "hospital_beds_in_use_covid_total",
             "bedsICU": "icu_beds_in_use_covid_total",
             "NegativeTests": "negative_tests_total",
-            "TotalTests": "tests_total",
             "TotalCases": "cases_total",
             "deaths": "deaths_confirmed",
             "pDeaths": "deaths_suspected",
@@ -84,14 +83,15 @@ class Maryland(DatasetBaseNoDate, ArcGIS):
             "hospital_beds_in_use_covid_total",
             "icu_beds_in_use_covid_total",
             "negative_tests_total",
-            "positive_tests_total",
-            "tests_total"
+            # "positive_tests_total",
         ]
 
         # Rename and create additional variables
         df = fulldf.rename(columns=crenamer)
         df["deaths_total"] = df.eval("deaths_confirmed + deaths_suspected")
-        df["positive_tests_total"] = df.eval("(PosTestPercent/100) * TotalTests")
+        # TODO: Check how to do this better - This is using the 7 day
+        #       moving average of positive tests....
+        # df["positive_tests_total"] = df.eval("(PosTestPercent/100) * TotalTests")
         df["fips"] = self.state_fips
 
         df = df.loc[:, cols_to_keep]

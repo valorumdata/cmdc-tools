@@ -17,7 +17,7 @@ class Michigan(DatasetBaseNoDate, CountyData):
         cases_county = self._get_county_cases(urls["cases"])
         tests = self._get_tests(urls["tests"])
         result = pd.concat([cases_county, tests], sort=False)
-        return result.assign(vintage=pd.Timestamp.utcnow().normalize())
+        return result.assign(vintage=self._retrieve_vintage())
 
     def _get_urls(self):
         res = requests.get(self.source)
