@@ -189,10 +189,11 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
             "Active_Cases": "active_total",
         }
         df = df.rename(columns=crename).loc[:, crename.values()]
-        df["fips"] = df["county"].map(lambda x: cdict[x.lower()])
-        df["dt"] = self._retrieve_dt("US/Alaska")
 
-        df = df.drop(["county"], axis=1)
+        # Assign fips -- Use -1 if it can't be found and drop any below 0
+        df["fips"] = df["county"].map(lambda x: cdict.get(x.lower(), -1))
+        df["dt"] = self._retrieve_dt("US/Alaska")
+        df = df.drop(["county"], axis=1).query("fips > 0")
 
         out = df.melt(
             id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
