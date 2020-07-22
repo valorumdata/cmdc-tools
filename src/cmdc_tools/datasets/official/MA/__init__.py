@@ -33,6 +33,7 @@ class Massachusetts(DatasetBaseNeedsDate, CountyData):
         int_cols = ["cases_total", "deaths_total"]
         out[int_cols] = out[int_cols].fillna(0).astype(int)
         melted = out.melt(id_vars=["dt", "county"], var_name="variable_name")
+
         return melted.drop_duplicates(
             subset=["dt", "county", "variable_name"], keep="first"
         )
