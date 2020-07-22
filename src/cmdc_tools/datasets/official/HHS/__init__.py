@@ -36,11 +36,13 @@ class HHS(DatasetBaseNoDate, ArcGIS):
             "fac_reporting_20200720": "number_facilities_reporting",
         }
         # Read percent of facilities reporting data
-        df = self.get_all_sheet_to_df(
-            "Percentage_of_Facilities_Reporting_by_State", 0, 5
-        ).rename(
-            columns=crename
-        ).loc[:, crename.values()]
+        df = (
+            self.get_all_sheet_to_df(
+                "Percentage_of_Facilities_Reporting_by_State", 0, 5
+            )
+            .rename(columns=crename)
+            .loc[:, crename.values()]
+        )
 
         # Convert fips codes to integers
         df["fips"] = df["fips"].astype(int)
@@ -60,11 +62,11 @@ class HHS(DatasetBaseNoDate, ArcGIS):
             "fac_reporting_20200720": "number_facilities_reporting",
         }
         # Read percent of facilities reporting data
-        df = self.get_all_sheet_to_df(
-            "NHSN_Percentage_of_Inpatient_Beds_Occupied", 0, 5
-        ).rename(
-            columns=crename
-        ).loc[:, crename.values()]
+        df = (
+            self.get_all_sheet_to_df("NHSN_Percentage_of_Inpatient_Beds_Occupied", 0, 5)
+            .rename(columns=crename)
+            .loc[:, crename.values()]
+        )
 
         # Convert fips codes to integers
         df["fips"] = df["fips"].astype(int)
@@ -76,14 +78,12 @@ class HHS(DatasetBaseNoDate, ArcGIS):
     def get(self):
         df = pd.concat(
             [self._get_percent_reporting(), self._get_hospital_census()],
-            axis=0, ignore_index=True
+            axis=0,
+            ignore_index=True,
         )
 
         df["dt"] = (
-            pd.Timestamp.utcnow()
-                .tz_convert("US/Eastern")
-                .tz_localize(None)
-                .normalize()
+            pd.Timestamp.utcnow().tz_convert("US/Eastern").tz_localize(None).normalize()
         )
         df["vintage"] = pd.Timestamp.utcnow().normalize()
 
