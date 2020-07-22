@@ -16,6 +16,14 @@ class CountyData(InsertWithTempTable, ABC):
     state_fips: int
     provider: str = "state"
 
+    def _retrieve_dt(self, tz="US/Eastern"):
+        out = pd.Timestamp.utcnow().tz_convert(tz).normalize().tz_localize(None)
+
+        return out
+
+    def _retrieve_vintage(self):
+        return pd.Timestamp.utcnow().normalize()
+
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         if self.has_fips:
             out = f"""
@@ -70,9 +78,9 @@ class ArcGIS(CountyData, ABC):
         self.params = params
 
     def _esri_ts_to_dt(self, ts):
-        return pd.Timestamp.fromtimestamp(ts / 1000)
+        return pd.Timestamp.fromtimestamp(ts / 1000).normalize()
 
-    def arcgis_query_url(self, service, sheet, srvid=1):
+    def arcgis_query_url(self, service, sheet, srvid):
         out = f"https://services{srvid}.arcgis.com/{self.ARCGIS_ID}/"
         out += f"ArcGIS/rest/services/{service}/FeatureServer/{sheet}/query"
 
