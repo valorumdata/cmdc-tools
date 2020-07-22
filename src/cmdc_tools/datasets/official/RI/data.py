@@ -35,7 +35,7 @@ class RhodeIsland(DatasetBaseNoDate, CountyData):
             ignore_index=True,
             sort=False,
         )
-        out["vintage"] = pd.Timestamp.utcnow().normalize()
+        out["vintage"] = self._retrieve_vintage()
 
         return out
 
@@ -139,7 +139,7 @@ class RhodeIsland(DatasetBaseNoDate, CountyData):
             .agg("sum")
             .reset_index()
         )
-        agged["dt"] = pd.Timestamp.now().normalize()
+        agged["dt"] = self._retrieve_dt("US/Eastern")
 
         out = agged.melt(id_vars=["dt", "fips"], var_name="variable_name")
 
