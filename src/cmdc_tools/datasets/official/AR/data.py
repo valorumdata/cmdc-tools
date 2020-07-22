@@ -33,7 +33,7 @@ class Arkansas(DatasetBaseNoDate, ArcGIS):
         df = df.rename(columns=crename).loc[:, crename.values()]
 
         # Create full 5 digit fips
-        df["fips"] = df["fips"].astype(int) + 1000*self.state_fips
+        df["fips"] = df["fips"].astype(int) + 1000 * self.state_fips
 
         df["vintage"] = self._retrieve_vintage()
         df["dt"] = self._retrieve_dt(tz="US/Central")

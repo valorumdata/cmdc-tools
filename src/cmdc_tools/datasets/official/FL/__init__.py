@@ -136,7 +136,6 @@ class Florida(DatasetBaseNoDate, ArcGIS):
             .query("fips not in (12998, 12999)")  # 998: state, 999: unknown
             .melt(id_vars=["fips"], var_name="variable_name")
             .assign(
-                dt=self._retrieve_dt("US/Eastern"),
-                vintage=self._retrieve_vintage()
+                dt=self._retrieve_dt("US/Eastern"), vintage=self._retrieve_vintage()
             )
         )

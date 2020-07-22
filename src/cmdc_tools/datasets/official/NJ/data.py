@@ -49,9 +49,7 @@ class NewJersey(DatasetBaseNoDate, ArcGIS):
     def _get_hospital_data(self):
         # Download all data and convert timestamp to date
         df = self.get_all_sheet_to_df(service="PPE_Capacity", sheet=0, srvid=7)
-        df["survey_period"] = df["survey_period"].map(
-            lambda x: self._esri_ts_to_dt(x)
-        )
+        df["survey_period"] = df["survey_period"].map(lambda x: self._esri_ts_to_dt(x))
 
         # Group by the county, date, and variable and sum up all values
         df = (

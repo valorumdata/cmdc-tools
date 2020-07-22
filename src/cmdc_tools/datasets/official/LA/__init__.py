@@ -85,10 +85,8 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
             .groupby("fips")["value"]
             .sum()
             .reset_index()
-            .assign(
-                dt=self._retrieve_dt("US/Central"),
-                variable_name="cases_total",
-            ).loc[:, variables]
+            .assign(dt=self._retrieve_dt("US/Central"), variable_name="cases_total",)
+            .loc[:, variables]
         )
 
         # Get deaths
@@ -97,10 +95,7 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
             .groupby("fips")["value"]
             .sum()
             .reset_index()
-            .assign(
-                dt=self._retrieve_dt("US/Central"),
-                variable_name="deaths_total",
-            )
+            .assign(dt=self._retrieve_dt("US/Central"), variable_name="deaths_total",)
             .loc[:, variables]
         )
 
@@ -112,10 +107,7 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
             .groupby("fips")["value"]
             .sum()
             .reset_index()
-            .assign(
-                dt=self._retrieve_dt("US/Central"),
-                variable_name="tests_total",
-            )
+            .assign(dt=self._retrieve_dt("US/Central"), variable_name="tests_total",)
             .loc[:, variables]
         )
 

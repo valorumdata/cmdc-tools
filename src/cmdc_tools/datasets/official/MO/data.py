@@ -79,8 +79,7 @@ class MissouriFips(DatasetBaseNoDate, ArcGIS):
             renamed[["county", "deaths_total"]]
             .melt(id_vars=["county"], var_name="variable_name")
             .assign(
-                dt=self._retrieve_dt("US/Central"),
-                vintage=self._retrieve_vintage()
+                dt=self._retrieve_dt("US/Central"), vintage=self._retrieve_vintage()
             )
         )
 
@@ -98,7 +97,7 @@ class MissouriFips(DatasetBaseNoDate, ArcGIS):
         )
 
     def _get_tests(self):
-        crename ={
+        crename = {
             "test_date2": "dt",
             "Negative": "negative_tests_total",
             "Positive": "positive_tests_total",

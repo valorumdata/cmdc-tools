@@ -84,7 +84,7 @@ class LosAngeles(DatasetBaseNoDate, CountyData):
 
     def get(self):
         df = asyncio.run(test_data())
-        fips = self.county_fips + 1000*self.state_fips
+        fips = self.county_fips + 1000 * self.state_fips
 
         return (
             df.reset_index()

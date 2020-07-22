@@ -52,7 +52,7 @@ class SanDiego(DatasetBaseNoDate, ArcGIS):
         # rather than epoch seconds
         df["Date"] = df["Date"].map(lambda x: self._esri_ts_to_dt(x))
         df["vintage"] = self._retrieve_vintage()
-        df["fips"] = self.county_fips + 1000*self.state_fips
+        df["fips"] = self.county_fips + 1000 * self.state_fips
 
         # Rename columns
         df = df.rename(

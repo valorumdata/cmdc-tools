@@ -37,10 +37,14 @@ class Pennsylvania(DatasetBaseNoDate, ArcGIS):
         renamed["ventilators_in_use_any"] += renamed["ventilators_in_use_covid_total"]
         renamed = renamed.loc[:, list(column_map.values())]
 
-        return renamed.melt(
-            id_vars=["county"], var_name="variable_name", value_name="value"
-        ).dropna().assign(
-            dt=self._retrieve_dt("US/Eastern"),
-            vintage=self._retrieve_vintage(),
-            value=lambda x: x["value"].astype(int)
+        return (
+            renamed.melt(
+                id_vars=["county"], var_name="variable_name", value_name="value"
+            )
+            .dropna()
+            .assign(
+                dt=self._retrieve_dt("US/Eastern"),
+                vintage=self._retrieve_vintage(),
+                value=lambda x: x["value"].astype(int),
+            )
         )
