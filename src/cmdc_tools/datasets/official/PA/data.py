@@ -35,9 +35,16 @@ class Pennsylvania(DatasetBaseNoDate, ArcGIS):
 
         # the column we used was non-covid, need to add covid to get total
         renamed["ventilators_in_use_any"] += renamed["ventilators_in_use_covid_total"]
-
         renamed = renamed.loc[:, list(column_map.values())]
-        dt = pd.Timestamp.utcnow().normalize()
-        return renamed.melt(
-            id_vars=["county"], var_name="variable_name", value_name="value"
-        ).assign(dt=dt, vintage=dt)
+
+        return (
+            renamed.melt(
+                id_vars=["county"], var_name="variable_name", value_name="value"
+            )
+            .dropna()
+            .assign(
+                dt=self._retrieve_dt("US/Eastern"),
+                vintage=self._retrieve_vintage(),
+                value=lambda x: x["value"].astype(int),
+            )
+        )

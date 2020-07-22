@@ -87,7 +87,7 @@ class WIDane(DatasetBaseNoDate, ArcGIS):
             axis=0,
             ignore_index=True,
         ).assign(
-            vintage=pd.Timestamp.utcnow().normalize(),
+            vintage=self._retrieve_vintage(),
             fips=self.state_fips * 1000 + self.county_fips,
         )
 
