@@ -45,7 +45,7 @@ class CountyData(InsertWithTempTable, ABC):
             FROM {temp_name} tt
             INNER JOIN meta.us_fips us on tt.county=us.name
             INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-            WHERE us.state = LPAD({self.state_fips}::TEXT, 2, '0')
+            WHERE us.state = LPAD({self.state_fips}::TEXT, 2, '0') AND us.fips>100
             ON CONFLICT {pk} DO UPDATE SET value = excluded.value
             """
         return textwrap.dedent(out)
