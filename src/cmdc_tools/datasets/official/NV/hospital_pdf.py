@@ -8,57 +8,28 @@ from ...base import DatasetBaseNeedsDate
 from ..base import CountyData
 
 
-NVHA_keep_name_added = [
-    (False, "HospitalName", pd.to_datetime("2020-03-01")),
-    (False, "Region", pd.to_datetime("2020-03-01")),
-    (False, "Tier", pd.to_datetime("2020-03-01")),
-    (False, "Zip", pd.to_datetime("2020-03-01")),
-    (True, "county", pd.to_datetime("2020-03-01")),
-    (False, "CertNo", pd.to_datetime("2020-03-01")),
-    (True, "hospital_beds_capacity_count", pd.to_datetime("2020-03-01")),
-    (True, "hospital_beds_in_use_any", pd.to_datetime("2020-03-01")),
-    (False, "hospital_beds_occ_rate", pd.to_datetime("2020-03-01")),
-    (True, "icu_beds_capacity_count", pd.to_datetime("2020-03-01")),
-    (True, "icu_beds_in_use_any", pd.to_datetime("2020-03-01")),
-    (False, "icu_beds_occ_rate", pd.to_datetime("2020-03-01")),
-    (True, "ventilators_capacity_count", pd.to_datetime("2020-03-01")),
-    (True, "ventilators_in_use_any", pd.to_datetime("2020-03-01")),
-    (False, "ventilators_occ_rate", pd.to_datetime("2020-03-01")),
-    (True, "hospital_beds_in_use_covid_confirmed", pd.to_datetime("2020-03-01")),
-    (True, "hospital_beds_in_use_covid_suspected", pd.to_datetime("2020-03-01")),
-    (False, "overflow_covid_total", pd.to_datetime("2020-03-01")),
-    (False, "overflow_on_vent_covid_total", pd.to_datetime("2020-03-01")),
-    (False, "hospital_beds_in_use_covid_new", pd.to_datetime("2020-03-01")),
-    (False, "covid_patients_cleared_but_cannot_discharge", pd.to_datetime("2020-07-08")),
-    (True, "icu_beds_in_use_covid_total", pd.to_datetime("2020-03-01")),
-    (True, "icu_beds_in_use_covid_new", pd.to_datetime("2020-03-01")),
-    (True, "ventilators_in_use_covid_total", pd.to_datetime("2020-03-01")),
-    (False, "ventilators_used_today", pd.to_datetime("2020-03-01")),
-    (False, "HFNC_in_use_covid_total", pd.to_datetime("2020-03-01")),
-    (False, "HFNC_used_today", pd.to_datetime("2020-03-01")),
-    (False, "patients_develop_covid_symptoms", pd.to_datetime("2020-03-01")),
-    (False, "covid_patient_deaths_total", pd.to_datetime("2020-03-01")),
-    (False, "covid_patient_deaths_new", pd.to_datetime("2020-03-01")),
-    (False, "staff_cases_total", pd.to_datetime("2020-03-01")),
-    (False, "staffing_levels", pd.to_datetime("2020-03-01")),
-    (False, "staffing_comments", pd.to_datetime("2020-03-01")),
-    (False, "N95_supply", pd.to_datetime("2020-03-01")),
+_COLS = [
+    (0, "name"),
+    (4, "county"),
+    # 8 corresponds to staffed beds -- Should we use licensed beds
+    # instead?
+    (8, "hospital_beds_capacity_count"),
+    (11, "hospital_beds_in_use_any"),
+    (14, "icu_beds_capacity_count"),
+    (16, "icu_beds_in_use_any"),
+    (22, "ventilators_capacity_count"),
+    (24, "ventilators_in_use_any"),
+    (26, "hospital_beds_in_use_covid_confirmed"),
+    (29, "hospital_beds_in_use_covid_suspected"),
+    (34, "hospital_beds_in_use_covid_new"),
+    (36, "icu_beds_in_use_covid_total"),
+    (39, "ventilators_in_use_covid_total"),
 ]
 
 
 class NVHospitalPdf(DatasetBaseNeedsDate, CountyData):
     state_fips = int(us.states.lookup("Nevada").fips)
     has_fips = False
-
-    def determine_cols(self, dt, how="all"):
-        if how == "dt":
-            keep = lambda x: x[2] <= dt
-        elif how == "keep":
-            keep = lambda x: x[0]
-        else:
-            keep = lambda x: x[0] and x[2] <= dt
-
-        return [c[1] for c in NVHA_keep_name_added if keep(c)]
 
     def get_date(self, pdf_file):
         # Open file and extract text
@@ -71,37 +42,57 @@ class NVHospitalPdf(DatasetBaseNeedsDate, CountyData):
         # Get the date
         dt = self.get_date(pdf_file)
 
-        # Get the column names based on whether the column was active
-        # on given dt
-        cols = self.determine_cols(dt, how="dt")
-
         # Read all tables on the first page
         tables = camelot.read_pdf(
-            pdf_file, pages="1", flavor="lattice", shift_text="",
+            pdf_file, pages="1,2,7,8", flavor="lattice",
+            shift_text="", strip_text="\n",
             layout_kwargs={"char_margin": 0.5}
         )
+        # Organize tables by which type they are
+        t1_tables = [0, 2, 3]
+        t2_tables = [1, 4, 5]
+        tables_w_headers = [0, 1, 2, 4]
 
-        rows = []
-        for table in tables:
-            _df = table.df
-            if len(_df.columns) != len(cols):
-                msg = "Column counts don't line up\n"
-                msg += "Check the columns in the pdf against code cols"
-                raise ValueError(msg)
+        # Pull out correct column labels
+        t1_headers = tables[0].df.iloc[0, :]
+        t1_headers[0] = "name"
+        t2_headers = tables[1].df.iloc[0, :]
+        t2_headers[0] = "name"
+        agg_regions = ['total', 'south', 'rural', 'north']
 
-            _df.columns = cols
-            for row in _df.itertuples(index=False):
-                # Skip any rows with the wrong columns
-                if not str(row.Tier).isnumeric():
-                    continue
-                elif "hospital name" in row.HospitalName.lower():
-                    continue
-                elif "fail" in row.HospitalName.lower():
-                    continue
+        dfs = []
+        for (itable, table) in enumerate(tables):
+            # Get correct subset of data
+            if itable in tables_w_headers:
+                _df = table.df.iloc[1:, :]
+            else:
+                _df = table.df
 
-                # If it makes it this far then add it to the rows
-                rows.append(row)
-        hospital_table = pd.DataFrame(rows)
+            if itable in t1_tables:
+                _df.columns = t1_headers
+            elif itable in t2_tables:
+                _df.columns = t2_headers
+            else:
+                raise ValueError("Unexpected table")
+
+            _df["name"] = _df["name"].str.lower()
+            _df = _df.query(
+                "(name not in @agg_regions) & (name != '')"
+            )
+            dfs.append(_df)
+
+        # Stack matching dfs and then merge
+        t1_df = pd.concat(
+            [dfs[i] for i in t1_tables], axis=0, ignore_index=True
+        )
+        t2_df = pd.concat(
+            [dfs[i] for i in t2_tables], axis=0, ignore_index=True
+        )
+        hospital_table = t1_df.merge(t2_df, on="name", how="outer")
+
+        # Rename columns that we're interested in
+        hospital_table = hospital_table.iloc[:, [c[0] for c in _COLS]]
+        hospital_table.columns = [c[1] for c in _COLS]
 
         # For whatever reason, Horizon Specialty Hospital reports
         # 'NEVADA' as their county... Google search reveals that it
@@ -130,11 +121,6 @@ class NVHospitalPdf(DatasetBaseNeedsDate, CountyData):
         dt = self.get_date(pdf_file)
         ht = self.parse_pdf(pdf_file)
 
-        # Only keep columns that we'll use and create new total
-        # covid patients
-        cols = self.determine_cols(dt, how="all")
-
-        ht = ht.loc[:, cols]
         ht["hospital_beds_in_use_covid_total"] = ht.eval(
             "hospital_beds_in_use_covid_confirmed + hospital_beds_in_use_covid_suspected"
         )
@@ -143,9 +129,10 @@ class NVHospitalPdf(DatasetBaseNeedsDate, CountyData):
         ht = ht.groupby("county").sum().reset_index()
         ht = ht.melt(id_vars=["county"], var_name="variable_name")
 
-        ht["vintage"] = pd.Timestamp.utcnow().normalize()
-        ht["dt"] = pd.to_datetime(
-            fitz.open(pdf_file).getPageText(0).split("\n")[1]
-        ).date()
+        ht["vintage"] = self._retrieve_vintage()
+        ht["dt"] = dt
+
+        ht = ht.dropna()
+        ht["value"] = ht["value"].astype(int)
 
         return ht
