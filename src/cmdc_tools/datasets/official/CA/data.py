@@ -22,7 +22,8 @@ class CACountyData(DatasetBaseNoDate, CountyData):
         cd_df = self.get_case_death_data()
         hosp_df = self.get_hospital_data()
         df = pd.concat([cd_df, hosp_df], axis=0, ignore_index=True)
-        df["vintage"] = pd.datetime.today()
+        df["value"] = df["value"].astype(int)
+        df["vintage"] = pd.Timestamp.utcnow().normalize()
 
         return df
 

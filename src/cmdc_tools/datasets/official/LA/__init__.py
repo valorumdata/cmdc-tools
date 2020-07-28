@@ -85,7 +85,7 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
             .groupby("fips")["value"]
             .sum()
             .reset_index()
-            .assign(dt=pd.datetime.today().date(), variable_name="cases_total",)
+            .assign(dt=self._retrieve_dt("US/Central"), variable_name="cases_total",)
             .loc[:, variables]
         )
 
@@ -95,7 +95,7 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
             .groupby("fips")["value"]
             .sum()
             .reset_index()
-            .assign(dt=pd.datetime.today().date(), variable_name="deaths_total",)
+            .assign(dt=self._retrieve_dt("US/Central"), variable_name="deaths_total",)
             .loc[:, variables]
         )
 
@@ -107,7 +107,7 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
             .groupby("fips")["value"]
             .sum()
             .reset_index()
-            .assign(dt=pd.datetime.today().date(), variable_name="tests_total",)
+            .assign(dt=self._retrieve_dt("US/Central"), variable_name="tests_total",)
             .loc[:, variables]
         )
 
@@ -122,7 +122,7 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
         """
         # Will create a list of DataFrames
         out = []
-        dt = pd.datetime.today().date()
+        dt = self._retrieve_dt("US/Central")
         ladf = fulldf.query("Geography == 'Louisiana'")
         variables = ["dt", "fips", "variable_name", "value"]
 
@@ -217,6 +217,6 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
         # Concat all of the data together and add vintage
         out = pd.concat(
             [county, county_ct_ts, state], ignore_index=True, axis=0
-        ).assign(vintage=pd.Timestamp.utcnow().normalize())
+        ).assign(vintage=self._retrieve_vintage())
 
         return out

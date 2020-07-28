@@ -35,7 +35,7 @@ class OWID(DatasetBaseNoDate):
         url = "https://covid.ourworldindata.org/data/owid-covid-data.csv"
         return (
             pd.read_csv(url, parse_dates=["date"])
-            .rename(columns={"date": "dt"})
+            .rename(columns={"date": "dt", "cardiovasc_death_rate": "cvd_death_rate"})
             .dropna(subset=["iso_code"])
         )
 

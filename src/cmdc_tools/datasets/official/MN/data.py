@@ -25,11 +25,11 @@ class MinnesotaCountiesCasesDeaths(DatasetBaseNoDate, CountyData):
         )
 
         # Create datetime
-        df["dt"] = pd.Timestamp.utcnow().tz_convert("US/Central").normalize()
+        df["dt"] = self._retrieve_dt("US/Central")
         df = df.melt(
             id_vars=["dt", "county"], var_name="variable_name", value_name="value"
         )
-        df["vintage"] = pd.Timestamp.utcnow().normalize()
+        df["vintage"] = self._retrieve_vintage()
 
         return df
 
@@ -103,7 +103,7 @@ class Minnesota(DatasetBaseNoDate, CountyData):
             )
             .dropna()
             .assign(
-                vintage=pd.Timestamp.utcnow().normalize(),
+                vintage=self._retrieve_vintage(),
                 value=lambda x: x["value"].astype(int),
             )
         )

@@ -28,8 +28,7 @@ def _covid_dataset_tests(cls, df):
 
 def _test_data_structure(cls, df):
     if getattr(cls, "data_type", None) == "covid":
-        if not isinstance(cls, datasets.JHUDailyReportsUS):
-            _covid_dataset_tests(cls, df)
+        _covid_dataset_tests(cls, df)
 
 
 @pytest.mark.parametrize("cls", nodates)
@@ -38,7 +37,7 @@ def test_no_date_datasets(cls):
         print("Skipping!")
         assert True
         return
-    if cls is datasets.LA:
+    if cls is datasets.LosAngeles:
         print("Skipping the flaky LA test!")
         assert True
         return

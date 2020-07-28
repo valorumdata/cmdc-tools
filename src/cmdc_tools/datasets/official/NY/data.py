@@ -18,7 +18,7 @@ class NewYork(DatasetBaseNoDate, CountyData):
         tests = self._get_tests_data()
 
         out = pd.concat([tests], axis=0, ignore_index=True)
-        out["vintage"] = pd.Timestamp.now().normalize()
+        out["vintage"] = self._retrieve_vintage()
 
         return out
 
