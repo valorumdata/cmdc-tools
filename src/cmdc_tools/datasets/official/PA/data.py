@@ -13,7 +13,7 @@ class Pennsylvania(DatasetBaseNoDate, ArcGIS):
         "index.html#/85054b06472e4208b02285b8557f24cf"
     )
     state_fips = int(us.states.lookup("Pennsylvania").fips)
-    has_fips: bool = False
+    has_fips = False
 
     def get(self):
         df = self.get_all_sheet_to_df(
@@ -25,23 +25,26 @@ class Pennsylvania(DatasetBaseNoDate, ArcGIS):
             "Cases": "cases_total",
             "Deaths": "deaths_total",
             "AvailableBedsAdultICU": "available_icu_beds",
-            "AvailableBedsMedSurg": "available_other_beds",
-            "AvailableBedsPICU": "available_picu_beds",
-            "COVID19Hospitalized": "hospital_beds_in_use_covid_confirmed",
+            "COVID19Hospitalized": "hospital_beds_in_use_covid_total",
             "TotalVents": "ventilators_capacity_count",
             "VentsInUse": "ventilators_in_use_any",
-            "COVID19onVents": "ventilators_in_use_covid_confirmed",
+            "COVID19onVents": "ventilators_in_use_covid_total",
         }
 
         renamed = df.rename(columns=column_map)
 
         # the column we used was non-covid, need to add covid to get total
-        renamed["ventilators_in_use_any"] += renamed[
-            "ventilators_in_use_covid_confirmed"
-        ]
-
+        renamed["ventilators_in_use_any"] += renamed["ventilators_in_use_covid_total"]
         renamed = renamed.loc[:, list(column_map.values())]
-        dt = pd.Timestamp.utcnow().normalize()
-        return renamed.melt(
-            id_vars=["county"], var_name="variable_name", value_name="value"
-        ).assign(dt=dt, vintage=dt)
+
+        return (
+            renamed.melt(
+                id_vars=["county"], var_name="variable_name", value_name="value"
+            )
+            .dropna()
+            .assign(
+                dt=self._retrieve_dt("US/Eastern"),
+                vintage=self._retrieve_vintage(),
+                value=lambda x: x["value"].astype(int),
+            )
+        )

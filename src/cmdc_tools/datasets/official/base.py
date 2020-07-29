@@ -10,17 +10,27 @@ from .. import InsertWithTempTable
 class CountyData(InsertWithTempTable, ABC):
     table_name: str = "us_covid"
     pk: str = '("vintage", "dt", "fips", "variable_id")'
+    provider = "state"
     data_type: str = "covid"
     has_fips: bool
     state_fips: int
+    provider: str = "state"
+
+    def _retrieve_dt(self, tz="US/Eastern"):
+        out = pd.Timestamp.utcnow().tz_convert(tz).normalize().tz_localize(None)
+
+        return out
+
+    def _retrieve_vintage(self):
+        return pd.Timestamp.utcnow().normalize()
 
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         if self.has_fips:
             out = f"""
             INSERT INTO data.{table_name} (
-              vintage, dt, fips, variable_id, value
+              vintage, dt, fips, variable_id, value, provider
             )
-            SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value
+            SELECT tt.vintage, tt.dt, tt.fips, mv.id as variable_id, tt.value, '{self.provider}'
             FROM {temp_name} tt
             INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name
             ON CONFLICT {pk} DO UPDATE set value = excluded.value
@@ -29,13 +39,13 @@ class CountyData(InsertWithTempTable, ABC):
             assert "county" in df.columns
             out = f"""
             INSERT INTO data.{table_name} (
-              vintage, dt, fips, variable_id, value
+              vintage, dt, fips, variable_id, value, provider
             )
-            SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value
+            SELECT tt.vintage, tt.dt, us.fips, mv.id as variable_id, tt.value, '{self.provider}'
             FROM {temp_name} tt
             INNER JOIN meta.us_fips us on tt.county=us.name
             INNER JOIN meta.covid_variables mv ON tt.variable_name=mv.name
-            WHERE us.state = LPAD({self.state_fips}::TEXT, 2, '0')
+            WHERE us.state = LPAD({self.state_fips}::TEXT, 2, '0') AND us.fips>100
             ON CONFLICT {pk} DO UPDATE SET value = excluded.value
             """
         return textwrap.dedent(out)
@@ -67,7 +77,10 @@ class ArcGIS(CountyData, ABC):
 
         self.params = params
 
-    def arcgis_query_url(self, service, sheet, srvid=1):
+    def _esri_ts_to_dt(self, ts):
+        return pd.Timestamp.fromtimestamp(ts / 1000).normalize()
+
+    def arcgis_query_url(self, service, sheet, srvid):
         out = f"https://services{srvid}.arcgis.com/{self.ARCGIS_ID}/"
         out += f"ArcGIS/rest/services/{service}/FeatureServer/{sheet}/query"
 
@@ -121,5 +134,33 @@ class ArcGIS(CountyData, ABC):
 
         # Stack these up
         df = pd.concat(_dfs)
+
+        return df
+
+
+class SODA(CountyData, ABC):
+    """
+    Must define class variables:
+
+    * `baseurl`
+
+    in order to use this class
+    """
+
+    baseurl: str
+
+    def __init__(self, params=None):
+        super(SODA, self).__init__()
+
+    def soda_query_url(self, data_id, resource="resource", ftype="json"):
+        out = self.baseurl + f"/{resource}/{data_id}.{ftype}"
+
+        return out
+
+    def get_dataset(self, data_id, resource="resource", ftype="json"):
+        url = self.soda_query_url(data_id, resource, ftype)
+        res = requests.get(url)
+
+        df = pd.DataFrame(res.json())
 
         return df

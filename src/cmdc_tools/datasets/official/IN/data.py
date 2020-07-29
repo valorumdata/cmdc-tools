@@ -16,7 +16,7 @@ class Indiana(DatasetBaseNoDate, CountyData):
         cd = self._get_case_deaths()
 
         out = pd.concat([hosp, cd], sort=False).sort_values(["dt", "fips"])
-        out["vintage"] = pd.Timestamp.utcnow().normalize()
+        out["vintage"] = self._retrieve_vintage()
 
         return out
 
@@ -52,7 +52,7 @@ class Indiana(DatasetBaseNoDate, CountyData):
                 "DATE": "dt",
                 "COVID_COUNT_CUMSUM": "cases_total",
                 "COVID_DEATHS_CUMSUM": "deaths_total",
-                # "COVID_TEST_CUMSUM": "total_test",
+                "COVID_TEST_CUMSUM": "total_test",
             }
         )
 
@@ -76,7 +76,7 @@ class Indiana(DatasetBaseNoDate, CountyData):
             "DATE": "dt",
             "COVID_COUNT_CUMSUM": "cases_total",
             "COVID_DEATHS_CUMSUM": "deaths_total",
-            # "COVID_TEST_CUMSUM": "test_total"
+            "COVID_TEST_CUMSUM": "test_total",
         }
 
         for _county in county_jsons:

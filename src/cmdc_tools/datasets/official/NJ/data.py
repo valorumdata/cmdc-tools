@@ -42,18 +42,14 @@ class NewJersey(DatasetBaseNoDate, ArcGIS):
 
         # Concat data
         df = pd.concat([hosp, cases], axis=0).sort_values(["dt", "county"])
-        df["vintage"] = pd.Timestamp.now().normalize()
+        df["vintage"] = self._retrieve_vintage()
 
         return df
 
     def _get_hospital_data(self):
         # Download all data and convert timestamp to date
         df = self.get_all_sheet_to_df(service="PPE_Capacity", sheet=0, srvid=7)
-        df["survey_period"] = pd.to_datetime(
-            df["survey_period"].map(
-                lambda x: pd.datetime.fromtimestamp(x / 1000).date()
-            )
-        )
+        df["survey_period"] = df["survey_period"].map(lambda x: self._esri_ts_to_dt(x))
 
         # Group by the county, date, and variable and sum up all values
         df = (
@@ -110,7 +106,8 @@ class NewJersey(DatasetBaseNoDate, ArcGIS):
         )
 
         df = df[["county", "cases_total", "deaths_total"]]
-        dt = pd.Timestamp.now().normalize()
+        df["county"] = df["county"].str.title()
+        dt = self._retrieve_dt("US/Eastern")
         df["dt"] = dt
 
         df = df.melt(

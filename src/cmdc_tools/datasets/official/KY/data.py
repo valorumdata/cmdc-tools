@@ -26,15 +26,15 @@ class Kentucky(DatasetBaseNoDate, ArcGIS):
         column_map = {
             "County": "county",
             "FIPS": "fips",
-            "Hospitalized": "hospital_beds_in_use_covid_confirmed",
-            "ICU": "icu_beds_in_use_covid_confirmed",
+            # "Hospitalized": "hospital_beds_in_use_covid_confirmed",
+            # "ICU": "icu_beds_in_use_covid_confirmed",
             "Deceased": "deaths_confirmed",
             "Confirmed": "cases_confirmed",
         }
 
         renamed = df.rename(columns=column_map).loc[:, list(column_map.values())]
 
-        dt = pd.Timestamp.utcnow().normalize()
+        dt = self._retrieve_dt("US/Eastern")
         return (
             renamed.melt(
                 id_vars=["county", "fips"], var_name="variable_name", value_name="value"

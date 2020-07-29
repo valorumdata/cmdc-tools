@@ -12,50 +12,36 @@ class Arkansas(DatasetBaseNoDate, ArcGIS):
     ARCGIS_ID = "PwY9ZuZRDiI5nXUB"
     source = "https://experience.arcgis.com/experience/c2ef4a4fcbe5458fbf2e48a21e4fece9"
     state_fips = int(us.states.lookup("Arkansas").fips)
-    has_fips = False
-
-    def __init__(self, params=None):
-
-        if params is None:
-            params = {
-                "f": "json",
-                "where": "1=1",
-                "outFields": "*",
-                "returnGeometry": "false",
-            }
-
-        super(Arkansas, self).__init__(params)
+    has_fips = True
 
     def get(self):
-        url = self.arcgis_query_url(
+        df = self.get_all_sheet_to_df(
             service="ADH_COVID19_Positive_Test_Results", sheet=0, srvid=""
         )
-        res = requests.get(url, params=self.params)
-
-        df = pd.DataFrame.from_records(
-            [x["attributes"] for x in res.json()["features"]]
-        )
+        df = df.query("county_nam != 'Missing County Info'")
 
         # Filter columns
         crename = {
-            "county_nam": "county",
+            "FIPS": "fips",
             "positive": "positive_tests_total",
             "negative": "negative_tests_total",
+            "total_tests": "tests_total",
             "Recoveries": "recovered_total",
             "deaths": "deaths_total",
             "active_cases": "active_total",
         }
-        keep = df.rename(columns=crename)
+        df = df.rename(columns=crename).loc[:, crename.values()]
 
-        keeprows = ~keep["county"].str.lower().str.contains("missing")
-        keep = keep.loc[keeprows, crename.values()]
+        # Create full 5 digit fips
+        df["fips"] = df["fips"].astype(int) + 1000 * self.state_fips
 
-        keep["vintage"] = pd.datetime.today().date()
-        keep["dt"] = pd.datetime.today().date()
-        keep = keep.melt(
-            id_vars=["vintage", "dt", "county"],
+        df["vintage"] = self._retrieve_vintage()
+        df["dt"] = self._retrieve_dt(tz="US/Central")
+
+        out = df.melt(
+            id_vars=["vintage", "dt", "fips"],
             var_name="variable_name",
             value_name="value",
         )
 
-        return keep
+        return out

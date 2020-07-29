@@ -1,14 +1,35 @@
--- JHU
-CREATE OR REPLACE VIEW api.jhu_covid AS
+/* Covid Tracking Project */
+CREATE OR REPLACE VIEW api.covidtrackingproject AS
   WITH last_vintage as (
-    SELECT dt, fips, variable_id, MAX(date_updated) AS date_updated
-    FROM data.jhu_daily_reports_us
+    SELECT dt, fips, variable_id, MAX(vintage) AS vintage
+    FROM data.ctp_covid
     GROUP BY (dt, fips, variable_id)
   )
-  SELECT jhu.dt, jhu.fips, cv.name as variable, jhu.value
+  SELECT ctp.dt, ctp.fips, cv.name as variable, ctp.value
   FROM last_vintage lv
-  LEFT JOIN data.jhu_daily_reports_us jhu using (dt, fips, variable_id, date_updated)
-  left join meta.covid_variables cv ON cv.id = jhu.variable_id;
+  LEFT JOIN data.ctp_covid ctp using (dt, fips, variable_id, vintage)
+  LEFT JOIN meta.covid_variables cv ON cv.id = ctp.variable_id;
+
+COMMENT ON VIEW api.covidtrackingproject IS E'This table contains the data from the COVID Tracking Project COVID data
+
+This table only includes the most recent observation for each date, location, and variable. If you are interested in historical revisions of this data, please reach out -- We have previous "vintages" of the CTP data but, in order to simplify our list of tables, we have chosen not to expose (but are happy to if it would be useful).
+
+The COVID Tracking Project collects data on the number of cases, test results, and hospitaliztions at the state level. As always, if you intend to use this data, we recommend that you read the corresponding documentation on their [data page](https://covidtracking.com/data) as it provides insights into how data collection changed at various points in time and highlights other data caveats.
+
+The data can also be found at on the [COVID Tracking Project page](https://covidtracking.com/data).
+
+The COVID Tracking Project data is released under the following license:
+
+You are welcome to copy, distribute, and develop data and website content from The COVID Tracking Project at The Atlantic for all healthcare, medical, journalistic and non-commercial uses, including any personal, editorial, academic, or research purposes.
+
+The COVID Tracking Project at The Atlantic data and website content is published under a Creative Commons CC BY-NC-4.0 license, which requires users to attribute the source and license type (CC BY-NC-4.0) when sharing our data or website content. The COVID Tracking Project at The Atlantic also grants permission for any derivative use of this data and website content that supports healthcare or medical research (including institutional use by public health and for-profit organizations), or journalistic usage (by nonprofit or for-profit organizations). All other commercial uses are not permitted under the Creative Commons license, and will require permission from The COVID Tracking Project at The Atlantic.
+';
+
+COMMENT ON COLUMN api.covidtrackingproject.dt is E'The date of the observation';
+COMMENT ON COLUMN api.covidtrackingproject.fips is E'The fips code corresponding to the observation';
+COMMENT ON COLUMN api.covidtrackingproject.variable is E'Denotes whether observation is total cases or total deaths';
+COMMENT ON COLUMN api.covidtrackingproject.value is E'The value of the observation';
+
 
 
 /* NYTimes */
