@@ -26,5 +26,6 @@ from .OK import OKTulsa
 from .PA import Pennsylvania
 from .RI import RhodeIsland
 from .TN import Tennessee, TennesseeCounties
+from .UT import Utah, UtahFips
 from .VT import Vermont
 from .WI import Wisconsin, WIDane

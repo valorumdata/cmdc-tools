@@ -1,1 +1,1 @@
-from .data import Utah
+from .data import Utah, UtahFips
