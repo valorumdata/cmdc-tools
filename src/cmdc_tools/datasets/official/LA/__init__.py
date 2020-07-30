@@ -35,6 +35,7 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
             raw.loc[:, list(column_names.values())]
             .set_index(["dt", "county"])
             .unstack()
+            .sort_index()
             .cumsum()
             .stack()
             .reset_index()
