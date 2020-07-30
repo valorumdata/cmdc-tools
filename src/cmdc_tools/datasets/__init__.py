@@ -39,6 +39,7 @@ from .official import (
     MinnesotaCountiesCasesDeaths,
     MissouriCounty,
     MissouriFips,
+    MOStLouis,
     Montana,
     Nebraska,
     NewJersey,
