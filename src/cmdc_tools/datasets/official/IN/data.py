@@ -108,6 +108,7 @@ class Indiana(DatasetBaseNoDate, CountyData):
             columns={
                 "date": "dt",
                 "district": "fips",
+                "m1a_beds_all_occupied_beds_covid_19_smoothed": "hospital_beds_in_use_covid_total",
                 "m2b_hospitalized_icu_supply": "icu_beds_capacity_count",
                 "m2b_hospitalized_icu_occupied_covid": "icu_beds_in_use_covid_total",
                 "m2b_hospitalized_icu_occupied_non_covid": "icu_beds_in_use_noncovid",
@@ -131,6 +132,7 @@ class Indiana(DatasetBaseNoDate, CountyData):
             "dt",
             "fips",
             "district_type",
+            "hospital_beds_in_use_covid_total",
             "icu_beds_capacity_count",
             "icu_beds_in_use_covid_total",
             "icu_beds_in_use_any",
