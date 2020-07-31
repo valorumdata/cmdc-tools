@@ -43,7 +43,9 @@ class CACountyData(DatasetBaseNoDate, CountyData):
         hosp_df = self.get_hospital_data()
         test_df = self.get_test_data()
 
-        df = pd.concat([cd_df, hosp_df, test_df], axis=0, ignore_index=True)
+        df = pd.concat(
+            [cd_df, hosp_df, test_df], axis=0, ignore_index=True, sort=True
+        )
         df["value"] = df["value"].astype(int)
         df["vintage"] = pd.Timestamp.utcnow().normalize()
 
@@ -88,11 +90,12 @@ class CACountyData(DatasetBaseNoDate, CountyData):
             # "icu_available_beds": "icu_beds_capacity_count", Unsure if this is capacity
         }
         df = df.rename(columns=crename).loc[:, crename.values()]
-        df["dt"] = pd.to_datetime(df["dt"])
 
-        # Convert to numeric
+        # Convert to numeric and date
         df = df.replace("None", None)
         df = df.apply(lambda x: pd.to_numeric(x, errors="ignore"))
+        df["dt"] = pd.to_datetime(df["dt"])
+
         df["icu_beds_in_use_covid_total"] = df.eval(
             "icu_beds_in_use_covid_confirmed + icu_beds_in_use_covid_suspected"
         )
