@@ -10,14 +10,28 @@ class AlabamaFips(ArcGIS, DatasetBaseNoDate):
     ARCGIS_ID = "4RQmZZ0yaZkGR1zy"
     has_fips = True
     state_fips = int(us.states.lookup("Alabama").fips)
-    source = "https://alpublichealth.maps.arcgis.com/apps/opsdashboard/index.html#/6d2771faa9da4a2786a509d82c8cf0f7"
+    source = (
+        "https://alpublichealth.maps.arcgis.com/apps/opsdashboard/"
+        "index.html#/6d2771faa9da4a2786a509d82c8cf0f7"
+    )
 
-    def get(self):
-        public = self._get_public_dashboard()
-        hosp = self._get_hosp()
-        concat = pd.concat([public, hosp], sort=False)
-        result = concat[concat.fips != 99999]
-        return result
+    def _get_statehosp(self):
+        df = self.get_all_sheet_to_df(
+            "HospitalizedPatientTemporal_READ_ONLY", 1, 7
+        )
+
+        # WARNING: This is a 2020 specific operation... Will break in 2021
+        df["dt"] = pd.to_datetime("2020-" + df["DateTxt"])
+        df = df.rename(columns=
+            {
+                "Confirmed_AllWeekdays": "hospital_beds_in_use_covid_total"
+            }
+        ).loc[:, ["dt", "hospital_beds_in_use_covid_total"]]
+        df["fips"] = self.state_fips
+
+        out = df.melt(id_vars=["dt", "fips"], var_name="variable_name")
+
+        return out
 
     def _get_hosp(self):
         df = self.get_all_sheet_to_df("c19v2_hcw_ltcf_PUBLIC", 1, 7)
@@ -41,25 +55,66 @@ class AlabamaFips(ArcGIS, DatasetBaseNoDate):
                 ]
             ]
             .melt(id_vars=["dt", "fips"], var_name="variable_name")
-            .assign(vintage=pd.Timestamp.utcnow())
         )
 
-    def _get_public_dashboard(self):
-        df = self.get_all_sheet_to_df("COV19_Public_Dashboard_ReadOnly", 0, 7)
-        renamed = df.rename(
+    def _get_cases_deaths_current_tests(self):
+
+        df = self.get_all_sheet_to_df(
+            "COV19_Public_Dashboard_ReadOnly", 0, 7
+        ).rename(
             columns={
                 "CNTYFIPS": "fips",
                 "CONFIRMED": "cases_confirmed",
-                "DIED": "deaths_total",
+                "DIED": "deaths_confirmed",
                 "LabTestCount": "tests_total",
             }
+        ).loc[:, ["fips", "cases_confirmed", "deaths_confirmed", "tests_total"]]
+
+        df["fips"] = df["fips"].astype(int)
+        df["dt"] = self._retrieve_dt("US/Central")
+
+        df2 = self.get_all_sheet_to_df(
+            "COVID19_probable_confirmed_PUBLIC", 1, 7
+        ).rename(
+            columns={
+                "FIPS": "fips",
+                "PROBABLE": "cases_suspected",
+                "PROBABLE_DEATH": "deaths_suspected",
+            }
+        ).loc[:, ["fips", "cases_suspected", "deaths_suspected"]]
+
+        # Join the two dfs
+        dfs = df.merge(df2, on="fips", how="outer")
+
+        dfs["cases_total"] = dfs.eval(
+            "cases_confirmed + cases_suspected"
         )
-        renamed.fips = renamed.fips.astype(int)
-        return (
-            renamed[["fips", "cases_confirmed", "deaths_total", "tests_total"]]
-            .melt(id_vars=["fips"], var_name="variable_name")
-            .assign(vintage=pd.Timestamp.utcnow(), dt=pd.Timestamp.today().normalize())
+        dfs["deaths_total"] = dfs.eval(
+            "deaths_confirmed + deaths_suspected"
         )
+
+        out = dfs.melt(
+            id_vars=["dt", "fips"], var_name="variable_name"
+        ).dropna()
+        out["value"] = out["value"].astype(int)
+
+        return out
+
+    def get(self):
+        pub = self._get_cases_deaths_current_tests()
+        # TODO: This is commented out because (1) we don't currently have
+        # any cumulative variables and (2) the data doesn't line up with
+        # the dashboard numbers...
+        # hosp = self._get_hosp()
+        sthosp = self._get_statehosp()
+
+        result = pd.concat(
+            [pub, sthosp], axis=0, ignore_index=True, sort=False
+        ).query("fips != 99999")
+        result["vintage"] = self._retrieve_vintage()
+
+        return result
+
 
 
 class AlabamaCounty(AlabamaFips, DatasetBaseNoDate):
@@ -70,42 +125,36 @@ class AlabamaCounty(AlabamaFips, DatasetBaseNoDate):
 
     def get(self):
         tests = self._get_lab_test_summary()
-        return tests
-        # return pd.concat([tests], sort=False)
+
+        result = pd.concat([tests], axis=0, ignore_index=True)
+        result["vintage"] = self._retrieve_vintage()
+
+        return result
 
     def _get_lab_test_summary(self):
-        df = self.get_all_sheet_to_df("Labtest_Summary_by_County_PUBLIC", 1, 7)
-        renamed = df.rename(
+        df = self.get_all_sheet_to_df(
+            "Labtest_Summary_by_County_PUBLIC", 1, 7
+        ).rename(
             columns={
-                "DateTxt": "dt",
                 "Jurisdiction": "county",
                 "LabTestCount": "tests_total",
             }
         )
-        renamed.dt = renamed.dt + "-2020"
-        renamed.dt = pd.to_datetime(renamed.dt)
-        renamed = (
-            renamed.set_index("dt")
-            .tz_localize("US/Central")
-            .tz_convert("UTC")
-            .reset_index()
-        )
-        return (
-            renamed[["dt", "county", "tests_total"]]
-            .sort_values(["dt", "county"])
-            .melt(id_vars=["dt", "county"], var_name="variable_name")
-            .assign(vintage=pd.Timestamp.utcnow())
-        )
 
-    # def _get_confirmed(self):
-    #     df = self.get_all_sheet_to_df("Daily_Confirmed_by_County_PUBLIC", 1, 7)
-    #     renamed = df.rename(
-    #         columns={
-    #             "Jurisdiction": "county",
-    #             "DateTxt": "dt",
-    #             "Confirmed": "cases_confirmed",
-    #         }
-    #     )
-    #     renamed.dt = renamed.dt + "-2020"
-    #     renamed.dt = pd.to_datetime(renamed.dt)
-    #     return renamed[["county", "dt", "cases_confirmed"]]
+        df["dt"] = pd.to_datetime("2020-" + df["DateTxt"])
+
+        # Pivot this because they don't report cumulative
+        pt = df.pivot_table(
+            index="dt", columns="county", values="tests_total"
+        ).sort_index()
+        pt = pt.cumsum().reset_index()
+
+        # Reshape how we want
+        out = pt.melt(
+            id_vars="dt", var_name="county", value_name="value"
+        ).dropna()
+        out["value"] = out["value"].astype(int)
+        out["county"] = out["county"].str.title()
+        out["variable_name"] = "tests_total"
+
+        return out
