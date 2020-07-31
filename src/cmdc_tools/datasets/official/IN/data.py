@@ -102,7 +102,7 @@ class Indiana(DatasetBaseNoDate, CountyData):
         )
 
         res = requests.get(url)
-        df = pd.DataFrame(res.json()["metrics"])
+        df = pd.DataFrame(res.json()["metrics"]["data"])
 
         df = df.rename(
             columns={
