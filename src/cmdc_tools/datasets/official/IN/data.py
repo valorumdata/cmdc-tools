@@ -102,7 +102,11 @@ class Indiana(DatasetBaseNoDate, CountyData):
         )
 
         res = requests.get(url)
+
+        # Put into dataframe and dump garbage district... No idea why
+        # it shows up but it isn't an Indiana fips code
         df = pd.DataFrame(res.json()["metrics"]["data"])
+        df = df.query("district != '18901'")
 
         df = df.rename(
             columns={
