@@ -4,14 +4,13 @@ import textwrap
 import pandas as pd
 import us
 
+from abc import ABC
+
 from ..base import CountyData
 from ... import DatasetBaseNoDate
 
 
-class CACountyData(DatasetBaseNoDate, CountyData):
-    source = "https://public.tableau.com/profile/ca.open.data#!/vizhome/COVID-19HospitalsDashboard/Hospitals"
-    state_fips = int(us.states.lookup("California").fips)
-    has_fips = False
+class OpenDataCali(CountyData, ABC):
     query_url = "https://data.ca.gov/api/3/action/datastore_search"
 
     def data_from_api(self, resource_id, limit=1000, **kwargs):
@@ -38,12 +37,46 @@ class CACountyData(DatasetBaseNoDate, CountyData):
 
         return out
 
+
+class California(DatasetBaseNoDate, OpenDataCali):
+    source = "https://public.tableau.com/profile/ca.open.data#!/vizhome/COVID-19HospitalsDashboard/Hospitals"
+    state_fips = int(us.states.lookup("California").fips)
+    has_fips = True
+
+    def get(self):
+        test_df = self.get_test_data()
+
+        df = pd.concat([test_df], axis=0, ignore_index=True, sort=True)
+        df["value"] = df["value"].astype(int)
+        df["vintage"] = pd.Timestamp.utcnow().normalize()
+
+        return df
+
+    def get_test_data(self):
+        resource_id = "b6648a0d-ff0a-4111-b80b-febda2ac9e09"
+        df = self.data_from_api(resource_id=resource_id)
+
+        df = df.rename(columns={"date": "dt", "tested": "tests_total",}).drop(
+            "_id", axis=1
+        )
+        df["dt"] = pd.to_datetime(df["dt"])
+        df["fips"] = self.state_fips
+
+        out = df.melt(id_vars=["dt", "fips"], var_name="variable_name")
+
+        return out
+
+
+class CACountyData(DatasetBaseNoDate, OpenDataCali):
+    source = "https://public.tableau.com/profile/ca.open.data#!/vizhome/COVID-19HospitalsDashboard/Hospitals"
+    state_fips = int(us.states.lookup("California").fips)
+    has_fips = False
+
     def get(self):
         cd_df = self.get_case_death_data()
         hosp_df = self.get_hospital_data()
-        test_df = self.get_test_data()
 
-        df = pd.concat([cd_df, hosp_df, test_df], axis=0, ignore_index=True, sort=True)
+        df = pd.concat([cd_df, hosp_df], axis=0, ignore_index=True, sort=True)
         df["value"] = df["value"].astype(int)
         df["vintage"] = pd.Timestamp.utcnow().normalize()
 
@@ -103,19 +136,5 @@ class CACountyData(DatasetBaseNoDate, CountyData):
             id_vars=["dt", "county"], var_name="variable_name", value_name="value"
         ).dropna()
         out["value"] = out["value"].astype(int)
-
-        return out
-
-    def get_test_data(self):
-        resource_id = "b6648a0d-ff0a-4111-b80b-febda2ac9e09"
-        df = self.data_from_api(resource_id=resource_id)
-
-        df = df.rename(columns={"date": "dt", "tested": "tests_total",}).drop(
-            "_id", axis=1
-        )
-        df["dt"] = pd.to_datetime(df["dt"])
-        df["fips"] = self.state_fips
-
-        out = df.melt(id_vars=["dt", "fips"], var_name="variable_name")
 
         return out
