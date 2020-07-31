@@ -16,16 +16,12 @@ class AlabamaFips(ArcGIS, DatasetBaseNoDate):
     )
 
     def _get_statehosp(self):
-        df = self.get_all_sheet_to_df(
-            "HospitalizedPatientTemporal_READ_ONLY", 1, 7
-        )
+        df = self.get_all_sheet_to_df("HospitalizedPatientTemporal_READ_ONLY", 1, 7)
 
         # WARNING: This is a 2020 specific operation... Will break in 2021
         df["dt"] = pd.to_datetime("2020-" + df["DateTxt"])
-        df = df.rename(columns=
-            {
-                "Confirmed_AllWeekdays": "hospital_beds_in_use_covid_total"
-            }
+        df = df.rename(
+            columns={"Confirmed_AllWeekdays": "hospital_beds_in_use_covid_total"}
         ).loc[:, ["dt", "hospital_beds_in_use_covid_total"]]
         df["fips"] = self.state_fips
 
@@ -44,58 +40,53 @@ class AlabamaFips(ArcGIS, DatasetBaseNoDate):
         )
         renamed["fips"] = self.state_fips
         renamed["dt"] = pd.Timestamp.today().normalize()
-        return (
-            renamed[
-                [
-                    "dt",
-                    "fips",
-                    "cumulative_icu",
-                    "cumulative_ventilators",
-                    "cumulative_hospitalizations",
-                ]
+        return renamed[
+            [
+                "dt",
+                "fips",
+                "cumulative_icu",
+                "cumulative_ventilators",
+                "cumulative_hospitalizations",
             ]
-            .melt(id_vars=["dt", "fips"], var_name="variable_name")
-        )
+        ].melt(id_vars=["dt", "fips"], var_name="variable_name")
 
     def _get_cases_deaths_current_tests(self):
 
-        df = self.get_all_sheet_to_df(
-            "COV19_Public_Dashboard_ReadOnly", 0, 7
-        ).rename(
-            columns={
-                "CNTYFIPS": "fips",
-                "CONFIRMED": "cases_confirmed",
-                "DIED": "deaths_confirmed",
-                "LabTestCount": "tests_total",
-            }
-        ).loc[:, ["fips", "cases_confirmed", "deaths_confirmed", "tests_total"]]
+        df = (
+            self.get_all_sheet_to_df("COV19_Public_Dashboard_ReadOnly", 0, 7)
+            .rename(
+                columns={
+                    "CNTYFIPS": "fips",
+                    "CONFIRMED": "cases_confirmed",
+                    "DIED": "deaths_confirmed",
+                    "LabTestCount": "tests_total",
+                }
+            )
+            .loc[:, ["fips", "cases_confirmed", "deaths_confirmed", "tests_total"]]
+        )
 
         df["fips"] = df["fips"].astype(int)
         df["dt"] = self._retrieve_dt("US/Central")
 
-        df2 = self.get_all_sheet_to_df(
-            "COVID19_probable_confirmed_PUBLIC", 1, 7
-        ).rename(
-            columns={
-                "FIPS": "fips",
-                "PROBABLE": "cases_suspected",
-                "PROBABLE_DEATH": "deaths_suspected",
-            }
-        ).loc[:, ["fips", "cases_suspected", "deaths_suspected"]]
+        df2 = (
+            self.get_all_sheet_to_df("COVID19_probable_confirmed_PUBLIC", 1, 7)
+            .rename(
+                columns={
+                    "FIPS": "fips",
+                    "PROBABLE": "cases_suspected",
+                    "PROBABLE_DEATH": "deaths_suspected",
+                }
+            )
+            .loc[:, ["fips", "cases_suspected", "deaths_suspected"]]
+        )
 
         # Join the two dfs
         dfs = df.merge(df2, on="fips", how="outer")
 
-        dfs["cases_total"] = dfs.eval(
-            "cases_confirmed + cases_suspected"
-        )
-        dfs["deaths_total"] = dfs.eval(
-            "deaths_confirmed + deaths_suspected"
-        )
+        dfs["cases_total"] = dfs.eval("cases_confirmed + cases_suspected")
+        dfs["deaths_total"] = dfs.eval("deaths_confirmed + deaths_suspected")
 
-        out = dfs.melt(
-            id_vars=["dt", "fips"], var_name="variable_name"
-        ).dropna()
+        out = dfs.melt(id_vars=["dt", "fips"], var_name="variable_name").dropna()
         out["value"] = out["value"].astype(int)
 
         return out
@@ -108,13 +99,12 @@ class AlabamaFips(ArcGIS, DatasetBaseNoDate):
         # hosp = self._get_hosp()
         sthosp = self._get_statehosp()
 
-        result = pd.concat(
-            [pub, sthosp], axis=0, ignore_index=True, sort=False
-        ).query("fips != 99999")
+        result = pd.concat([pub, sthosp], axis=0, ignore_index=True, sort=False).query(
+            "fips != 99999"
+        )
         result["vintage"] = self._retrieve_vintage()
 
         return result
-
 
 
 class AlabamaCounty(AlabamaFips, DatasetBaseNoDate):
@@ -132,13 +122,8 @@ class AlabamaCounty(AlabamaFips, DatasetBaseNoDate):
         return result
 
     def _get_lab_test_summary(self):
-        df = self.get_all_sheet_to_df(
-            "Labtest_Summary_by_County_PUBLIC", 1, 7
-        ).rename(
-            columns={
-                "Jurisdiction": "county",
-                "LabTestCount": "tests_total",
-            }
+        df = self.get_all_sheet_to_df("Labtest_Summary_by_County_PUBLIC", 1, 7).rename(
+            columns={"Jurisdiction": "county", "LabTestCount": "tests_total",}
         )
 
         df["dt"] = pd.to_datetime("2020-" + df["DateTxt"])
@@ -150,9 +135,7 @@ class AlabamaCounty(AlabamaFips, DatasetBaseNoDate):
         pt = pt.cumsum().reset_index()
 
         # Reshape how we want
-        out = pt.melt(
-            id_vars="dt", var_name="county", value_name="value"
-        ).dropna()
+        out = pt.melt(id_vars="dt", var_name="county", value_name="value").dropna()
         out["value"] = out["value"].astype(int)
         out["county"] = out["county"].str.title()
         out["variable_name"] = "tests_total"
