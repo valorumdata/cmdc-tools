@@ -43,9 +43,7 @@ class CACountyData(DatasetBaseNoDate, CountyData):
         hosp_df = self.get_hospital_data()
         test_df = self.get_test_data()
 
-        df = pd.concat(
-            [cd_df, hosp_df, test_df], axis=0, ignore_index=True, sort=True
-        )
+        df = pd.concat([cd_df, hosp_df, test_df], axis=0, ignore_index=True, sort=True)
         df["value"] = df["value"].astype(int)
         df["vintage"] = pd.Timestamp.utcnow().normalize()
 
