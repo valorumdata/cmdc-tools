@@ -1,7 +1,8 @@
 from .AK import Alaska
+from .AL import AlabamaCounty, AlabamaFips
 from .AR import Arkansas
 from .base import ArcGIS, CountyData
-from .CA import LosAngeles, CACountyData, Imperial, SanDiego
+from .CA import CACountyData, Imperial, LosAngeles, SanDiego
 from .CT import ConnecticutCounty, ConnecticutState
 from .DC import DC
 from .DE import Delaware, DelawareKent, DelawareNewCastle, DelawareSussex
@@ -19,12 +20,12 @@ from .MN import Minnesota, MinnesotaCountiesCasesDeaths
 from .MO import MissouriCounty, MissouriFips, MOStLouis
 from .MT import Montana
 from .NE import Nebraska
-from .NY import NewYork
 from .NJ import NewJersey
 from .NM import NewMexico
+from .NY import NewYork
 from .OK import OKTulsa
 from .PA import Pennsylvania
 from .RI import RhodeIsland
 from .TN import Tennessee, TennesseeCounties
 from .VT import Vermont
-from .WI import Wisconsin, WIDane
+from .WI import WIDane, Wisconsin
