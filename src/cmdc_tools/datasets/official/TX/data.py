@@ -17,20 +17,15 @@ class Texas(DatasetBaseNoDate, ArcGIS):
     has_fips = True
 
     def _get_tests(self):
-        df = self.get_all_sheet_to_df(
-            "DSHS_COVID19_TestData_Service", 3, 5
-        ).rename(columns={
-            "Date": "dt",
-            "ViralTests": "tests_total",
-        })
+        df = self.get_all_sheet_to_df("DSHS_COVID19_TestData_Service", 3, 5).rename(
+            columns={"Date": "dt", "ViralTests": "tests_total",}
+        )
 
         df["dt"] = df["dt"].map(lambda x: self._esri_ts_to_dt(x))
         df["fips"] = self.state_fips
 
         df = df.loc[:, ["dt", "fips", "tests_total"]]
-        out = df.melt(
-            id_vars=["dt", "fips"], var_name="variable_name"
-        ).dropna()
+        out = df.melt(id_vars=["dt", "fips"], var_name="variable_name").dropna()
         out["value"] = out["value"].astype(int)
 
         return out
@@ -62,33 +57,26 @@ class TexasCounty(DatasetBaseNoDate, ArcGIS):
             "Recoveries": "recovered_total",
             "Active": "active_total",
         }
-        df = self.get_all_sheet_to_df(
-            "DSHS_COVID19_Cases_Service", 0, 5
-        ).rename(columns=crename)
+        df = self.get_all_sheet_to_df("DSHS_COVID19_Cases_Service", 0, 5).rename(
+            columns=crename
+        )
         df["dt"] = self._retrieve_dt("US/Central")
 
         df = df.loc[:, crename.values()]
-        out = df.melt(
-            id_vars=["dt", "county"], var_name="variable_name"
-        ).dropna()
+        out = df.melt(id_vars=["dt", "county"], var_name="variable_name").dropna()
         out["value"] = out["value"].astype(int)
 
         return out
 
     def _get_tests(self):
-        df = self.get_all_sheet_to_df(
-            "DSHS_COVID19_TestData_Service", 0, 5
-        ).rename(columns={
-            "County": "county",
-            "ViralTest": "tests_total",
-        })
+        df = self.get_all_sheet_to_df("DSHS_COVID19_TestData_Service", 0, 5).rename(
+            columns={"County": "county", "ViralTest": "tests_total",}
+        )
 
         df["dt"] = self._retrieve_dt("US/Central")
 
         df = df.loc[:, ["dt", "county", "tests_total"]]
-        out = df.melt(
-            id_vars=["dt", "county"], var_name="variable_name"
-        ).dropna()
+        out = df.melt(id_vars=["dt", "county"], var_name="variable_name").dropna()
         out["value"] = out["value"].astype(int)
 
         return out
