@@ -6,7 +6,6 @@ from ... import ArcGIS
 from .... import DatasetBaseNoDate
 
 
-
 class MOStLouis(DatasetBaseNoDate, ArcGIS):
     """
     St Louis, Missouri publishes their county level data in a
@@ -27,9 +26,7 @@ class MOStLouis(DatasetBaseNoDate, ArcGIS):
     def _get_cases(self):
         # Case data
         df_cases = self.get_all_sheet_to_df("covid19_timeline_test", 0, 2)
-        df_cases["dt"] = df_cases["report_date"].map(
-            lambda x: self._esri_ts_to_dt(x)
-        )
+        df_cases["dt"] = df_cases["report_date"].map(lambda x: self._esri_ts_to_dt(x))
         df_cases = df_cases.rename(columns={"cumulative_cases": "cases_total"})
 
         out = df_cases.loc[:, ["dt", "cases_total"]].melt(
@@ -55,9 +52,7 @@ class MOStLouis(DatasetBaseNoDate, ArcGIS):
 
     def _get_tests(self):
         df_tests = self.get_all_sheet_to_df("covid19_labs_daily", 0, 2)
-        df_tests["dt"] = df_tests["test_date"].map(
-            lambda x: self._esri_ts_to_dt(x)
-        )
+        df_tests["dt"] = df_tests["test_date"].map(lambda x: self._esri_ts_to_dt(x))
         df_tests = df_tests.sort_values("dt")
 
         df_tests["negative_tests_total"] = df_tests["negative"].cumsum()
@@ -67,22 +62,18 @@ class MOStLouis(DatasetBaseNoDate, ArcGIS):
         )
 
         _vars = ["dt", "negative_tests_total", "positive_tests_total"]
-        out = df_tests.loc[:, _vars].melt(
-            id_vars="dt", var_name="variable_name"
-        )
+        out = df_tests.loc[:, _vars].melt(id_vars="dt", var_name="variable_name")
 
         return out
 
     def get(self):
 
         df = pd.concat(
-            [
-                self._get_cases(),
-                self._get_deaths(),
-                self._get_tests()
-            ], axis=0, ignore_index=True
+            [self._get_cases(), self._get_deaths(), self._get_tests()],
+            axis=0,
+            ignore_index=True,
         )
         df["vintage"] = self._retrieve_vintage()
-        df["fips"] = self.state_fips*1000 + self.county_fips
+        df["fips"] = self.state_fips * 1000 + self.county_fips
 
         return df
