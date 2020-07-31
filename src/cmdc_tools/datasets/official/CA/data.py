@@ -11,6 +11,7 @@ from ... import DatasetBaseNoDate
 
 
 class OpenDataCali(CountyData, ABC):
+    state_fips = int(us.states.lookup("California").fips)
     query_url = "https://data.ca.gov/api/3/action/datastore_search"
 
     def data_from_api(self, resource_id, limit=1000, **kwargs):
@@ -40,7 +41,6 @@ class OpenDataCali(CountyData, ABC):
 
 class California(DatasetBaseNoDate, OpenDataCali):
     source = "https://public.tableau.com/profile/ca.open.data#!/vizhome/COVID-19HospitalsDashboard/Hospitals"
-    state_fips = int(us.states.lookup("California").fips)
     has_fips = True
 
     def get(self):
@@ -69,7 +69,6 @@ class California(DatasetBaseNoDate, OpenDataCali):
 
 class CACountyData(DatasetBaseNoDate, OpenDataCali):
     source = "https://public.tableau.com/profile/ca.open.data#!/vizhome/COVID-19HospitalsDashboard/Hospitals"
-    state_fips = int(us.states.lookup("California").fips)
     has_fips = False
 
     def get(self):
