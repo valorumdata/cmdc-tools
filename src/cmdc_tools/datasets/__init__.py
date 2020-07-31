@@ -19,6 +19,7 @@ from .official import (
     AlabamaFips,
     Alaska,
     Arkansas,
+    California,
     CACountyData,
     ConnecticutCounty,
     ConnecticutState,
