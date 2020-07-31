@@ -11,7 +11,6 @@ from .cex import CountyDex, DailyCountyLex, DailyStateLex, StateDex
 from .covidtrackingproject import CTP
 from .db_util import TempTable, fast_to_sql
 from .dol import StateUIClaims
-from .jhu import JHUDailyReports, JHUDailyReportsUS, Locations
 from .keystone import KeystonePolicy
 from .nytimes import NYTimesState
 from .official import (
@@ -27,6 +26,9 @@ from .official import (
     DelawareKent,
     DelawareNewCastle,
     DelawareSussex,
+    Florida,
+    FloridaHospital,
+    Hawaii,
     Imperial,
     Iowa,
     Kentucky,
@@ -39,6 +41,7 @@ from .official import (
     MinnesotaCountiesCasesDeaths,
     MissouriCounty,
     MissouriFips,
+    MOStLouis,
     Montana,
     Nebraska,
     NewJersey,

@@ -15,7 +15,7 @@ class DelawareBase(CountyData):
         df["county"] = df["Location"].str.replace("County", "").str.strip()
         df = df.drop("Location", axis=1)
 
-        df["vintage"] = pd.Timestamp.utcnow().normalize()
+        df["vintage"] = self._retrieve_vintage()
 
         return df
 
@@ -56,7 +56,7 @@ class Delaware(DatasetBaseNoDate, DelawareBase):
 
     def get(self):
         df = self._get_from_source(self.data_url).drop("Location", axis=1)
-        df["vintage"] = pd.Timestamp.utcnow().normalize()
+        df["vintage"] = self._retrieve_vintage()
         df["fips"] = self.state_fips
 
         return df

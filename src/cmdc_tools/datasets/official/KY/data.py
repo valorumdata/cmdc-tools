@@ -34,7 +34,7 @@ class Kentucky(DatasetBaseNoDate, ArcGIS):
 
         renamed = df.rename(columns=column_map).loc[:, list(column_map.values())]
 
-        dt = pd.Timestamp.utcnow().normalize()
+        dt = self._retrieve_dt("US/Eastern")
         return (
             renamed.melt(
                 id_vars=["county", "fips"], var_name="variable_name", value_name="value"

@@ -6,7 +6,9 @@ from .CA import CACountyData, Imperial, LosAngeles, SanDiego
 from .CT import ConnecticutCounty, ConnecticutState
 from .DC import DC
 from .DE import Delaware, DelawareKent, DelawareNewCastle, DelawareSussex
+from .FL import Florida, FloridaHospital
 from .GU import Guam
+from .HI import Hawaii
 from .IA import Iowa
 from .IN import Indiana
 from .KY import Kentucky
@@ -15,7 +17,7 @@ from .MA import Massachusetts
 from .MD import Maryland
 from .MI import Michigan
 from .MN import Minnesota, MinnesotaCountiesCasesDeaths
-from .MO import MissouriCounty, MissouriFips
+from .MO import MissouriCounty, MissouriFips, MOStLouis
 from .MT import Montana
 from .NE import Nebraska
 from .NJ import NewJersey

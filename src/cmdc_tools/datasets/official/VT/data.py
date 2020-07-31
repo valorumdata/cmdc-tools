@@ -10,8 +10,8 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
     source = (
         "https://experience.arcgis.com/experience/" "85f43bd849e743cb957993a545d17170"
     )
-    state_fips: int = int(us.states.lookup("Vermont").fips)
-    has_fips: bool = True
+    state_fips = int(us.states.lookup("Vermont").fips)
+    has_fips = True
 
     def get(self):
         state = self._get_daily_count()
@@ -39,9 +39,7 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
 
         # Convert to datetime -- Need to divide by 1000 to convert from ms
         hosp["fips"] = self.state_fips
-        hosp["dt"] = pd.to_datetime(
-            hosp["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000).date())
-        )
+        hosp["dt"] = hosp["dt"].map(lambda x: self._esri_ts_to_dt(x))
 
         hosp["hospital_beds_in_use_covid_total"] = hosp.eval(
             "hospital_beds_in_use_covid_confirmed + hospital_beds_in_use_covid_suspected"
@@ -73,9 +71,7 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
             }
         )
 
-        county["dt"] = pd.to_datetime(
-            county["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000).date())
-        )
+        county["dt"] = county["dt"].map(lambda x: self._esri_ts_to_dt(x))
         out = county.loc[:, ["dt", "fips", "cases_confirmed", "deaths_total"]].melt(
             id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
         )
@@ -99,9 +95,7 @@ class Vermont(DatasetBaseNoDate, ArcGIS):
         )
 
         # Convert Timestamps
-        state["dt"] = pd.to_datetime(
-            state["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000).date())
-        )
+        state["dt"] = state["dt"].map(lambda x: self._esri_ts_to_dt(x))
         state["fips"] = self.state_fips
 
         state_keep = [

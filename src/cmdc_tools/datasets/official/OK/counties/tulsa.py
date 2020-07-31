@@ -47,7 +47,7 @@ class OKTulsa(DatasetBaseNoDate, ArcGIS):
 
         # Divide by 1000 because arcgis spits time out in epoch milliseconds
         # rather than epoch seconds
-        df["Date"] = df["Date"].map(lambda x: pd.datetime.fromtimestamp(x / 1000))
+        df["Date"] = df["Date"].map(lambda x: self._esri_ts_to_dt(x))
 
         # Rename columns
         crenamer = {
@@ -72,6 +72,6 @@ class OKTulsa(DatasetBaseNoDate, ArcGIS):
             )
             .dropna()
         )
-        df["vintage"] = pd.Timestamp.utcnow().normalize()
+        df["vintage"] = self._retrieve_vintage()
 
         return df

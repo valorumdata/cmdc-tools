@@ -14,7 +14,7 @@ class NewMexico(DatasetBaseNoDate, CountyData):
     def get(self):
         return pd.concat(
             [self._get_county(), self._get_state()], ignore_index=True, sort=False
-        ).assign(vintage=pd.Timestamp.utcnow().normalize())
+        ).assign(vintage=self._retrieve_vintage())
 
     def _get_county(self):
         url = "https://e7p503ngy5.execute-api.us-west-2.amazonaws.com/prod/GetCounties"
@@ -33,7 +33,9 @@ class NewMexico(DatasetBaseNoDate, CountyData):
 
         renamed = df.rename(columns=column_names)
         renamed["fips"] = renamed["fips"] + self.state_fips * 1000
-        renamed["dt"] = renamed["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000))
+        renamed["dt"] = renamed["dt"].map(
+            lambda x: pd.datetime.fromtimestamp(x / 1000).date()
+        )
         return renamed.loc[:, list(column_names.values())].melt(
             id_vars=["dt", "fips"], var_name="variable_name"
         )
@@ -53,7 +55,9 @@ class NewMexico(DatasetBaseNoDate, CountyData):
         }
 
         renamed = df.rename(columns=column_names)
-        renamed["dt"] = renamed["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000))
+        renamed["dt"] = renamed["dt"].map(
+            lambda x: pd.datetime.fromtimestamp(x / 1000).date()
+        )
 
         renamed["fips"] = self.state_fips
         return renamed.loc[:, ["fips"] + list(column_names.values())].melt(
