@@ -52,6 +52,8 @@ from .official import (
     SanDiego,
     Tennessee,
     TennesseeCounties,
+    Texas,
+    TexasCounty,
     Vermont,
     WIDane,
     Wisconsin,
