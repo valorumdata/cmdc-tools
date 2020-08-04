@@ -72,7 +72,9 @@ VALUES ('cases_suspected'),
        ('ventilators_in_use_covid_new'),
        ('recovered_total'),
        ('active_total'),
-       ('tests_total');
+       ('tests_total'),
+       ('num_hospitals_reporting'),
+       ('num_of_hospitals');
 
 DROP TABLE IF EXISTS data.covid;
 
