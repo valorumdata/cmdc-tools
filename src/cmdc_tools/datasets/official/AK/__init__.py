@@ -115,11 +115,11 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
         return df.loc[:, ["dt", "fips", "variable_name", "value"]]
 
     def get_state_testing(self):
-        df = self.get_all_sheet_to_df("Daily_Test_Positivity", 0, 1)
+        df = self.get_all_sheet_to_df("Testing_Positivity", 0, 1)
 
         # Rename and select subset
         crename = {
-            "Date_": "dt",
+            "Date_Collected": "dt",
             "daily_positive": "positive_tests_total",
             "daily_negative": "negative_tests_total",
             "daily_tests": "tests_total",
@@ -141,13 +141,14 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
 
     def get_county_tests(self):
         # Get testing data
-        df = self.get_all_sheet_to_df("COVID_Tests_Dataset", 0, 1)
+        # https://services1.arcgis.com/WzFsmainVTuD5KML/arcgis/rest/services/Tests_Dataset/FeatureServer/0/query?outFields=*&where=1%3D1
+        df = self.get_all_sheet_to_df("Tests_Dataset", 0, 1)
 
         # Rename and select subset
         crename = {
-            "CollectedDate": "dt",
-            "CountyFIPS": "fips",
-            "Results": "result",
+            "Date_Collected": "dt",
+            "County_Code": "fips",
+            "Test_Result": "result",
         }
         df = df.rename(columns=crename).loc[:, crename.values()]
         df["fips"] = df["fips"].astype(int) + 1000 * self.state_fips
@@ -162,12 +163,16 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
             .cumsum()
             .reset_index()
         )
-        df = df.rename(
-            columns={
-                "Negative": "negative_tests_total",
-                "Positive": "positive_tests_total",
-            }
-        ).drop(["Inconclusive", "Unknown"], axis=1)
+        df = (
+            df.rename(
+                columns={
+                    "Negative": "negative_tests_total",
+                    "Positive": "positive_tests_total",
+                }
+            )
+            .assign(tests_total=lambda x: x.drop(["fips"], axis=1).sum(axis=1))
+            .drop(["Inconclusive", "Unknown"], axis=1)
+        ).astype(int)
 
         out = df.melt(
             id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
@@ -178,11 +183,11 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
     def get_county_cases_deaths_recoveries(self):
         # Retrieve the counties and case/death/recovered/active data
         cdict = self.get_census_borough_areas_dict()
-        df = self.get_all_sheet_to_df("HospDecRecTable", 0, 1)
+        df = self.get_all_sheet_to_df("Hospitalized_Deceased_Recovered", 0, 1)
 
         # Rename and select subset
         crename = {
-            "County": "county",
+            "County_Name": "county",
             "Total_Cases": "cases_total",
             "Deaths_Cumulative": "deaths_total",
             "Recoveries_Cumulative": "recovered_total",
