@@ -6,6 +6,15 @@ from ..base import ArcGIS, CountyData
 from ... import DatasetBaseNoDate
 
 
+def fips_lookup(x):
+    state = us.states.lookup(x)
+
+    if state is None:
+        return -1
+    else:
+        return int(state.fips)
+
+
 class HHS(DatasetBaseNoDate, ArcGIS):
     """
     This scraper retrieves the hospital data provided by HHS at:
@@ -18,69 +27,80 @@ class HHS(DatasetBaseNoDate, ArcGIS):
     """
 
     ARCGIS_ID = "qWZ7BaZXaP5isnfT"
-    table_name = "us_covid"
+    table_name = "hhs_covid"
     pk = '("vintage", "dt", "fips", "variable_id")'
     has_fips = True
     state_fips = 0  # Using 0 to denote that this is a national database
     source = "https://protect-public.hhs.gov/pages/hospital-capacity"
     provider = "HHS"
 
-    def _get_percent_reporting(self):
-        # TODO: See what pattern for the variable,
-        #       `fac_reporting_{}` will look like -- Will they add
-        #       new columns or will it always report the date from
-        #       yesterday?
+    def __init__(self, params=None):
+        super(ArcGIS, self).__init__()
+
+        # Default parameter values
+        if params is None:
+            params = {
+                "f": "json",
+                "where": "1=1",
+                "outFields": "*",
+                "returnGeometry": "false",
+                "token": ""
+            }
+
+        self.params = params
+
+    def _get_hospital_census(self):
         crename = {
-            "state_fips": "fips",
-            "definitive_fac": "number_of_facilities",
-            "fac_reporting_20200720": "number_facilities_reporting",
+            "state_name": "state",
+            "total_icu_beds": "icu_beds_capacity_count",
+            "icu_beds_used_estimate": "icu_beds_in_use_any",
+            "icu_beds_used_covid_est": "icu_beds_in_use_covid_total",
+            "total_inpatient_beds": "hospital_beds_capacity_count",
+            "inpatient_beds_used_estimate": "hospital_beds_in_use_any",
+            "inpatient_beds_used_covid_est": "hospital_beds_in_use_covid_total"
         }
-        # Read percent of facilities reporting data
         df = (
             self.get_all_sheet_to_df(
-                "Percentage_of_Facilities_Reporting_by_State", 0, 5
+                "State_Representative_Estimates_for_Hospital_Utilization", 0, 5
             )
             .rename(columns=crename)
             .loc[:, crename.values()]
         )
 
-        # Convert fips codes to integers
-        df["fips"] = df["fips"].astype(int)
-
-        out = df.melt(id_vars=["fips"], var_name="variable_name")
+        out = df.melt(id_vars=["state"], var_name="variable_name")
 
         return out
 
-    def _get_hospital_census(self):
+    def _get_num_reporting(self):
         crename = {
-            "state_fips": "fips",
-            "total_inpatient_beds": "hospital_beds_capacity_count",
-            "total_icu_beds": "icu_beds_capacity_count",
-            "icu_beds_used_estimate": "icu_beds_in_use_any",
-            "inp_beds_used_estimate": "hospital_beds_in_use_any",
-            "inpatient_beds_used_covid_est": "hospital_beds_in_use_covid_total",
-            "fac_reporting_20200720": "number_facilities_reporting",
+            "state_name": "state",
+            "reporting_hospitals": "num_hospitals_reporting",
+            "total_hospitals": "num_of_hospitals"
         }
-        # Read percent of facilities reporting data
         df = (
-            self.get_all_sheet_to_df("NHSN_Percentage_of_Inpatient_Beds_Occupied", 0, 5)
+            self.get_all_sheet_to_df(
+                "Hospitals_Reporting_State_Level", 0, 5
+            )
             .rename(columns=crename)
             .loc[:, crename.values()]
         )
 
-        # Convert fips codes to integers
-        df["fips"] = df["fips"].astype(int)
-
-        out = df.melt(id_vars=["fips"], var_name="variable_name")
+        out = df.melt(id_vars=["state"], var_name="variable_name")
 
         return out
 
     def get(self):
         df = pd.concat(
-            [self._get_percent_reporting(), self._get_hospital_census()],
+            [self._get_num_reporting(), self._get_hospital_census()],
             axis=0,
             ignore_index=True,
         )
+
+        # Map state name to fips code and then drop state name
+        df["fips"] = df["state"].map(
+            lambda x: fips_lookup(x)
+        )
+        df = df.drop(["state"], axis=1).query("fips > 0")
 
         df["dt"] = (
             pd.Timestamp.utcnow().tz_convert("US/Eastern").tz_localize(None).normalize()
@@ -89,5 +109,7 @@ class HHS(DatasetBaseNoDate, ArcGIS):
 
         # We are storing everything as integers so we need to convert
         # the numbers from estimated floats to integers...
+        df = df.dropna()
         df["value"] = df["value"].astype(int)
-        return df.dropna()
+
+        return df

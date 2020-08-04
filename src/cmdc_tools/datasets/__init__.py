@@ -51,6 +51,7 @@ from .official import (
     Vermont,
     Wisconsin,
     WIDane,
+    HHS,
 )
 from .owid import OWID
 from .usafacts import USAFactsCases, USAFactsDeaths
