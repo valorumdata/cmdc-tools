@@ -13,7 +13,7 @@ from ..base import ArcGIS
 
 class Utah(ArcGIS, DatasetBaseNoDate):
     ARCGIS_ID = "KaHXE9OkiB9e63uE"
-    has_fips = False
+    has_fips = True
     state_fips = int(us.states.lookup("Utah").fips)
     source = "https://coronavirus-dashboard.utah.gov/#overview"
 
@@ -32,13 +32,17 @@ class Utah(ArcGIS, DatasetBaseNoDate):
                 "Hospitalizations": "cumulative_hospitalized",
             }
         )
-        renamed["dt"] = renamed["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000))
-
+        renamed["dt"] = (
+            renamed["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000)).dt.date
+        )
         return (
             renamed[["dt", "district", "cases_total", "cumulative_hospitalized"]]
-            .melt(id_vars=["dt", "district"], var_name="variable_name")
-            .assign(vintage=pd.Timestamp.utcnow())
-            .sort_values(["dt", "district"])
+            .groupby(["dt"])
+            .agg("sum")
+            .reset_index()[["dt", "cases_total", "cumulative_hospitalized"]]
+            .melt(id_vars=["dt"], var_name="variable_name")
+            .assign(vintage=pd.Timestamp.utcnow(), fips=self.state_fips)
+            .sort_values(["dt", "variable_name"])
         )
 
 
@@ -50,8 +54,9 @@ class UtahFips(DatasetBaseNoDate):
     def get(self):
         hosp = self._get_hosp_sync()
         tests = self._get_tests_sync()
+        deaths = self._get_deaths_sync()
 
-        return pd.concat([hosp, tests], sort=False)
+        return pd.concat([hosp, tests, deaths], sort=False)
 
     async def _get_hosp(self):
         url = "https://coronavirus-dashboard.utah.gov/#hospitalizations-mortality"
@@ -110,11 +115,44 @@ class UtahFips(DatasetBaseNoDate):
                 .assign(vintage=pd.Timestamp.utcnow(), fips=self.state_fips)
             )
 
+    async def _get_deaths(self):
+        url = "https://coronavirus-dashboard.utah.gov/#hospitalizations-mortality"
+        async with with_page() as page:
+            await page.goto(url)
+            await page.waitForXPath("//div[@class='plot-container plotly']")
+            plots = await page.Jx(
+                "//div[@id='covid-19-deaths-by-date-of-death-data-will-backfill-n314']//div[@class='plot-container plotly']/.."
+            )
+            text = await page.evaluate("(elem) => [elem.data, elem.layout]", plots[0])
+            data = text[0]
+            layout = text[1]
+            # return text
+
+            df = self._extract_plotly_data(data, layout)
+
+            renamed = df.fillna(0)
+
+            renamed = renamed.rename(columns={"Deaths": "deaths_total"})
+            agged = (
+                renamed[["dt", "deaths_total"]]
+                .set_index("dt")
+                .sort_index()
+                .cumsum()
+                .reset_index()
+            )
+
+            return agged.melt(id_vars=["dt"], var_name="variable_name").assign(
+                vintage=pd.Timestamp.utcnow(), fips=self.state_fips
+            )
+
     def _get_hosp_sync(self):
         return asyncio.run(self._get_hosp())
 
     def _get_tests_sync(self):
         return asyncio.run(self._get_tests())
+
+    def _get_deaths_sync(self):
+        return asyncio.run(self._get_deaths())
 
     def _extract_plotly_data(self, data, layout):
         dfs = []
