@@ -121,7 +121,7 @@ class UtahFips(DatasetBaseNoDate):
             await page.goto(url)
             await page.waitForXPath("//div[@class='plot-container plotly']")
             plots = await page.Jx(
-                "//div[@id='covid-19-deaths-by-date-of-death-data-will-backfill-n314']//div[@class='plot-container plotly']/.."
+                "//div[contains(@id, 'covid-19-deaths-by-date-of')]//div[@class='plot-container plotly']/.."
             )
             text = await page.evaluate("(elem) => [elem.data, elem.layout]", plots[0])
             data = text[0]
