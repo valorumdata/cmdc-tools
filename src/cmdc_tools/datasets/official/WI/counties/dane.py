@@ -50,6 +50,10 @@ class WIDane(DatasetBaseNoDate, ArcGIS):
         df["dt"] = pd.to_datetime(df["dt"] + "/2020")
         df = df.sort_values("dt")
 
+        # no report for July 22
+        if df.query("dt == '2020-07-22'").isna().any().any():
+            df = df.query("dt != '2020-07-22'")
+
         # Make sure things are integers
         df["icu_beds_in_use_covid_total"] = df.eval(
             "icu_beds_in_use_covid_total"

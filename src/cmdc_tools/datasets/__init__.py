@@ -14,13 +14,15 @@ from .dol import StateUIClaims
 from .keystone import KeystonePolicy
 from .nytimes import NYTimesState
 from .official import (
-    LosAngeles,
+    DC,
+    AlabamaCounty,
+    AlabamaFips,
     Alaska,
     Arkansas,
+    California,
     CACountyData,
     ConnecticutCounty,
     ConnecticutState,
-    DC,
     Delaware,
     DelawareKent,
     DelawareNewCastle,
@@ -28,9 +30,11 @@ from .official import (
     Florida,
     FloridaHospital,
     Hawaii,
-    Iowa,
     Imperial,
+    Iowa,
+    Indiana,
     Kentucky,
+    LosAngeles,
     Louisiana,
     Maryland,
     Massachusetts,
@@ -39,6 +43,7 @@ from .official import (
     MinnesotaCountiesCasesDeaths,
     MissouriCounty,
     MissouriFips,
+    MOStLouis,
     Montana,
     Nebraska,
     NewJersey,
@@ -51,9 +56,11 @@ from .official import (
     TennesseeCounties,
     Utah,
     UtahFips,
+    Texas,
+    TexasCounty,
     Vermont,
-    Wisconsin,
     WIDane,
+    Wisconsin,
 )
 from .owid import OWID
 from .usafacts import USAFactsCases, USAFactsDeaths

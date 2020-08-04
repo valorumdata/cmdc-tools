@@ -60,6 +60,6 @@ jobs:
           kedro install
       - run: black --check ./src
       - name: run tests
-        run: pytest src --maxfail=2
+        run: pytest src
         env:
           PG_CONN_STR: "postgresql://postgres:postgres@localhost:5432"
