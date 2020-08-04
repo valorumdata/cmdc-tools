@@ -77,15 +77,18 @@ class LosAngeles(DatasetBaseNoDate, CountyData):
     source = (
         "http://dashboard.publichealth.lacounty.gov/covid19_surveillance_dashboard/"
     )
+    county_fips = 37  # Los Angeles County, 06037
     state_fips = int(us.states.lookup("California").fips)
     has_fips = True
     provider = "county"
 
     def get(self):
         df = asyncio.run(test_data())
+        fips = self.county_fips + 1000 * self.state_fips
+
         return (
             df.reset_index()
             .rename(columns=dict(date="dt"))
-            .assign(fips=6037, vintage=pd.Timestamp.today().normalize(),)
+            .assign(fips=fips, vintage=pd.Timestamp.today().normalize(),)
             .melt(id_vars=["vintage", "dt", "fips"], var_name="variable_name")
         )

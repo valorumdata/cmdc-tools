@@ -55,7 +55,7 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
         result = pd.concat(
             [s_cd, s_hosp, s_test, c_cdr, c_test], axis=0, ignore_index=True, sort=False
         )
-        result["vintage"] = pd.Timestamp.utcnow().normalize()
+        result["vintage"] = self._retrieve_vintage()
 
         return result
 
@@ -92,6 +92,9 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
         # Retrieve the hospitalization sheet
         df = self.get_all_sheet_to_df("COVID_Hospital_Dataset_(prod)", 0, 1)
 
+        # Filter out the duplicated values
+        df = df.query("facility_filter == 0")
+
         # Rename and select subset
         crename = {
             "Inpatient_Beds": "hospital_beds_capacity_count",
@@ -106,9 +109,7 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
         df = df.groupby("variable_name")["value"].sum().reset_index()
 
         # Create date and vintage
-        df["dt"] = (
-            pd.Timestamp.utcnow().tz_convert("US/Alaska").normalize().tz_localize(None)
-        )
+        df["dt"] = self._retrieve_dt("US/Alaska")
         df["fips"] = self.state_fips
 
         return df.loc[:, ["dt", "fips", "variable_name", "value"]]
@@ -124,9 +125,7 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
             "daily_tests": "tests_total",
         }
         df = df.rename(columns=crename).loc[:, crename.values()]
-        df["dt"] = df["dt"].map(
-            lambda x: pd.Timestamp.fromtimestamp(x / 1000).normalize()
-        )
+        df["dt"] = df["dt"].map(lambda x: self._esri_ts_to_dt(x))
         df["fips"] = self.state_fips
         df = df.sort_values("dt")
 
@@ -152,9 +151,7 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
         }
         df = df.rename(columns=crename).loc[:, crename.values()]
         df["fips"] = df["fips"].astype(int) + 1000 * self.state_fips
-        df["dt"] = df["dt"].map(
-            lambda x: pd.Timestamp.fromtimestamp(x / 1000).normalize()
-        )
+        df["dt"] = df["dt"].map(lambda x: self._esri_ts_to_dt(x))
 
         # Count all of the positive/negative tests for each day/fips
         df = (
@@ -167,10 +164,10 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
         )
         df = df.rename(
             columns={
-                "Negative": "negatives_tests_total",
+                "Negative": "negative_tests_total",
                 "Positive": "positive_tests_total",
             }
-        )
+        ).drop(["Inconclusive", "Unknown"], axis=1)
 
         out = df.melt(
             id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
@@ -192,11 +189,11 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
             "Active_Cases": "active_total",
         }
         df = df.rename(columns=crename).loc[:, crename.values()]
-        df["fips"] = df["county"].map(lambda x: cdict[x.lower()])
-        df["dt"] = (
-            pd.Timestamp.utcnow().tz_convert("US/Alaska").normalize().tz_localize(None)
-        )
-        df = df.drop(["county"], axis=1)
+
+        # Assign fips -- Use -1 if it can't be found and drop any below 0
+        df["fips"] = df["county"].map(lambda x: cdict.get(x.lower(), -1))
+        df["dt"] = self._retrieve_dt("US/Alaska")
+        df = df.drop(["county"], axis=1).query("fips > 0")
 
         out = df.melt(
             id_vars=["dt", "fips"], var_name="variable_name", value_name="value"

@@ -20,53 +20,30 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
         return c2f.set_index("PARISH")["PFIPS"].to_dict()
 
     def _get_county_casestests_ts(self):
-        """
-        Gets the time series of tests and cases. This data seems to
-        often be a few days behind relative to the main data but has
-        the benefit of including the history of test/case counts
-        """
-        # Get the county to fips mapper from the ArcGIS db
-        c2f = self._get_county_to_fips()
 
-        # Set rename columns and read data in
-        crename = {
-            "Lab_Collection_Date": "dt",
+        column_names = {
+            "datetime": "dt",
             "Parish": "county",
-            "Daily_Test_Count": "tests_total",
-            "Daily_Case_Count": "cases_total",
+            "Daily Test Count": "tests_total",
+            "Daily Negative Test Count": "negative_tests_total",
+            "Daily Positive Test Count": "positive_tests_total",
+            "Daily Case Count": "cases_total",
         }
-        tests = (
-            self.get_all_sheet_to_df(
-                "Parish_Case_and_Test_Counts_by_Collect_Date", 0, 5
-            )
-            .rename(columns=crename)
-            .loc[:, crename.values()]
-        )
-
-        # Create dt
-        tests["dt"] = tests["dt"].map(self._esri_ts_to_dt)
-
-        # Make sure to get cumulative counts
-        tests = (
-            tests.set_index(["dt", "county"])
+        url = "http://ldh.la.gov/assets/oph/Coronavirus/data/LA_COVID_TESTBYDAY_PARISH_PUBLICUSE.xlsx"
+        raw = pd.read_excel(url).rename(columns=column_names)
+        return (
+            raw.loc[:, list(column_names.values())]
+            .set_index(["dt", "county"])
+            .unstack()
             .sort_index()
-            .unstack(level="county")
             .cumsum()
-            .stack(level="county")
+            .stack()
             .reset_index()
-            .melt(id_vars=["dt", "county"], var_name="variable_name")
+            .replace({"county": {"DeSoto": "De Soto", "LaSalle": "La Salle"}})
+            .assign(fips=lambda x: x["county"].replace(self._get_county_to_fips()))
+            .drop(["county"], axis=1)
+            .melt(id_vars=["dt", "fips"], var_name="variable_name")
         )
-        # For whatever reason they have De Soto/La Salle county as
-        # DeSoto/LaSalle -.-
-        # Make sure to replace just in case this doesn't get fixed
-        tests["county"] = tests["county"].str.replace("DeSoto", "De Soto")
-        tests["county"] = tests["county"].str.replace("LaSalle", "La Salle")
-
-        # The conversion to int will fail if one of the counties is
-        # missing or misspelled -- This is a feature, not a bug
-        tests["fips"] = tests["county"].map(lambda x: c2f.get(x, None)).astype(int)
-
-        return tests.loc[:, ["dt", "fips", "variable_name", "value"]]
 
     def _get_county_data(self, fulldf):
         # Get the county to fips mapper from the ArcGIS db
@@ -85,7 +62,7 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
             .groupby("fips")["value"]
             .sum()
             .reset_index()
-            .assign(dt=pd.datetime.today().date(), variable_name="cases_total",)
+            .assign(dt=self._retrieve_dt("US/Central"), variable_name="cases_total",)
             .loc[:, variables]
         )
 
@@ -95,7 +72,7 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
             .groupby("fips")["value"]
             .sum()
             .reset_index()
-            .assign(dt=pd.datetime.today().date(), variable_name="deaths_total",)
+            .assign(dt=self._retrieve_dt("US/Central"), variable_name="deaths_total",)
             .loc[:, variables]
         )
 
@@ -107,7 +84,7 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
             .groupby("fips")["value"]
             .sum()
             .reset_index()
-            .assign(dt=pd.datetime.today().date(), variable_name="tests_total",)
+            .assign(dt=self._retrieve_dt("US/Central"), variable_name="tests_total",)
             .loc[:, variables]
         )
 
@@ -122,7 +99,7 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
         """
         # Will create a list of DataFrames
         out = []
-        dt = pd.datetime.today().date()
+        dt = self._retrieve_dt("US/Central")
         ladf = fulldf.query("Geography == 'Louisiana'")
         variables = ["dt", "fips", "variable_name", "value"]
 
@@ -217,6 +194,7 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
         # Concat all of the data together and add vintage
         out = pd.concat(
             [county, county_ct_ts, state], ignore_index=True, axis=0
-        ).assign(vintage=pd.Timestamp.utcnow().normalize())
+        ).assign(vintage=self._retrieve_vintage())
+        out["fips"] = out["fips"].astype(int)
 
         return out

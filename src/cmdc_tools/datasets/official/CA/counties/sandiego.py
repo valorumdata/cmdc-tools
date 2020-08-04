@@ -21,11 +21,11 @@ class SanDiego(DatasetBaseNoDate, ArcGIS):
     """
 
     ARCGIS_ID = "1vIhDJwtG5eNmiqX"
-    FIPS = 6073
     source = (
         "https://www.sandiegocounty.gov/content/sdc/hhsa/programs"
         "/phs/community_epidemiology/dc/2019-nCoV/status.html"
     )
+    county_fips = 73  # San Diego County, 06073
     state_fips = int(us.states.lookup("California").fips)
     has_fips = True
     provider = "county"
@@ -46,18 +46,13 @@ class SanDiego(DatasetBaseNoDate, ArcGIS):
 
     def get(self):
 
-        _url = self.arcgis_query_url("CovidDashUpdate", 1)
-        req = requests.get(_url, params=self.params)
+        df = self.get_all_sheet_to_df("CovidDashUpdate", 1, 1)
 
-        # Read into dataframe
-        df = pd.DataFrame.from_records(
-            [x["attributes"] for x in req.json()["features"]]
-        )
         # Divide by 1000 because arcgis spits time out in epoch milliseconds
         # rather than epoch seconds
-        df["Date"] = df["Date"].map(lambda x: pd.datetime.fromtimestamp(x / 1000))
-        df["vintage"] = pd.datetime.today()
-        df["fips"] = self.FIPS
+        df["Date"] = df["Date"].map(lambda x: self._esri_ts_to_dt(x))
+        df["vintage"] = self._retrieve_vintage()
+        df["fips"] = self.county_fips + 1000 * self.state_fips
 
         # Rename columns
         df = df.rename(

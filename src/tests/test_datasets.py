@@ -28,8 +28,7 @@ def _covid_dataset_tests(cls, df):
 
 def _test_data_structure(cls, df):
     if getattr(cls, "data_type", None) == "covid":
-        if not isinstance(cls, datasets.JHUDailyReportsUS):
-            _covid_dataset_tests(cls, df)
+        _covid_dataset_tests(cls, df)
 
 
 @pytest.mark.parametrize("cls", nodates)

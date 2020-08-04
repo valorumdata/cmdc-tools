@@ -16,7 +16,7 @@ class Indiana(DatasetBaseNoDate, CountyData):
         cd = self._get_case_deaths()
 
         out = pd.concat([hosp, cd], sort=False).sort_values(["dt", "fips"])
-        out["vintage"] = pd.Timestamp.utcnow().normalize()
+        out["vintage"] = self._retrieve_vintage()
 
         return out
 
@@ -102,20 +102,27 @@ class Indiana(DatasetBaseNoDate, CountyData):
         )
 
         res = requests.get(url)
-        df = pd.DataFrame(res.json()["metrics"])
 
-        df = df.rename(
-            columns={
-                "date": "dt",
-                "district": "fips",
-                "m2b_hospitalized_icu_supply": "icu_beds_capacity_count",
-                "m2b_hospitalized_icu_occupied_covid": "icu_beds_in_use_covid_total",
-                "m2b_hospitalized_icu_occupied_non_covid": "icu_beds_in_use_noncovid",
-                "m2b_hospitalized_vent_supply": "ventilators_capacity_count",
-                "m2b_hospitalized_vent_occupied_covid": "ventilators_in_use_covid_total",
-                "m2b_hospitalized_vent_occupied_non_covid": "ventilators_in_use_noncovid",
-            }
-        )
+        # Put into dataframe and dump garbage district... No idea why
+        # it shows up but it isn't an Indiana fips code
+        df = pd.DataFrame(res.json()["metrics"]["data"])
+        df = df.query("district != '18901'")
+
+        column_names = {
+            "date": "dt",
+            "district": "fips",
+            "m1a_beds_all_occupied_beds_covid_19_smoothed": "hospital_beds_in_use_covid_total",
+            "m2b_hospitalized_icu_supply": "icu_beds_capacity_count",
+            "m2b_hospitalized_icu_occupied_covid": "icu_beds_in_use_covid_total",
+            "m2b_hospitalized_icu_occupied_non_covid": "icu_beds_in_use_noncovid",
+            "m2b_hospitalized_vent_supply": "ventilators_capacity_count",
+            "m2b_hospitalized_vent_occupied_covid": "ventilators_in_use_covid_total",
+            "m2b_hospitalized_vent_occupied_non_covid": "ventilators_in_use_noncovid",
+            "m1e_covid_tests_cumsum": "tests_total",
+            "m3b_covid_tests_positive_lag": "positive_tests_daily",
+        }
+
+        df = df.rename(columns=column_names)
 
         # To datetime and create new variables
         df["dt"] = pd.to_datetime(df["dt"])
@@ -125,32 +132,28 @@ class Indiana(DatasetBaseNoDate, CountyData):
         df["ventilators_in_use_any"] = df.eval(
             "ventilators_in_use_covid_total + ventilators_in_use_noncovid"
         )
+        # set index to ensure data stays aligned as we compute cumsum of positive tests
+        temp = df.set_index(["dt", "fips"])
+        pt = temp.unstack()["positive_tests_daily"].sort_index().cumsum().stack()
+        temp["positive_tests_total"] = pt
+        df = temp.reset_index()
 
         # Only keep data that we want
-        cols_to_keep = [
-            "dt",
+        int_cols_to_keep = [
             "fips",
-            "district_type",
+            "hospital_beds_in_use_covid_total",
             "icu_beds_capacity_count",
             "icu_beds_in_use_covid_total",
             "icu_beds_in_use_any",
             "ventilators_capacity_count",
             "ventilators_in_use_covid_total",
             "ventilators_in_use_any",
+            "tests_total",
+            "positive_tests_total",
         ]
         df = (
-            df.loc[:, cols_to_keep]
-            .astype(
-                {
-                    "fips": int,
-                    "icu_beds_capacity_count": int,
-                    "icu_beds_in_use_covid_total": int,
-                    "icu_beds_in_use_any": int,
-                    "ventilators_capacity_count": int,
-                    "ventilators_in_use_covid_total": int,
-                    "ventilators_in_use_any": int,
-                }
-            )
+            df.loc[:, ["dt", "district_type"] + int_cols_to_keep]
+            .astype({k: int for k in int_cols_to_keep})
             .query("district_type != 'd'")
         )
 

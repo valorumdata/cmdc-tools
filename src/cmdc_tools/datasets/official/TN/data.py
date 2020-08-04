@@ -40,7 +40,8 @@ class Tennessee(DatasetBaseNoDate, CountyData):
         out = df.melt(
             id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
         ).dropna()
-        out["vintage"] = pd.Timestamp.utcnow().normalize()
+        out["value"] = out["value"].astype(int)
+        out["vintage"] = self._retrieve_vintage()
 
         return out
 
@@ -77,6 +78,7 @@ class TennesseeCounties(DatasetBaseNoDate, CountyData):
         out = df.melt(
             id_vars=["dt", "county"], var_name="variable_name", value_name="value"
         ).dropna()
-        out["vintage"] = pd.Timestamp.utcnow().normalize()
+        out["value"] = out["value"].astype(int)
+        out["vintage"] = self._retrieve_vintage()
 
         return out

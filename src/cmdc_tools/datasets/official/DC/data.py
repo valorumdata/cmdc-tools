@@ -85,6 +85,6 @@ class DC(DatasetBaseNeedsDate, CountyData):
         df = df.melt(id_vars="variable_name", var_name="dt").dropna()
         df["value"] = df["value"].astype(int)
         df["fips"] = self.state_fips
-        df["vintage"] = date.normalize()
+        df["vintage"] = self._retrieve_vintage()
 
         return df
