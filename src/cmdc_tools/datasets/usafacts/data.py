@@ -1,8 +1,8 @@
-import pandas as pd
 import textwrap
 
-from .. import InsertWithTempTable, DatasetBaseNoDate
+import pandas as pd
 
+from .. import DatasetBaseNoDate, InsertWithTempTable
 
 BASEURL = "https://usafactsstatic.blob.core.windows.net/public/data/"
 

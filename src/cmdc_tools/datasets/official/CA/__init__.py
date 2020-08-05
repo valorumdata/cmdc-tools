@@ -1,2 +1,2 @@
+from .counties import Imperial, LosAngeles, SanDiego
 from .data import CACountyData, California
-from .counties import LosAngeles, Imperial, SanDiego

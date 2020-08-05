@@ -36,6 +36,7 @@ class Tennessee(DatasetBaseNoDate, CountyData):
         }
         df = df.rename(columns=crename).loc[:, crename.values()]
         df["fips"] = self.state_fips
+        df["tests_total"] = df.eval("positive_tests_total + negative_tests_total")
 
         out = df.melt(
             id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
@@ -73,6 +74,7 @@ class TennesseeCounties(DatasetBaseNoDate, CountyData):
             "TOTAL_HOSPITALIZED": "hospital_beds_in_use_covid_total",
         }
         df = df.rename(columns=crename)
+        df["tests_total"] = df.eval("positive_tests_total + negative_tests_total")
 
         # Reshape
         out = df.melt(

@@ -1,11 +1,11 @@
-import pandas as pd
-import requests
 import textwrap
 
+import pandas as pd
+import requests
 import us
 
-from ..base import ArcGIS
 from ...base import DatasetBaseNoDate
+from ..base import ArcGIS
 
 
 class Louisiana(DatasetBaseNoDate, ArcGIS):
