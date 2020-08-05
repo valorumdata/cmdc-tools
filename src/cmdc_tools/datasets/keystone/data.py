@@ -1,6 +1,6 @@
 import pandas as pd
 
-from .. import InsertWithTempTable, DatasetBaseNoDate
+from .. import DatasetBaseNoDate, InsertWithTempTable
 
 
 class KeystonePolicy(InsertWithTempTable, DatasetBaseNoDate):

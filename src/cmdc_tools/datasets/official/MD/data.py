@@ -49,10 +49,14 @@ class Maryland(DatasetBaseNoDate, ArcGIS):
         # Work with State data
         sdf = self.separate_state_specific_data(df)
 
+        county_tests = self.get_counties_tested()
+
         # Convert timestamps
         out = pd.concat([cdf, sdf], sort=False, ignore_index=True, axis=0)
         out["dt"] = out["dt"].map(lambda x: self._esri_ts_to_dt(x))
-        out["vintage"] = self._retrieve_vintage()
+        out = pd.concat([out, county_tests], ignore_index=True, sort=True).assign(
+            vintage=self._retrieve_vintage()
+        )
 
         return out.sort_values("dt").dropna()
 
@@ -129,7 +133,6 @@ class Maryland(DatasetBaseNoDate, ArcGIS):
                 f"death{county}": "deaths_confirmed",
                 f"pDeath{county}": "deaths_suspected",
             }
-
             # Find out which columns correspond to a particular county
             # but make sure to keep the report date column
             county_cols = [col for col in df.columns if county in col]
@@ -160,3 +163,13 @@ class Maryland(DatasetBaseNoDate, ArcGIS):
         )
 
         return counties_df
+
+    def get_counties_tested(self):
+        df = self.get_all_sheet_to_df(
+            "MDH_COVID_19_Dashboard_Feature_Layer_Counties_MEMA", 0, ""
+        )
+        df["value"] = df["Total_Pop_Tested"]
+        df["dt"] = self._retrieve_dt()
+        df["variable_name"] = "total_tests"
+        df["fips"] = df["COUNTY_FIP"] + self.state_fips * 1000
+        return df[["dt", "fips", "variable_name", "value"]]

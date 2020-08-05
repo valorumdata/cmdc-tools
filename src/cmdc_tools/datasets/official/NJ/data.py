@@ -1,12 +1,11 @@
-import pandas as pd
-import requests
 import textwrap
 
+import pandas as pd
+import requests
 import us
 
 from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
-
 
 _NJ_PPA_COLS = {
     "# of new COVID patients (confirmed and PUI) were admitted to the hospital in the past 24 hours": "hospital_beds_in_use_covid_new",

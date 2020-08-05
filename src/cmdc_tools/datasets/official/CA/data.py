@@ -1,13 +1,12 @@
-import requests
 import textwrap
-
-import pandas as pd
-import us
-
 from abc import ABC
 
-from ..base import CountyData
+import pandas as pd
+import requests
+import us
+
 from ... import DatasetBaseNoDate
+from ..base import CountyData
 
 
 class OpenDataCali(CountyData, ABC):

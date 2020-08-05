@@ -3,7 +3,6 @@ import us
 
 from ...base import DatasetBaseNoDate
 from ..base import ArcGIS
-
 from .counties import WIDane
 
 

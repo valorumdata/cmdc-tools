@@ -1,9 +1,10 @@
+import xml.etree.ElementTree as ET
+
 import pandas as pd
 import requests
 import us
-import xml.etree.ElementTree as ET
 
-from ..base import InsertWithTempTable, DatasetBaseNoDate
+from ..base import DatasetBaseNoDate, InsertWithTempTable
 
 
 class StateUIClaims(InsertWithTempTable, DatasetBaseNoDate):

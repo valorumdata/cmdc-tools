@@ -1,8 +1,9 @@
 import json
 import os
+from typing import List, Union
+
 import pandas as pd
 import requests
-from typing import List, Union
 
 STATE_FIPS = [
     "01",

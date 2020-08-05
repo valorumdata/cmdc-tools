@@ -1,8 +1,9 @@
-import pandas as pd
 import textwrap
+
+import pandas as pd
 import us
 
-from .. import InsertWithTempTable, DatasetBaseNeedsDate, DatasetBaseNoDate
+from .. import DatasetBaseNeedsDate, DatasetBaseNoDate, InsertWithTempTable
 
 BASE_URL = (
     "https://raw.githubusercontent.com/COVIDExposureIndices/COVIDExposureIndices/master"

@@ -1,5 +1,5 @@
-from abc import ABC
 import textwrap
+from abc import ABC
 
 import pandas as pd
 import requests

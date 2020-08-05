@@ -10,7 +10,6 @@ import us
 from cmdc_tools.datasets.puppet import with_page
 
 from ...base import DatasetBaseNoDate
-
 from ..base import CountyData
 
 
