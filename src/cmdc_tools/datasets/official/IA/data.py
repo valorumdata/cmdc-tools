@@ -15,7 +15,7 @@ class Iowa(ArcGIS, DatasetBaseNoDate):
         cdt = self._get_cases()
 
         out = pd.concat([cdt], axis=0, ignore_index=True)
-        out["vintage"] = pd.Timestamp.utcnow().normalize()
+        out["vintage"] = self._retrieve_vintage()
 
         return out
 
@@ -23,7 +23,7 @@ class Iowa(ArcGIS, DatasetBaseNoDate):
         # Renamers
         crename = {
             "FIPS": "fips",
-            "Confirmed": "cases_confirmed",
+            "Confirmed": "cases_total",
             "Recovered": "recovered_total",
             "Deaths": "deaths_total",
             "individuals_tested": "tests_total",
@@ -59,7 +59,7 @@ class Iowa(ArcGIS, DatasetBaseNoDate):
             }
         )
 
-        renamed["dt"] = pd.Timestamp.utcnow().normalize()
+        renamed["dt"] = self._retrieve_dt("US/Central")
         return reanmed[
             [
                 "dt",

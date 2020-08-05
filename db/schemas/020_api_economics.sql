@@ -4,13 +4,13 @@ CREATE OR REPLACE VIEW api.economics AS
     FROM data.dol_ui
     GROUP BY dt, fips, variable_name
   )
-  SELECT lv.dt, lv.fips as location, lv.variable_name as variable, value
-  FROM data.dol_ui ui
-  LEFT JOIN last_vintage lv USING (vintage, dt, fips, variable_name)
+  SELECT lv.dt, lv.fips as location, lv.variable_name AS variable, ui.value
+  FROM last_vintage lv
+  LEFT JOIN data.dol_ui ui USING (vintage, dt, fips, variable_name)
   UNION ALL
-  SELECT dt, 0 as location, 'wei'::TEXT AS variable, wei AS value
+  SELECT dt, 0 as location, 'wei'::TEXT as variable, wei AS value
   FROM data.weeklyeconomicindex
-;
+  ;
 
 COMMENT ON VIEW api.economics IS E'This table contains information on economic outcomes as time series data
 

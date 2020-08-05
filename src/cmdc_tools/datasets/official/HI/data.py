@@ -23,10 +23,11 @@ class Hawaii(DatasetBaseNoDate, ArcGIS):
             }
         )
         keep_rows = ["Hawaii", "Honolulu", "Kauai", "Maui"]
-        renamed["dt"] = pd.Timestamp.now(tz="US/Hawaii").tz_convert("UTC").normalize()
+        renamed["dt"] = self._retrieve_dt("US/Hawaii")
         renamed = renamed.loc[renamed.county.isin(keep_rows)]
+
         return (
             renamed[["county", "dt", "cases_total", "deaths_total"]]
             .melt(id_vars=["dt", "county"], var_name="variable_name")
-            .assign(vintage=pd.Timestamp.utcnow())
+            .assign(vintage=self._retrieve_vintage())
         )

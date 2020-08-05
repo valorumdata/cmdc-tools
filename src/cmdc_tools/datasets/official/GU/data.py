@@ -34,7 +34,7 @@ class Guam(ArcGIS, DatasetBaseNoDate):
         )
 
         # Map to datetime and add fips
-        df["dt"] = df["dt"].map(lambda x: pd.datetime.fromtimestamp(x / 1000))
+        df["dt"] = df["dt"].map(lambda x: self._esri_ts_to_dt(x))
         df["fips"] = self.state_fips
 
         # Reshape and return
@@ -48,7 +48,7 @@ class Guam(ArcGIS, DatasetBaseNoDate):
         out = df.loc[:, keepers].melt(
             id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
         )
-        out["vintage"] = pd.Timestamp.utcnow().normalize()
+        out["vintage"] = self._retrieve_vintage()
 
         return out
 
@@ -65,5 +65,5 @@ class Guam(ArcGIS, DatasetBaseNoDate):
             }
         )
 
-        renamed["dt"] = pd.Timestamp.utcnow().normalize()
+        renamed["dt"] = self._retrieve_dt("Pacific/Guam")
         return renamed[["dt", "village", "cases_suspected", "recovered_total"]]

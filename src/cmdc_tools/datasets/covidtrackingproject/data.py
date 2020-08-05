@@ -25,8 +25,9 @@ class CTP(InsertWithTempTable, DatasetBaseNoDate):
         self.crenamer = {
             "date": "dt",
             "fips": "fips",
+            "positive": "cases_total",
             "death": "deaths_total",
-            "positive": "positive_tests_total",
+            "positiveTestsViral": "positive_tests_total",
             "negative": "negative_tests_total",
             "totalTestResults": "tests_total",
             "hospitalizedCurrently": "hospital_beds_in_use_covid_total",
