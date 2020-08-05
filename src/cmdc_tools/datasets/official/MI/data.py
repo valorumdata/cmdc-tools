@@ -1,6 +1,6 @@
-import requests
 import lxml.html
 import pandas as pd
+import requests
 import us
 
 from ...base import DatasetBaseNoDate

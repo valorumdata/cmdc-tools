@@ -1,13 +1,13 @@
 import io
-from typing import Optional
 import zipfile
+from typing import Optional
 
 import pandas as pd
 import requests
 import us
 
-from .. import CountyData
 from ... import DatasetBaseNeedsDate
+from .. import CountyData
 
 
 class Massachusetts(DatasetBaseNeedsDate, CountyData):

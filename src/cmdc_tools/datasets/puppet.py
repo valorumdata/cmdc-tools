@@ -18,6 +18,10 @@ CHROME_AGENT = (
 DEFAULT_VIEWPORT = {"width": 1280, "height": 800, "isMobile": False}
 
 
+def xpath_class_check(cls):
+    return f"contains(concat(' ',normalize-space(@class),' '),' {cls} ')"
+
+
 @asynccontextmanager
 async def with_page(headless=True) -> pyppeteer.page.Page:
     browser = await pyppeteer.launch(headless=headless)

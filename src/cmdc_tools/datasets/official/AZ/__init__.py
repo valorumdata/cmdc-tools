@@ -1,11 +1,11 @@
 import asyncio
+
 import numpy as np
 import pandas as pd
-
-from ..base import CountyData
-from ...puppet import with_page
-
 from pyppeteer.element_handle import ElementHandle
+
+from ...puppet import with_page
+from ..base import CountyData
 
 
 async def get_data_from_pivot_table(el):

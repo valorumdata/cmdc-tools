@@ -1,11 +1,12 @@
 #%% setup
-from concurrent.futures import ThreadPoolExecutor
-import textwrap
 import os
-import requests
-import pandas as pd
+import textwrap
+from concurrent.futures import ThreadPoolExecutor
 
-from ..base import InsertWithTempTable, DatasetBaseNoDate
+import pandas as pd
+import requests
+
+from ..base import DatasetBaseNoDate, InsertWithTempTable
 
 KEY = os.environ.get("BEA_KEY", None)
 

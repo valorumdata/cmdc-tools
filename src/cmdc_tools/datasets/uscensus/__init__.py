@@ -1,2 +1,2 @@
-from .data import ACS, ACSVariables, _VARIABLES_ACS
+from .data import _VARIABLES_ACS, ACS, ACSVariables
 from .geo import USGeoBaseAPI

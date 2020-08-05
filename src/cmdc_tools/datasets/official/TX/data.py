@@ -1,10 +1,10 @@
-import pandas as pd
 import textwrap
 
+import pandas as pd
 import us
 
-from ..base import ArcGIS
 from ... import DatasetBaseNoDate
+from ..base import ArcGIS
 
 
 class Texas(DatasetBaseNoDate, ArcGIS):

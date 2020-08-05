@@ -1,9 +1,9 @@
-import pandas as pd
-import requests
 import textwrap
 
-from .. import InsertWithTempTable, DatasetBaseNoDate
+import pandas as pd
+import requests
 
+from .. import DatasetBaseNoDate, InsertWithTempTable
 
 CURRENT_URL = "https://covidtracking.com/api/v1/states/current.json"
 HISTORIC_URL = "https://covidtracking.com/api/v1/states/daily.json"

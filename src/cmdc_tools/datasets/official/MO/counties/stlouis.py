@@ -1,9 +1,10 @@
-import pandas as pd
 import textwrap
+
+import pandas as pd
 import us
 
-from ... import ArcGIS
 from .... import DatasetBaseNoDate
+from ... import ArcGIS
 
 
 class MOStLouis(DatasetBaseNoDate, ArcGIS):
