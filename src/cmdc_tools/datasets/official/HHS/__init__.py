@@ -44,7 +44,7 @@ class HHS(DatasetBaseNoDate, ArcGIS):
                 "where": "1=1",
                 "outFields": "*",
                 "returnGeometry": "false",
-                "token": ""
+                "token": "",
             }
 
         self.params = params
@@ -57,7 +57,7 @@ class HHS(DatasetBaseNoDate, ArcGIS):
             "icu_beds_used_covid_est": "icu_beds_in_use_covid_total",
             "total_inpatient_beds": "hospital_beds_capacity_count",
             "inpatient_beds_used_estimate": "hospital_beds_in_use_any",
-            "inpatient_beds_used_covid_est": "hospital_beds_in_use_covid_total"
+            "inpatient_beds_used_covid_est": "hospital_beds_in_use_covid_total",
         }
         df = (
             self.get_all_sheet_to_df(
@@ -75,12 +75,10 @@ class HHS(DatasetBaseNoDate, ArcGIS):
         crename = {
             "state_name": "state",
             "reporting_hospitals": "num_hospitals_reporting",
-            "total_hospitals": "num_of_hospitals"
+            "total_hospitals": "num_of_hospitals",
         }
         df = (
-            self.get_all_sheet_to_df(
-                "Hospitals_Reporting_State_Level", 0, 5
-            )
+            self.get_all_sheet_to_df("Hospitals_Reporting_State_Level", 0, 5)
             .rename(columns=crename)
             .loc[:, crename.values()]
         )
@@ -97,9 +95,7 @@ class HHS(DatasetBaseNoDate, ArcGIS):
         )
 
         # Map state name to fips code and then drop state name
-        df["fips"] = df["state"].map(
-            lambda x: fips_lookup(x)
-        )
+        df["fips"] = df["state"].map(lambda x: fips_lookup(x))
         df = df.drop(["state"], axis=1).query("fips > 0")
 
         df["dt"] = (
