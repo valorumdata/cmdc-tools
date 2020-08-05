@@ -30,6 +30,7 @@ from .official import (
     FloridaHospital,
     Hawaii,
     Imperial,
+    Illinois,
     Indiana,
     Iowa,
     Kentucky,

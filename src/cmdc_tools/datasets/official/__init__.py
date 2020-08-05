@@ -10,6 +10,7 @@ from .FL import Florida, FloridaHospital
 from .GU import Guam
 from .HI import Hawaii
 from .IA import Iowa
+from .IL import Illinois
 from .IN import Indiana
 from .KY import Kentucky
 from .LA import Louisiana
