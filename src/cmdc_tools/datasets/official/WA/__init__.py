@@ -1,9 +1,11 @@
-from ...puppet import with_page, xpath_class_check
 import asyncio
-import tempfile
 import glob
 import os
+import tempfile
+
 import pandas as pd
+
+from ...puppet import with_page, xpath_class_check
 
 
 async def test_data():
@@ -20,11 +22,15 @@ async def test_data():
             )
             print("here's what chrome said:", resp)
 
-            button = await page.waitForXPath("//button/span[contains(text(), 'Testing')]/..")
+            button = await page.waitForXPath(
+                "//button/span[contains(text(), 'Testing')]/.."
+            )
             print("I have this button!", button)
             await button.click()
 
-            download = await page.waitForXPath("//button/span[contains(text(), 'Download')]/..")
+            download = await page.waitForXPath(
+                "//button/span[contains(text(), 'Download')]/.."
+            )
             await download.click()
 
             for _ in range(10):

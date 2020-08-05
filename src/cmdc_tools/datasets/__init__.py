@@ -1,7 +1,6 @@
 from .base import DatasetBaseNeedsDate, DatasetBaseNoDate, InsertWithTempTable
 from .bea import CountyGDP
 from .cex import CountyDex, DailyCountyLex, DailyStateLex, StateDex
-
 # from .covidactnow import (
 #     CANCountyActuals,
 #     CANCountyTimeseries,
@@ -19,8 +18,8 @@ from .official import (
     AlabamaFips,
     Alaska,
     Arkansas,
-    California,
     CACountyData,
+    California,
     ConnecticutCounty,
     ConnecticutState,
     Delaware,
@@ -31,8 +30,8 @@ from .official import (
     FloridaHospital,
     Hawaii,
     Imperial,
-    Iowa,
     Indiana,
+    Iowa,
     Kentucky,
     LosAngeles,
     Louisiana,
@@ -43,8 +42,8 @@ from .official import (
     MinnesotaCountiesCasesDeaths,
     MissouriCounty,
     MissouriFips,
-    MOStLouis,
     Montana,
+    MOStLouis,
     Nebraska,
     NewJersey,
     NewMexico,

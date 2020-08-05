@@ -1,9 +1,9 @@
-import requests
 import pandas as pd
+import requests
 import us
 
-from ... import ArcGIS
 from .... import DatasetBaseNoDate
+from ... import ArcGIS
 
 
 class Imperial(DatasetBaseNoDate, ArcGIS):

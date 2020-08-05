@@ -1,12 +1,11 @@
+import re
 import textwrap
 
 import pandas as pd
-import re
-
 import us
 
-from ..base import ArcGIS, CountyData
 from ... import DatasetBaseNoDate
+from ..base import ArcGIS, CountyData
 
 __all__ = ["Alaska"]
 

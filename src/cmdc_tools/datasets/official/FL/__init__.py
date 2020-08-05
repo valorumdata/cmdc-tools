@@ -1,12 +1,10 @@
+import pandas as pd
 import pyppeteer
 import us
 
-
-from ..base import CountyData, ArcGIS
 from ...base import DatasetBaseNoDate
 from ...puppet import TableauNeedsClick
-
-import pandas as pd
+from ..base import ArcGIS, CountyData
 
 
 class FloridaHospitalUsage(TableauNeedsClick):

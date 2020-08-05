@@ -44,7 +44,6 @@ class Tennessee(DatasetBaseNoDate, CountyData):
         out["value"] = out["value"].astype(int)
         out["vintage"] = self._retrieve_vintage()
 
-
         return out
 
 

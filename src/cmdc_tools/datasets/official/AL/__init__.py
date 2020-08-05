@@ -1,1 +1,1 @@
-from .data import AlabamaFips, AlabamaCounty
+from .data import AlabamaCounty, AlabamaFips

@@ -99,7 +99,9 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
             .loc[:, list(colmap.values())]
             .assign(
                 fips=lambda x: x["fips"].astype(int) + self.state_fips * 1000,
-                tests_total=lambda x: x.eval("positive_tests_total + negative_tests_total")
+                tests_total=lambda x: x.eval(
+                    "positive_tests_total + negative_tests_total"
+                ),
             )
             .melt(id_vars=["fips"], var_name="variable_name")
         )

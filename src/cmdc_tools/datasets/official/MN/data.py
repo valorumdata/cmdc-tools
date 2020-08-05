@@ -2,8 +2,8 @@ import numpy as np
 import pandas as pd
 import us
 
-from ..base import CountyData
 from ...base import DatasetBaseNoDate
+from ..base import CountyData
 
 
 class MinnesotaCountiesCasesDeaths(DatasetBaseNoDate, CountyData):

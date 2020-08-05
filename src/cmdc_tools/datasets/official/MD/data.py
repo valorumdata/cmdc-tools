@@ -54,9 +54,8 @@ class Maryland(DatasetBaseNoDate, ArcGIS):
         # Convert timestamps
         out = pd.concat([cdf, sdf], sort=False, ignore_index=True, axis=0)
         out["dt"] = out["dt"].map(lambda x: self._esri_ts_to_dt(x))
-        out = (
-            pd.concat([out, county_tests], ignore_index=True, sort=True)
-            .assign(vintage=self._retrieve_vintage())
+        out = pd.concat([out, county_tests], ignore_index=True, sort=True).assign(
+            vintage=self._retrieve_vintage()
         )
 
         return out.sort_values("dt").dropna()

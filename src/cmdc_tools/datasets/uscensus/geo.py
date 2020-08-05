@@ -1,9 +1,8 @@
 import geopandas as gpd
 import pandas as pd
 
-from ..base import InsertWithTempTable, DatasetBaseNoDate
+from ..base import DatasetBaseNoDate, InsertWithTempTable
 from .census import STATE_FIPS
-
 
 BASE_GEO_URL = "https://www2.census.gov/geo/tiger/"
 

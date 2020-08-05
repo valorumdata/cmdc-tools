@@ -30,6 +30,7 @@
 """
 
 from typing import Dict
+
 from kedro.pipeline import Pipeline
 
 

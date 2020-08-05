@@ -1,6 +1,5 @@
 from .data import RhodeIsland
 
-
 # Note: The following code generates the `ri_citytown_to_county.json` file
 # # import geopandas as gpd
 # # import json

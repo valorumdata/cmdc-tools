@@ -1,7 +1,8 @@
-import pandas as pd
 import textwrap
 
-from .. import InsertWithTempTable, DatasetBaseNeedsDate, DatasetBaseNoDate
+import pandas as pd
+
+from .. import DatasetBaseNeedsDate, DatasetBaseNoDate, InsertWithTempTable
 
 
 class NYTimesState(InsertWithTempTable, DatasetBaseNoDate):
