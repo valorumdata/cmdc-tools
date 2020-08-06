@@ -105,6 +105,7 @@ class MissouriFips(DatasetBaseNoDate, ArcGIS):
         }
         df = self.get_all_sheet_to_df("PCR_Test_by_Date_Automated", 0, 6)
         df = df.rename(columns=crename).loc[:, crename.values()]
+        df = df.dropna(subset=["dt"])
 
         df["dt"] = df["dt"].map(lambda x: self._esri_ts_to_dt(x))
         cumulative = df.sort_values("dt").set_index("dt").cumsum().reset_index()

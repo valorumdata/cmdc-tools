@@ -4,8 +4,8 @@ import pandas as pd
 import requests
 import us
 
-from ..base import ArcGIS
 from ...base import DatasetBaseNoDate
+from ..base import ArcGIS
 
 
 class Arkansas(DatasetBaseNoDate, ArcGIS):

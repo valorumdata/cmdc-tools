@@ -1,6 +1,6 @@
 import pandas as pd
 
-from .. import InsertWithTempTable, DatasetBaseNoDate
+from .. import DatasetBaseNoDate, InsertWithTempTable
 
 BASEURL = "https://www.census.gov"
 DATEURL = "https://www.census.gov/econ/bfs/csv/date_table.csv"

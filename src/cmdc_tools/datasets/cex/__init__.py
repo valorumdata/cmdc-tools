@@ -1,1 +1,1 @@
-from .data import CountyDex, DailyCountyLex, StateDex, DailyStateLex
+from .data import CountyDex, DailyCountyLex, DailyStateLex, StateDex

@@ -1,10 +1,11 @@
 import asyncio
+
 import pandas as pd
 import us
 
-from ... import CountyData
-from ....puppet import with_page
 from .... import DatasetBaseNoDate
+from ....puppet import with_page
+from ... import CountyData
 
 
 def _class_check(cls):

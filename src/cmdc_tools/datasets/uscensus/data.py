@@ -1,13 +1,13 @@
 import json
+import os
+from typing import List, Union
+
 import pandas as pd
 import requests
-from typing import List, Union
-import os
 
+from .. import DatasetBaseNoDate, InsertWithTempTable
 from .census import ACSAPI
 from .geo import _create_fips
-from .. import InsertWithTempTable, DatasetBaseNoDate
-
 
 _VARIABLES_ACS = {
     "DP05_0001E": "Total population",

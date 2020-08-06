@@ -1,8 +1,10 @@
 #%% setup
 import textwrap
-import requests
+
 import pandas as pd
-from .. import InsertWithTempTable, DatasetBaseNoDate
+import requests
+
+from .. import DatasetBaseNoDate, InsertWithTempTable
 
 _CANURL = "https://data.covidactnow.org/latest/us"
 
