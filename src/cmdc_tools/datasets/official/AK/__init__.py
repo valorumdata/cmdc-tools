@@ -171,11 +171,12 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
             )
             .assign(tests_total=lambda x: x.drop(["fips"], axis=1).sum(axis=1))
             .drop(["Inconclusive", "Unknown"], axis=1)
-        ).astype(int)
+        )
 
         out = df.melt(
             id_vars=["dt", "fips"], var_name="variable_name", value_name="value"
         )
+        out["value"] = out["value"].astype(int)
 
         return out
 
