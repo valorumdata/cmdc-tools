@@ -22,7 +22,7 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
     def _get_county_casestests_ts(self):
 
         column_names = {
-            "datetime": "dt",
+            "Lab Collection Date": "dt",
             "Parish": "county",
             "Daily Test Count": "tests_total",
             "Daily Negative Test Count": "negative_tests_total",
@@ -31,6 +31,7 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
         }
         url = "http://ldh.la.gov/assets/oph/Coronavirus/data/LA_COVID_TESTBYDAY_PARISH_PUBLICUSE.xlsx"
         raw = pd.read_excel(url).rename(columns=column_names)
+
         return (
             raw.loc[:, list(column_names.values())]
             .set_index(["dt", "county"])
@@ -196,5 +197,6 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
             [county, county_ct_ts, state], ignore_index=True, axis=0
         ).assign(vintage=self._retrieve_vintage())
         out["fips"] = out["fips"].astype(int)
+        out["value"] = out["value"].astype(int)
 
         return out
