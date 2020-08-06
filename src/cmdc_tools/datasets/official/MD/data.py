@@ -170,6 +170,6 @@ class Maryland(DatasetBaseNoDate, ArcGIS):
         )
         df["value"] = df["Total_Pop_Tested"]
         df["dt"] = self._retrieve_dt()
-        df["variable_name"] = "total_tests"
+        df["variable_name"] = "tests_total"
         df["fips"] = df["COUNTY_FIP"] + self.state_fips * 1000
         return df[["dt", "fips", "variable_name", "value"]]
