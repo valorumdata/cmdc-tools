@@ -34,32 +34,55 @@ class Nevada(DatasetBaseNoDate):
             # Go to next page
             await button.click()
             # Find cumulative tests reported graph
-            graph = await page.waitForXPath("//div[text()='Cumulative Tests Reported']")
+            graph = await page.waitForXPath("//*[@class='cartesianChart']")
             await graph.click(button="right")
             # Get table button
             table_button = await page.waitForXPath("//h6[text()='Show as a table']")
             await table_button.click()
 
-            # get the table
-            table = await page.waitForXPath(
-                "//div[@class='pivotTableContainer']//div[@class='innerContainer']"
+            # # get the table
+            # table = await page.waitForXPath(
+            #     "//div[@class='pivotTableContainer']//div[@class='innerContainer']"
+            # )
+
+            # get all graph points
+            visual_modern = await page.waitForXPath("//*[@class='cartesianChart']")
+            print(f"Visual modern: {visual_modern}")
+            elems = await visual_modern.Jx(
+                "//*[@class='series']//*[@class='column setFocusRing']"
             )
 
-            xHeader = (await self._get_table_vals(page, table, "corner"))[0]
-            yHeader = (await self._get_table_vals(page, table, "columnHeaders"))[0]
-            x = await self._get_table_vals(page, table, "rowHeaders")
-            y = await self._get_table_vals(page, table, "bodyCells")
+            labels = [
+                (await page.evaluate("(el) => el.getAttribute('aria-label')", e))
+                for e in elems
+            ]
+            # parse labels
+            data = []
+            for label in labels:
+                split = label.split(". ")
+                print(split)
+                date = split[0].split("Date")[1].strip() + "/2020"
+                tests = split[1].split("Tests")
+                tests_type = tests[0].strip()
+                # Skip all new tests
+                if tests_type == "New":
+                    break
+                tests_num = int(tests[1][:-1].strip().replace(",", ""))
+                {"Date": date, f"{tests_type}": tests_num}
+                data.append({"Date": date, f"{tests_type}": tests_num})
 
-            print(f"Xheader: {xHeader}")
-            print(f"y header: {yHeader}")
-            print(f"x: {len(x)}")
-            print(f"y: {len(y)}")
+            df = pd.DataFrame(data)
+            renamed = df.rename(columns={"Date": "dt", "Cumulative": "tests_total"})
+            renamed.dt = pd.to_datetime(renamed.dt)
+            return renamed.melt(id_vars=["dt"], var_name="variable_name").assign(
+                vintage=pd.Timestamp.utcnow(), fips=self.state_fips
+            )
 
-            data = {f"{xHeader}": x, f"{yHeader}": y}
-            return data
-            df = pd.DataFrame.from_dict(data)
+            # data = {f"{xHeader}": x, f"{yHeader}": y}
+            # return data
+            # df = pd.DataFrame.from_dict(data)
 
-            return df
+            # return df
 
     async def _get_next_page_button(self, page):
         # class_name = "glyphicon glyph-small pbi-glyph-chevronrightmedium middleIcon pbi-focus-outline active"
