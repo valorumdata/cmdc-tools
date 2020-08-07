@@ -17,13 +17,12 @@ class Nevada(DatasetBaseNoDate):
         pass
 
     async def _get_tests_async(self):
-        async with with_page(headless=False) as page:
+        async with with_page() as page:
             await page.goto(self.source)
             # Wait for dashboard to load
             await page.waitForXPath("//span[text()='COVID-19 ']")
             # Get next page button
             button = await self._get_next_page_button(page)
-            print(f"Button: {button}")
             await button.click()
             # Wait for dashboard to load
             await page.waitForXPath("//div[text()='COVID-19 Statistics by County']")
@@ -40,14 +39,9 @@ class Nevada(DatasetBaseNoDate):
             table_button = await page.waitForXPath("//h6[text()='Show as a table']")
             await table_button.click()
 
-            # # get the table
-            # table = await page.waitForXPath(
-            #     "//div[@class='pivotTableContainer']//div[@class='innerContainer']"
-            # )
-
-            # get all graph points
+            # wait for graph to load
             visual_modern = await page.waitForXPath("//*[@class='cartesianChart']")
-            print(f"Visual modern: {visual_modern}")
+            # get all graph points
             elems = await visual_modern.Jx(
                 "//*[@class='series']//*[@class='column setFocusRing']"
             )
@@ -60,7 +54,6 @@ class Nevada(DatasetBaseNoDate):
             data = []
             for label in labels:
                 split = label.split(". ")
-                print(split)
                 date = split[0].split("Date")[1].strip() + "/2020"
                 tests = split[1].split("Tests")
                 tests_type = tests[0].strip()
@@ -78,22 +71,7 @@ class Nevada(DatasetBaseNoDate):
                 vintage=pd.Timestamp.utcnow(), fips=self.state_fips
             )
 
-            # data = {f"{xHeader}": x, f"{yHeader}": y}
-            # return data
-            # df = pd.DataFrame.from_dict(data)
-
-            # return df
-
     async def _get_next_page_button(self, page):
         # class_name = "glyphicon glyph-small pbi-glyph-chevronrightmedium middleIcon pbi-focus-outline active"
         button = await page.waitForXPath("//i[@title='Next Page']")
         return button
-
-    async def _get_table_vals(self, page, table: ElementHandle, parentClass: str):
-        xp = f"//div[@class='{parentClass}']//div[{self._class_check('pivotTableCellWrap')}]"
-        elements = await table.Jx(xp)
-        func = "(el) => el.textContent"
-        return [(await page.evaluate(func, e)).strip() for e in elements]
-
-    def _class_check(self, cls):
-        return f"contains(concat(' ',normalize-space(@class),' '),' {cls} ')"
