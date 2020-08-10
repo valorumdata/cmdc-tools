@@ -140,7 +140,6 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
 
     def get_county_tests(self):
         # Get testing data
-        # https://services1.arcgis.com/WzFsmainVTuD5KML/arcgis/rest/services/Tests_Dataset/FeatureServer/0/query?outFields=*&where=1%3D1
         df = self.get_all_sheet_to_df("Tests_Dataset", 0, 1)
 
         # Rename and select subset
@@ -185,6 +184,9 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
         cdict = self.get_census_borough_areas_dict()
         df = self.get_all_sheet_to_df("Hospitalized_Deceased_Recovered", 0, 1)
 
+        # Only keep resident values (what they report on the dashboard)
+        df = df.query("Resident == 'Y'")
+
         # Rename and select subset
         crename = {
             "County_Name": "county",
@@ -194,6 +196,7 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
             "Active_Cases": "active_total",
         }
         df = df.rename(columns=crename).loc[:, crename.values()]
+        df = df.groupby("county").sum().reset_index()
 
         # Assign fips -- Use -1 if it can't be found and drop any below 0
         df["fips"] = df["county"].map(lambda x: cdict.get(x.lower(), -1))
