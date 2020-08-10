@@ -57,7 +57,9 @@ async def test_data():
 
         # wait for chart to appear -- now we know we can change to Daily
         await page.waitForXPath("//div[@id='test_plot']/div")
-        test = await find_chart_data(page, "test_plot", "tests", "Cumulative Tests")
+        test = await find_chart_data(
+            page, "test_plot", "tests_total", "Cumulative Tests"
+        )
         pos = await find_chart_data(
             page, "test_plot", "positive_tests_total", "cumulative positive"
         )
@@ -67,10 +69,18 @@ async def test_data():
         .merge(cum_cases, on="date")
         .merge(cum_deaths, on="date")
         .set_index("date")
-        .assign(negative_tests_total=lambda x: x.eval("tests - positive_tests_total"))
+        .assign(
+            negative_tests_total=lambda x: x.eval("tests_total - positive_tests_total")
+        )
     )
     return data[
-        ["negative_tests_total", "positive_tests_total", "cases_total", "deaths_total"]
+        [
+            "negative_tests_total",
+            "positive_tests_total",
+            "tests_total",
+            "cases_total",
+            "deaths_total",
+        ]
     ]
 
 
