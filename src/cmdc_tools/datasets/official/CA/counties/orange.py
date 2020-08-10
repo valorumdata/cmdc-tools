@@ -28,16 +28,14 @@ class CAOrange(DatasetBaseNoDate, ArcGIS):
         crename = {
             "date": "dt",
             "tot_spec": "tests_total",
-            "tot_pcr_pos": "positive_tests_total"
+            "tot_pcr_pos": "positive_tests_total",
         }
         df = self.get_all_sheet_to_df("occovid_pcr_csv", 0, 2)
         df = df.rename(columns=crename).loc[:, crename.values()]
 
-        df["fips"] = 1000*self.state_fips + self.county_fips
+        df["fips"] = 1000 * self.state_fips + self.county_fips
         df["dt"] = df["dt"].map(lambda x: self._esri_ts_to_dt(x))
-        df["negative_tests_total"] = df.eval(
-            "tests_total - positive_tests_total"
-        )
+        df["negative_tests_total"] = df.eval("tests_total - positive_tests_total")
 
         out = df.melt(id_vars=["dt", "fips"], var_name="variable_name")
         out["vintage"] = self._retrieve_vintage()
