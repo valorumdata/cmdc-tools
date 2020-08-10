@@ -52,4 +52,8 @@ class Wisconsin(DatasetBaseNoDate, ArcGIS):
         out["value"] = out["value"].astype(int)
         out["vintage"] = self._retrieve_vintage()
 
+        # Get rid of duplicates because they randomly exist???
+        is_dupe = out.duplicated(subset=["dt", "fips", "variable_name"])
+        out = out.loc[~is_dupe, :]
+
         return out
