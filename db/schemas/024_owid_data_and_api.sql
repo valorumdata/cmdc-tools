@@ -41,6 +41,8 @@ CREATE TABLE data.owid_covid
     "total_tests_per_thousand"        real,
     "new_tests_per_thousand"          real,
     "new_tests_smoothed_per_thousand" real,
+    "positive_rate"                   real,
+    "tests_per_case"                  real,
     "tests_units"                     text,
     "stringency_index"                real,
     PRIMARY KEY (iso_code, dt)
