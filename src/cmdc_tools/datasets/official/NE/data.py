@@ -34,7 +34,7 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
         )
 
     def get_state(self):
-        df = self.get_all_sheet_to_df("Covid19_Update_service", 0, "Agency")
+        df = self.get_all_sheet_to_df("CovidUpdatePublic", 0, "enterprise")
 
         df["hospital_beds_in_use_any"] = df.eval("beds_total - beds_avail")
         df["icu_beds_in_use_any"] = df.eval("icu_beds_total - icu_beds_avail")
