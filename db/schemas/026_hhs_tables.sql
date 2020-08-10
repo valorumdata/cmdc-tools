@@ -11,7 +11,7 @@ CREATE TABLE data.hhs_covid (
 
 COMMENT ON TABLE data.hhs_covid IS E'This table contains the data collected by HHS';
 
-CREATE INDEX dt_idx ON data.hhs_covid (dt);
+CREATE INDEX hhs_dt_idx ON data.hhs_covid (dt);
 
 CREATE TRIGGER trig_hhs_to_us_covid
     AFTER INSERT ON data.hhs_covid
