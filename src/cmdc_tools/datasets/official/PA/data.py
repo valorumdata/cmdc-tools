@@ -27,21 +27,21 @@ class Pennsylvania(DatasetBaseNoDate, ArcGIS):
             "Deaths": "deaths_total",
             "Confirmed": "positive_tests_total",
             "Negative": "negative_tests_total",
-            #             "Adult_ICU_Beds_Available": "icu_beds_available",
+            # "Adult_ICU_Beds_Available": "icu_beds_available",
             "Adult_ICU_staffed": "icu_beds_capacity_count",
-            #             "Med_Surg_Beds_Available": "hospital_beds_available",
+            # "Med_Surg_Beds_Available": "hospital_beds_available",
             "Med_Surg_Staffed": "hospital_beds_capacity_count",
             "COVID19_Hospitalizations": "hospital_beds_in_use_covid_total",
             "Total_Ventilators": "ventilators_capacity_count",
             "Ventilators_in_use": "ventilators_in_use_any",
             "COVID19_Ventilators": "ventilators_in_use_covid_total",
-            #             "TotalTests": "tests_total",  # Doesn't exist but we want column later
+            # "TotalTests": "tests_total",  # Doesn't exist but we want column later
         }
-        df = df.rename(columns=column_map)
-        df["hospital_beds_capacity_count"] += df["icu_beds_capacity_count"]
+        df = df.rename(columns=column_map).loc[:, column_map.values()]
 
+        # Adjust current columns and add new ones
+        df["hospital_beds_capacity_count"] += df["icu_beds_capacity_count"]
         df["tests_total"] = df.eval("positive_tests_total + negative_tests_total")
-        df = df.loc[:, list(column_map.values())]
 
         out = df.melt(id_vars=["county"], var_name="variable_name").dropna()
         out["value"] = out["value"].astype(int)
