@@ -34,19 +34,19 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
         )
 
     def get_state(self):
-        df = self.get_all_sheet_to_df("Covid19_Update_service", 0, "Agency")
+        df = self.get_all_sheet_to_df("CovidUpdatePublic", 0, "enterprise")
 
-        df["hospital_beds_in_use_any"] = df.beds_total - df.beds_avail
-        df["icu_beds_in_use_any"] = df.icu_beds_total - df.icu_beds_avail
-        df["ventilators_in_use_any"] = df.vent_equip_total - df.vent_equip_avail
-        df["positive_tests_total"] = (
-            df.pos_gender_male + df.pos_gender_female + df.pos_gender_unknown
+        df["hospital_beds_in_use_any"] = df.eval("beds_total - beds_avail")
+        df["icu_beds_in_use_any"] = df.eval("icu_beds_total - icu_beds_avail")
+        df["ventilators_in_use_any"] = df.eval("vent_equip_total - vent_equip_avail")
+        df["positive_tests_total"] = df.eval(
+            "pos_gender_male + pos_gender_female + pos_gender_unknown"
         )
-        df["recovered_total"] = (
-            df.rec_gender_male + df.rec_gender_female + df.rec_gender_unknown
+        df["recovered_total"] = df.eval(
+            "rec_gender_male + rec_gender_female + rec_gender_unknown"
         )
-        df["deaths_total"] = (
-            df.dec_gender_male + df.dec_gender_female + df.dec_gender_unknown
+        df["deaths_total"] = df.eval(
+            "dec_gender_male + dec_gender_female + dec_gender_unknown"
         )
 
         # Rename columns using /schemas/covid_data.sql
@@ -78,10 +78,11 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
 
         # Convert timestamps
         keep["dt"] = keep["dt"].map(lambda x: self._esri_ts_to_dt(x))
-
         keep["fips"] = self.state_fips
 
-        return keep.melt(["dt", "fips"], var_name="variable_name")
+        out = keep.melt(id_vars=["dt", "fips"], var_name="variable_name")
+
+        return out
 
     def get_county(self):
         df = self.get_all_sheet_to_df("Covid19MapV5", 0, "enterprise")

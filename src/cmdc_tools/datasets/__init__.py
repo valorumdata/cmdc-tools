@@ -20,6 +20,7 @@ from .official import (
     Alaska,
     Arkansas,
     CACountyData,
+    CAOrange,
     California,
     ConnecticutCounty,
     ConnecticutState,
@@ -30,6 +31,7 @@ from .official import (
     Florida,
     FloridaHospital,
     Hawaii,
+    Iowa,
     Imperial,
     Illinois,
     Indiana,
@@ -62,6 +64,7 @@ from .official import (
     Vermont,
     WIDane,
     Wisconsin,
+    HHS,
 )
 from .owid import OWID
 from .usafacts import USAFactsCases, USAFactsDeaths

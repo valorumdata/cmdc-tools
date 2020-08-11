@@ -2,13 +2,14 @@ from .AK import Alaska
 from .AL import AlabamaCounty, AlabamaFips
 from .AR import Arkansas
 from .base import ArcGIS, CountyData
-from .CA import CACountyData, California, Imperial, LosAngeles, SanDiego
+from .CA import CACountyData, California, Imperial, LosAngeles, CAOrange, SanDiego
 from .CT import ConnecticutCounty, ConnecticutState
 from .DC import DC
 from .DE import Delaware, DelawareKent, DelawareNewCastle, DelawareSussex
 from .FL import Florida, FloridaHospital
 from .GU import Guam
 from .HI import Hawaii
+from .HHS import HHS
 from .IA import Iowa
 from .IL import Illinois
 from .IN import Indiana
@@ -32,3 +33,4 @@ from .TN import Tennessee, TennesseeCounties
 from .TX import Texas, TexasCounty
 from .VT import Vermont
 from .WI import WIDane, Wisconsin
+from .HHS import HHS

@@ -48,24 +48,19 @@ class SanDiego(DatasetBaseNoDate, ArcGIS):
 
         df = self.get_all_sheet_to_df("CovidDashUpdate", 1, 1)
 
-        # Divide by 1000 because arcgis spits time out in epoch milliseconds
-        # rather than epoch seconds
-        df["Date"] = df["Date"].map(lambda x: self._esri_ts_to_dt(x))
+        # Rename columns
+        crename = {
+            "Date": "dt",
+            "Tests": "tests_total",
+            "Positives": "positive_tests_total",
+        }
+        df = df.rename(columns=crename).loc[:, crename.values()]
+
+        # Work with columns to create what we want
+        df["dt"] = df["dt"].map(lambda x: self._esri_ts_to_dt(x))
         df["vintage"] = self._retrieve_vintage()
         df["fips"] = self.county_fips + 1000 * self.state_fips
-
-        # Rename columns
-        df = df.rename(
-            columns={
-                "Date": "dt",
-                "Tests": "tests_total",
-                "Positives": "positive_tests_total",
-            }
-        )
         df["negative_tests_total"] = df.eval("tests_total - positive_tests_total")
-        df = df[
-            ["vintage", "dt", "fips", "positive_tests_total", "negative_tests_total"]
-        ]
 
         df = df.melt(
             id_vars=["vintage", "dt", "fips"],
