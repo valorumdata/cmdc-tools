@@ -1,5 +1,6 @@
 import asyncio
 
+import numpy as np
 import pandas as pd
 import us
 from pyppeteer.element_handle import ElementHandle
@@ -8,9 +9,9 @@ from ...base import DatasetBaseNoDate
 from ...puppet import with_page
 
 
-class Nevada(DatasetBaseNoDate):
+class NevadaFips(DatasetBaseNoDate):
     state_fips = int(us.states.lookup("Nevada").fips)
-    has_fips = False
+    has_fips = True
     source = "https://app.powerbigov.us/view?r=eyJrIjoiMjA2ZThiOWUtM2FlNS00MGY5LWFmYjUtNmQwNTQ3Nzg5N2I2IiwidCI6ImU0YTM0MGU2LWI4OWUtNGU2OC04ZWFhLTE1NDRkMjcwMzk4MCJ9"
 
     def get(self):
@@ -30,7 +31,7 @@ class Nevada(DatasetBaseNoDate):
             # Wait for dashboard to load
             await page.waitForXPath("//span[text()='COVID-19 ']")
             # Get next page button
-            button = await self._get_next_page_button(page)
+            button = await _get_next_page_button(page)
             await button.click()
             # Wait for dashboard to load
             await page.waitForXPath("//div[text()='COVID-19 Statistics by County']")
@@ -91,7 +92,7 @@ class Nevada(DatasetBaseNoDate):
             # Wait for dashboard to load
             # Get next page button
             await page.waitForXPath("//span[text()='COVID-19 ']")
-            button = await self._get_next_page_button(page)
+            button = await _get_next_page_button(page)
             await button.click()
             # Wait for dashboard to load
             # Go to next page
@@ -135,7 +136,72 @@ class Nevada(DatasetBaseNoDate):
                 vintage=pd.Timestamp.utcnow(), fips=self.state_fips
             )
 
-    async def _get_next_page_button(self, page):
-        # class_name = "glyphicon glyph-small pbi-glyph-chevronrightmedium middleIcon pbi-focus-outline active"
-        button = await page.waitForXPath("//i[@title='Next Page']")
-        return button
+
+class NevadaCounty(DatasetBaseNoDate):
+    state_fips = int(us.states.lookup("Nevada").fips)
+    has_fips = False
+    source = "https://app.powerbigov.us/view?r=eyJrIjoiMjA2ZThiOWUtM2FlNS00MGY5LWFmYjUtNmQwNTQ3Nzg5N2I2IiwidCI6ImU0YTM0MGU2LWI4OWUtNGU2OC04ZWFhLTE1NDRkMjcwMzk4MCJ9"
+
+    def get(self):
+        return asyncio.run(self._get_county_overview_async())
+
+    async def _get_county_overview_async(self):
+        async with with_page() as page:
+            await page.goto(self.source)
+            # Wait for dashboard to load
+            # Get next page button
+            await page.waitForXPath("//span[text()='COVID-19 ']")
+            button = await _get_next_page_button(page)
+            await button.click()
+            # Wait for dashboard to load
+            # Go to next page
+            await page.waitForXPath("//div[text()='COVID-19 Statistics by County']")
+
+            table = await page.waitForXPath("//div[@class='tableExContainer']")
+
+            col_headers = await _get_table_vals(page, table, "columnHeaders")
+
+            body_cells = np.array(await _get_table_vals(page, table, "bodyCells"))
+
+            out = pd.DataFrame(
+                body_cells.reshape((-1, len(col_headers)), order="F"),
+                columns=col_headers,
+            )
+
+            renamed = out.rename(
+                columns={
+                    "County": "county",
+                    "Tests": "tests_total",
+                    "Total Cases": "cases_total",
+                    "Deaths": "deaths_total",
+                }
+            )
+
+            return (
+                renamed[["county", "tests_total", "cases_total", "deaths_total"]]
+                .melt(id_vars=["county"], var_name="variable_name")
+                .assign(
+                    vintage=pd.Timestamp.utcnow(),
+                    dt=pd.Timestamp.utcnow()
+                    .tz_convert("US/Mountain")
+                    .normalize()
+                    .tz_localize(None),
+                )
+            )
+
+
+async def _get_next_page_button(page):
+    # class_name = "glyphicon glyph-small pbi-glyph-chevronrightmedium middleIcon pbi-focus-outline active"
+    button = await page.waitForXPath("//i[@title='Next Page']")
+    return button
+
+
+async def _get_table_vals(page, table: ElementHandle, parentClass: str):
+    xp = f"//div[@class='{parentClass}']//div[{_class_check('pivotTableCellWrap')}]"
+    elements = await table.Jx(xp)
+    func = "(el) => el.textContent"
+    return [(await page.evaluate(func, e)).strip() for e in elements]
+
+
+def _class_check(cls):
+    return f"contains(concat(' ',normalize-space(@class),' '),' {cls} ')"

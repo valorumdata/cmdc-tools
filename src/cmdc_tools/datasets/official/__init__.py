@@ -23,6 +23,7 @@ from .MT import Montana
 from .NE import Nebraska
 from .NJ import NewJersey
 from .NM import NewMexico
+from .NV import NevadaCounty, NevadaFips
 from .NY import NewYork
 from .OK import OKTulsa
 from .PA import Pennsylvania

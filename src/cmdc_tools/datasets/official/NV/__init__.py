@@ -1,1 +1,1 @@
-from .data import Nevada
+from .data import NevadaCounty, NevadaFips

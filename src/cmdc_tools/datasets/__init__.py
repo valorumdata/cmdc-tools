@@ -47,6 +47,8 @@ from .official import (
     Montana,
     MOStLouis,
     Nebraska,
+    NevadaCounty,
+    NevadaFips,
     NewJersey,
     NewMexico,
     NewYork,
