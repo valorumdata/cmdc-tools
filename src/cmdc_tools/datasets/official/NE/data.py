@@ -77,8 +77,8 @@ class Nebraska(DatasetBaseNoDate, ArcGIS):
         ]
 
         # Convert timestamps
-        keep["dt"] = keep["dt"].map(lambda x: ne._esri_ts_to_dt(x))
-        keep["fips"] = ne.state_fips
+        keep["dt"] = keep["dt"].map(lambda x: self._esri_ts_to_dt(x))
+        keep["fips"] = self.state_fips
 
         out = keep.melt(id_vars=["dt", "fips"], var_name="variable_name")
 
