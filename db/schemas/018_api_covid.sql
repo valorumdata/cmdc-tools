@@ -156,32 +156,6 @@ COMMENT ON COLUMN api.usafacts_covid.value IS E'The value of the observation';
 
 
 /* The covid view */
-CREATE OR REPLACE VIEW api.covid AS
-WITH last_vintage AS (
-  SELECT
-    dt,
-    fips,
-    variable_id,
-    max(vintage) AS vintage
-  FROM
-    data.us_covid uc
-  GROUP BY
-    (dt,
-      fips,
-      variable_id))
-SELECT
-  lv.vintage,
-  uc.dt,
-  uc.fips,
-  cv.name AS variable,
-  uc.value
-FROM
-  last_vintage lv
-  LEFT JOIN data.us_covid uc USING (dt, fips, variable_id, vintage)
-  LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
-
-
-/* The covid view */
 CREATE OR REPLACE VIEW api.covid_us AS
 WITH last_vintage AS (
   SELECT
@@ -204,10 +178,12 @@ FROM
   last_vintage lv
   LEFT JOIN data.us_covid uc USING (dt, fips, variable_id, vintage)
   LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
+     
+COMMENT ON VIEW api.covid_us IS E'This table contains relevant information on COVID-19
 
-COMMENT ON VIEW api.covid IS E'This table contains relevant information on COVID-19
-
-This table only includes the most recent observation for each date, location, and variable. For a full history of all data we have collected see `covid_historical`
+This table only includes the most recent observation for each date, location, and variable. 
+     
+For a full history of all data we have collected see `covid_historical`
 
 Currently, the following variables are collected in the database
 
@@ -243,16 +219,13 @@ Currently, the following variables are collected in the database
 These variables are only collected from official US federal/state/county government sources
 ';
 
-COMMENT ON COLUMN api.covid.vintage IS E'The date/time the data was collected and stored in our database. Only the most recent vintage is returned. See `covid_historical` for data with all';
+COMMENT ON COLUMN api.covid_us.dt IS E'The date that corresponds to the observed variable';
 
-COMMENT ON COLUMN api.covid.dt IS E'The date that corresponds to the observed variable';
+COMMENT ON COLUMN api.covid_us.fips IS E'The fips code';
 
-COMMENT ON COLUMN api.covid.fips IS E'The fips code';
+COMMENT ON COLUMN api.covid_us.variable IS E'One of the variables described in the table description';
 
-COMMENT ON COLUMN api.covid.variable IS E'One of the variables described in the table description';
-
-COMMENT ON COLUMN api.covid.value IS E'The value of the variable';
-
+COMMENT ON COLUMN api.covid_us.value IS E'The value of the variable';
 
 /* Historical view with vintages */
 CREATE OR REPLACE VIEW api.covid_historical AS
