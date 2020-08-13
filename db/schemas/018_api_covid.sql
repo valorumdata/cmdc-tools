@@ -219,8 +219,6 @@ Currently, the following variables are collected in the database
 These variables are only collected from official US federal/state/county government sources
 ';
 
-COMMENT ON COLUMN api.covid_us.vintage IS E'The date/time the data was collected and stored in our database. Only the most recent vintage is returned. See `covid_historical` for data with all';
-
 COMMENT ON COLUMN api.covid_us.dt IS E'The date that corresponds to the observed variable';
 
 COMMENT ON COLUMN api.covid_us.fips IS E'The fips code';
