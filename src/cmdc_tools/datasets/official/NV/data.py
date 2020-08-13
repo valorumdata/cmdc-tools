@@ -18,7 +18,7 @@ class NevadaFips(DatasetBaseNoDate):
         cases = self._get_cases()
         tests = self._get_tests()
         hosp = self._get_hosp()
-        return pd.concat([tests, cases, hosp], sort=False)
+        return pd.concat([tests, cases, hosp], sort=False, ignore_index=True)
 
     def _get_tests(self):
         return asyncio.run(self._get_tests_async())
@@ -208,7 +208,7 @@ class NevadaFips(DatasetBaseNoDate):
                 variable_name="hospital_beds_in_use_covid_confirmed"
             )
 
-            df = pd.concat([suspected, confirmed])
+            df = pd.concat([suspected, confirmed], sort=False, ignore_index=True)
 
             df.dt = pd.to_datetime(df.dt)
             return df.assign(vintage=pd.Timestamp.utcnow(), fips=self.state_fips)
