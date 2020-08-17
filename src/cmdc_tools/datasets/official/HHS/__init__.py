@@ -67,7 +67,7 @@ class HHS(DatasetBaseNoDate, ArcGIS):
             "state_name": "state",
             "total_icu_beds": "icu_beds_capacity_count",
             "icu_beds_used_estimate": "icu_beds_in_use_any",
-            "icu_beds_used_covid_est": "icu_beds_in_use_covid_total",
+            # "icu_beds_used_covid_est": "icu_beds_in_use_covid_total",
             "total_inpatient_beds": "hospital_beds_capacity_count",
             "inpatient_beds_used_estimate": "hospital_beds_in_use_any",
             "inpatient_beds_used_covid_est": "hospital_beds_in_use_covid_total",
