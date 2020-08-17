@@ -178,11 +178,11 @@ FROM
   last_vintage lv
   LEFT JOIN data.us_covid uc USING (dt, fips, variable_id, vintage)
   LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
-     
+
 COMMENT ON VIEW api.covid_us IS E'This table contains relevant information on COVID-19
 
-This table only includes the most recent observation for each date, location, and variable. 
-     
+This table only includes the most recent observation for each date, location, and variable.
+
 For a full history of all data we have collected see `covid_historical`
 
 Currently, the following variables are collected in the database
@@ -221,11 +221,12 @@ These variables are only collected from official US federal/state/county governm
 
 COMMENT ON COLUMN api.covid_us.dt IS E'The date that corresponds to the observed variable';
 
-COMMENT ON COLUMN api.covid_us.fips IS E'The fips code';
+COMMENT ON COLUMN api.covid_us.location IS E'The fips code';
 
 COMMENT ON COLUMN api.covid_us.variable IS E'One of the variables described in the table description';
 
 COMMENT ON COLUMN api.covid_us.value IS E'The value of the variable';
+
 
 /* Historical view with vintages */
 CREATE OR REPLACE VIEW api.covid_historical AS
