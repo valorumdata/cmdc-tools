@@ -22,7 +22,9 @@ FROM
   LEFT JOIN data.ctp_covid ctp USING (dt, fips, variable_id, vintage)
   LEFT JOIN meta.covid_variables cv ON cv.id = lv.variable_id;
 
-COMMENT ON VIEW api.covidtrackingproject IS E'This table contains the data from the COVID Tracking Project COVID data
+COMMENT ON VIEW api.covidtrackingproject IS E'Redistributing Covid Tracking Project’s covid dataset.
+
+This table contains the data from the COVID Tracking Project COVID data
 
 This table only includes the most recent observation for each date, location, and variable. If you are interested in historical revisions of this data, please reach out -- We have previous "vintages" of the CTP data but, in order to simplify our list of tables, we have chosen not to expose (but are happy to if it would be useful).
 
@@ -70,7 +72,9 @@ FROM
   LEFT JOIN data.nyt_covid nyt USING (dt, fips, variable_id, vintage)
   LEFT JOIN meta.covid_variables cv ON cv.id = nyt.variable_id;
 
-COMMENT ON VIEW api.nytimes_covid IS E'This table contains the data from the NY Times COVID data
+COMMENT ON VIEW api.nytimes_covid IS E'Redistributing NYTimes’ covid dataset.
+
+This table contains the data from the NY Times COVID data
 
 This table only includes the most recent observation for each date, location, and variable. If you are interested in historical revisions of this data, please reach out -- We have previous "vintages" of the NYT data but, in order to simplify our list of tables, we have chosen not to expose (but are happy to if it would be useful).
 
@@ -135,7 +139,9 @@ FROM
   LEFT JOIN data.usafacts_covid ufc USING (dt, fips, variable_id, vintage)
   LEFT JOIN meta.covid_variables cv ON cv.id = ufc.variable_id;
 
-COMMENT ON VIEW api.usafacts_covid IS E'This table the USAFacts COVID data
+COMMENT ON VIEW api.usafacts_covid IS E'Redistributing USA Facts’ covid dataset.
+
+This table the USAFacts COVID data
 
 This table only includes the most recent observation for each date, location, and variable. If you are interested in historical revisions of this data, please reach out -- We have previous "vintages" of the USAFacts data but, in order to simplify our list of tables, we have chosen not to expose (but are happy to if it would be useful).
 
@@ -178,11 +184,13 @@ FROM
   last_vintage lv
   LEFT JOIN data.us_covid uc USING (dt, fips, variable_id, vintage)
   LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
-     
-COMMENT ON VIEW api.covid_us IS E'This table contains relevant information on COVID-19
 
-This table only includes the most recent observation for each date, location, and variable. 
-     
+COMMENT ON VIEW api.covid_us IS E'County-level COVID-19 data that includes testing, hospitalization, cases, and deaths.
+
+This table contains relevant information on COVID-19
+
+This table only includes the most recent observation for each date, location, and variable.
+
 For a full history of all data we have collected see `covid_historical`
 
 Currently, the following variables are collected in the database
@@ -239,7 +247,9 @@ FROM
   data.us_covid uc
   LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
 
-COMMENT ON VIEW api.covid_historical IS E'This table contains relevant information on COVID-19
+COMMENT ON VIEW api.covid_historical IS E'County-level COVID-19 data, similar to `covid_us`, but contains data vintages.
+
+This table contains relevant information on COVID-19
 
 This table returns all vintages (data from different collection dates) of data in our system.
 

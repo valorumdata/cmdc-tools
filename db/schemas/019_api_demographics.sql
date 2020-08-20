@@ -13,7 +13,9 @@ CREATE OR REPLACE VIEW api.demographics AS
   ORDER BY dd.fips, idn.name
 ;
 
-COMMENT ON VIEW api.demographics IS E'This table contains information on the demographics of a particular geography
+COMMENT ON VIEW api.demographics IS E'Demographics data from the US Census including population, age, race, and more.
+
+This table contains information on the demographics of a particular geography
 
 For the United States, this data comes from the American Community Survey that is administered by the US Census. Currently, the following variables are collected in the database
 

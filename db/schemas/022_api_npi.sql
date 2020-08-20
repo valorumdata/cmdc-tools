@@ -10,7 +10,9 @@ WITH last_vintage as (
    LEFT JOIN meta.npi_variables nv ON nv.id = npus.variable_id;
 
 
-COMMENT ON VIEW api.npi_us IS E'This table contains information on the nonpharmaceutical interventions (NPIs) that were taken in the United States in response to COVID
+COMMENT ON VIEW api.npi_us IS E'Info on nonpharmaceutical interventions (NPIs)  taken in the US in response to COVID-19.
+
+This table contains information on the nonpharmaceutical interventions (NPIs) that were taken in the United States in response to COVID
 
 The data begins on March 1, 2020 and covers approximately 650 different US geographies (states and counties). There are 10 different NPIs covered in this dataset which include:
 

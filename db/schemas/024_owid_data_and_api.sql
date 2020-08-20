@@ -88,7 +88,9 @@ SELECT "iso_code",
 FROM data.owid_covid
          LEFT JOIN data.owid_locations USING (iso_code);
 
-COMMENT ON VIEW api.covid_global IS E'This table contains the complete Our World in Data\'s COVID-19 dataset. Please see the [original source](https://ourworldindata.org/coronavirus-data) for more information.
+COMMENT ON VIEW api.covid_global IS E'Redistributing Our World in Data’s covid dataset.
+
+This table contains the complete Our World in Data\'s COVID-19 dataset. Please see the [original source](https://ourworldindata.org/coronavirus-data) for more information.
 
 All of Our World in Data is completely open access and all work is licensed under the Creative Commons BY license. You have the permission to use, distribute, and reproduce in any medium, provided the source and authors are credited.
 

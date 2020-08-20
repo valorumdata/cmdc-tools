@@ -5,7 +5,9 @@ CREATE OR REPLACE VIEW api.mobility_devices AS
   left join meta.mobility_dex_variables dex_var on dex_var.id = csd.variable_id
 ;
 
-COMMENT ON VIEW api.mobility_devices IS E'The DEX, or device exposure index, is an index that measures how much movement there is within a particular geography (state or county). This data is currently only available for the US.
+COMMENT ON VIEW api.mobility_devices IS E'Device Exposure Index (DEX) measures movement within a location.
+
+The DEX, or device exposure index, is an index that measures how much movement there is within a particular geography (state or county). This data is currently only available for the US.
 
 The DEX answers the question, for a smartphone residing in a given geography, how many distinct devices also visited any of the commercial venues that this device visited today?
 
@@ -34,7 +36,9 @@ SELECT dt, fips_prev, fips_today, lex
 from data.mobility_lex;
 
 
-COMMENT ON VIEW api.mobility_locations IS E'The Location Exposure Index (LEX) is a measure of how much exposure there is across different geographies. This data is currently only available for the US.
+COMMENT ON VIEW api.mobility_locations IS E'Location Exposure Index (LEX) captures the amount of movement between different counties/states.
+
+The Location Exposure Index (LEX) is a measure of how much exposure there is across different geographies. This data is currently only available for the US.
 
 Among smartphones that pinged in a given state (county) today, what share of those devices pinged in each state (county) at least once during the previous 14 days? The daily state-level (county-level) LEX is a 51-by-51 (ncounties-by-ncounties) matrix in which each cell reports, among devices that pinged today in the column state (county), the share of devices that pinged in the row state (county) at least once during the previous 14 days. It is important to note that a cell phone can ping in more than a single state (county) which means that these shares will not necessarily sum to 1.
 

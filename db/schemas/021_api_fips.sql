@@ -5,7 +5,9 @@ CREATE OR REPLACE VIEW api.us_states AS
 ;
 
 
-COMMENT ON VIEW api.us_states IS E'This table contains basic information about the U.S. states
+COMMENT ON VIEW api.us_states IS E'Basic information about US states from the US census.
+
+This table contains basic information about the U.S. states
 
 Source(s):
 
@@ -26,7 +28,9 @@ CREATE OR REPLACE VIEW api.us_counties AS
 ;
 
 
-COMMENT ON VIEW api.us_counties IS E'This table contains basic information about the U.S. counties
+COMMENT ON VIEW api.us_counties IS E'Basic information about US counties from the US census.
+
+This table contains basic information about the U.S. counties
 
 Source(s):
 

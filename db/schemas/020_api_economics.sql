@@ -12,7 +12,9 @@ CREATE OR REPLACE VIEW api.economics AS
   FROM data.weeklyeconomicindex
   ;
 
-COMMENT ON VIEW api.economics IS E'This table contains information on economic outcomes as time series data
+COMMENT ON VIEW api.economics IS E'Weekly economic index and unemployment claims (daily/weekly/monthly reporting).
+
+This table contains information on economic outcomes as time series data
 
 These variables tend to be observed at a daily/weekly/monthly/quarterly frequency and we can use them to think
 about changes in the economy as opposed to the slow moving variables included in the `economic_snapshots` table
@@ -44,7 +46,9 @@ CREATE OR REPLACE VIEW api.economic_snapshots AS
    FROM data.bea_gdp bg
      LEFT JOIN meta.bea_variables bv ON bv.id = bg.id;
 
-COMMENT ON VIEW api.economic_snapshots IS E'This table contains information on economic characteristics of different geographic areas.
+COMMENT ON VIEW api.economic_snapshots IS E'Industry-specific GDP at the county/state level (yearly frequency).
+
+This table contains information on economic characteristics of different geographic areas.
 
 These variables are not typically collected at a sufficiently high frequency to use them as time-series data but rather we use
 them to characterize the economic features of different locations. For example, while unemployment claims is observed on a
