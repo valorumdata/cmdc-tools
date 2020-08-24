@@ -20,6 +20,11 @@ COMMENT ON COLUMN meta.us_fips.id IS E'An internal, unique identifier for this g
 
 COMMENT ON COLUMN meta.us_fips.fips IS E'The fips code associated with this geography';
 
+COMMENT ON COLUMN meta.us_fips.state IS E'The state fips code. This is stored as an integer and if it is less than 2 digits it should be padded by leading 0\'s to form a proper fips code';
+
+COMMENT ON COLUMN meta.us_fips.county IS E'The county fips code. This is stored as an integer and if it is less than 3 digits it should be padded by leading 0\'s to form a proper fips code';
+
+
 COMMENT ON COLUMN meta.us_fips.name IS E'The name of the state or county. This is simply the word tract with the fips number for tracts.';
 
 COMMENT ON COLUMN meta.us_fips.area IS E'The land area measured in square miles';
