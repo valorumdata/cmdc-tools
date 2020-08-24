@@ -224,7 +224,7 @@ Currently, the following variables are collected in the database
 * `recovered_total`: The number of individuals who tested positive for COVID-19 and no longer test positive
 * `active_total`: The number of currently active COVID-19 cases
 
-These variables are only collected from official US federal/state/county government sources
+These variables are only collected from official US federal/state/county government sources or redistributed from reputable sources like CovidTracking Project, USAFacts, and the New York Times
 ';
 
 COMMENT ON COLUMN api.covid_us.dt IS E'The date that corresponds to the observed variable';
@@ -286,7 +286,7 @@ Currently, the following variables are collected in the database
 * `recovered_total`: The number of individuals who tested positive for COVID-19 and no longer test positive
 * `active_total`: The number of currently active COVID-19 cases
 
-These variables are only collected from official US federal/state/county government sources
+These variables are only collected from official US federal/state/county government sources or redistributed from reputable sources like CovidTracking Project, USAFacts, and the New York Times.
 ';
 
 COMMENT ON COLUMN api.covid_historical.vintage IS E'The date/time the data was collected and stored in our database';
