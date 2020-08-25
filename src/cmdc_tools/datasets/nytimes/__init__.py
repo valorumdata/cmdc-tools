@@ -1,1 +1,1 @@
-from .data import NYTimesState
+from .data import NYTimesState, NYTimesCounty
