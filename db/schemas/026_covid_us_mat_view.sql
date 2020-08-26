@@ -19,4 +19,4 @@ CREATE OR REPLACE VIEW api.covid_us AS
      LEFT JOIN meta.covid_variables cv ON cv.id = uc.variable_id;
 
 COMMENT ON COLUMN api.covid_us.location IS E'An integer identifying the geography. For US states and counties this is a fips code without leading zeros.';
-COMMENT ON COLUMN api.covid_us.location IS E'The 2 digit fips code for US states and 5 digit fips code for US counties.';
+COMMENT ON COLUMN api.covid_us.fips IS E'The 2 digit fips code for US states and 5 digit fips code for US counties.';
