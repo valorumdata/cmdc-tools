@@ -229,7 +229,7 @@ These variables are only collected from official US federal/state/county governm
 
 COMMENT ON COLUMN api.covid_us.dt IS E'The date that corresponds to the observed variable';
 
-COMMENT ON COLUMN api.covid_us.fips IS E'The fips code';
+COMMENT ON COLUMN api.covid_us.location IS E'The fips code';
 
 COMMENT ON COLUMN api.covid_us.variable IS E'One of the variables described in the table description';
 

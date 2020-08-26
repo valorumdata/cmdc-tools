@@ -12,6 +12,7 @@ class NYTimesState(InsertWithTempTable, DatasetBaseNoDate):
     source = "https://github.com/nytimes/covid-19-data"
     url = "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv"
     has_fips = True
+    geo = "state"
 
     def __init__(self):
         pass
@@ -29,7 +30,7 @@ class NYTimesState(InsertWithTempTable, DatasetBaseNoDate):
 
     def get(self):
         df = pd.read_csv(self.url, parse_dates=["date"])
-        df["vintage"] = pd.datetime.today().date()
+        df["vintage"] = self._retrieve_vintage()
 
         # We do some extra reshaping so we can get 0 cases and 0 deaths
         # when there is missing data... See this issue on github:
@@ -38,7 +39,9 @@ class NYTimesState(InsertWithTempTable, DatasetBaseNoDate):
             df.rename(
                 columns={"date": "dt", "cases": "cases_total", "deaths": "deaths_total"}
             )
-            .drop("state", axis=1)
+            .drop(self.geo, axis=1)
+            .pipe(lambda x: x.loc[~x["fips"].isna(), :])
+            .assign(fips=lambda x: x["fips"].astype(int))
             .set_index(["vintage", "dt", "fips"])
             .unstack(level="fips")
             .fillna(0.0)
@@ -49,3 +52,10 @@ class NYTimesState(InsertWithTempTable, DatasetBaseNoDate):
         df.name = "value"
 
         return df.reset_index()
+
+
+class NYTimesCounty(NYTimesState, DatasetBaseNoDate):
+    geo = ["county", "state"]
+    url = (
+        "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
+    )
