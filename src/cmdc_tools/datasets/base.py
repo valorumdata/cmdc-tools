@@ -20,6 +20,14 @@ class DatasetBase:
     def put(self, conn, df):
         pass
 
+    def _retrieve_dt(self, tz="US/Eastern"):
+        out = pd.Timestamp.utcnow().tz_convert(tz).normalize().tz_localize(None)
+
+        return out
+
+    def _retrieve_vintage(self):
+        return pd.Timestamp.utcnow().normalize()
+
     def put_prep(self, conn, df):
         pass
 
