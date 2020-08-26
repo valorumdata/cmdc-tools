@@ -12,7 +12,7 @@ from .covidtrackingproject import CTP
 from .db_util import TempTable, fast_to_sql
 from .dol import StateUIClaims
 from .keystone import KeystonePolicy
-from .nytimes import NYTimesState
+from .nytimes import NYTimesState, NYTimesCounty
 from .official import (
     DC,
     AlabamaCounty,

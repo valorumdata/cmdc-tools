@@ -16,14 +16,6 @@ class CountyData(InsertWithTempTable, ABC):
     state_fips: int
     provider: str = "state"
 
-    def _retrieve_dt(self, tz="US/Eastern"):
-        out = pd.Timestamp.utcnow().tz_convert(tz).normalize().tz_localize(None)
-
-        return out
-
-    def _retrieve_vintage(self):
-        return pd.Timestamp.utcnow().normalize()
-
     def _insert_query(self, df: pd.DataFrame, table_name: str, temp_name: str, pk: str):
         if self.has_fips:
             out = f"""
