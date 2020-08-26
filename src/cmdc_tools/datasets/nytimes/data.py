@@ -30,7 +30,7 @@ class NYTimesState(InsertWithTempTable, DatasetBaseNoDate):
 
     def get(self):
         df = pd.read_csv(self.url, parse_dates=["date"])
-        df["vintage"] = pd.datetime.today().date()
+        df["vintage"] = self._retrieve_vintage()
 
         # We do some extra reshaping so we can get 0 cases and 0 deaths
         # when there is missing data... See this issue on github:
