@@ -30,6 +30,7 @@ _COLS = [
 class NVHospitalPdf(DatasetBaseNeedsDate, CountyData):
     state_fips = int(us.states.lookup("Nevada").fips)
     has_fips = False
+    source = "https://nvha.net/"
 
     def get_date(self, pdf_file):
         # Open file and extract text
