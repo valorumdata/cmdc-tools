@@ -34,9 +34,17 @@ class NVHospitalPdf(DatasetBaseNeedsDate, CountyData):
     def get_date(self, pdf_file):
         # Open file and extract text
         f = fitz.open(pdf_file)
-        dt = f.getPageText(0).split("\n")[1]
 
-        return pd.to_datetime(dt).date()
+        # Be defensive because they sometimes put "CORRECTED" as
+        # first line -- Should usually happen as element 1 or 2
+        # but check the first 5 lines just in case
+        ptxt = f.getPageText(0).split("\n")
+        for line in ptxt[:5]:
+            dt = pd.to_datetime(line, errors="ignore")
+            if type(dt) is not str:
+                break
+
+        return dt.date()
 
     def parse_pdf(self, pdf_file):
         # Get the date
