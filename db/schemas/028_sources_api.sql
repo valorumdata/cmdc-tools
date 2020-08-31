@@ -13,7 +13,13 @@ The  source column will contain a URL for the location where CovidCountyData acc
 
 This means for each fips code and variable, we are reporting the *most recent* source used by CCD.
 
-NOTE that this view cannot be combined with others using the Julia/Python/R client libraries.';
+We aggregate data from many sources and have a strict preference ordering over the sources:
+
+county dashboard > state dashboard > covid tracking project > HHS > USA Facts > New York Time > CovidAtlas
+
+For each variable, date, and geography we will include data from only the most preferred source. When this is not available we fall back to the next preferred source.
+
+NOTE that this dataset cannot be combined with others using the Julia/Python/R client libraries.';
 
 COMMENT ON COLUMN api.covid_sources.location IS E'An integer identifying the geography. For US states and counties this is a fips code without leading zeros.';
 COMMENT ON COLUMN api.covid_sources.fips IS E'The 2 digit fips code for US states and 5 digit fips code for US counties.';
