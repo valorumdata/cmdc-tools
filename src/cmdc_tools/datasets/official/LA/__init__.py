@@ -122,8 +122,13 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
 
         # Deaths total -- The timeseries for deaths seems to be kept
         # up to date, so we use it here
+        qrystr = (
+            "ValueType=='death'"
+            "& Timeframe != 'cumulative'"
+            "& Timeframe != 'current'"
+        )
         deaths = (
-            ladf.query("ValueType=='death' & Timeframe != 'cumulative'")
+            ladf.query(qrystr)
             .assign(
                 dt=lambda x: pd.to_datetime(x["Timeframe"]),
                 fips=self.state_fips,
