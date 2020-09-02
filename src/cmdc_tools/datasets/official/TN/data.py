@@ -32,7 +32,7 @@ class Tennessee(DatasetBaseNoDate, CountyData):
             "TOTAL_ACTIVE": "active_total",
             "POS_TESTS": "positive_tests_total",
             "NEG_TESTS": "negative_tests_total",
-            "TOTAL_HOSP": "hospital_beds_in_use_covid",
+            "NEW_HOSP": "hospital_beds_in_use_covid_new",
         }
         df = df.rename(columns=crename).loc[:, crename.values()]
         df["fips"] = self.state_fips
@@ -71,7 +71,7 @@ class TennesseeCounties(DatasetBaseNoDate, CountyData):
             "POS_TESTS": "positive_tests_total",
             "TOTAL_RECOVERED": "recovered_total",
             "TOTAL_ACTIVE": "active_total",
-            "TOTAL_HOSPITALIZED": "hospital_beds_in_use_covid_total",
+            "NEW_HOSPITALIZED": "hospital_beds_in_use_covid_new",
         }
         df = df.rename(columns=crename)
         df["tests_total"] = df.eval("positive_tests_total + negative_tests_total")
