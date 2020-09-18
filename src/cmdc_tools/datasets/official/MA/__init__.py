@@ -26,10 +26,13 @@ class Massachusetts(DatasetBaseNeedsDate, CountyData):
         with zf.open("County.csv") as csv_f:
             df = pd.read_csv(csv_f, parse_dates=["Date"])
 
-        column_map = dict(
-            Date="dt", Count="cases_total", Deaths="deaths_total", County="county"
-        )
-        out = df.rename(columns=column_map)
+        column_map = {
+            "Date": "dt",
+            "Total Confirmed Cases": "cases_total",
+            "Total Probable and Confirmed Deaths": "deaths_total",
+            "County": "county",
+        }
+        out = df.rename(columns=column_map).loc[:, list(column_map.values())]
         int_cols = ["cases_total", "deaths_total"]
         out[int_cols] = out[int_cols].fillna(0).astype(int)
         melted = out.melt(id_vars=["dt", "county"], var_name="variable_name")
