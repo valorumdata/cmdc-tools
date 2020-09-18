@@ -47,11 +47,10 @@ class Indiana(DatasetBaseNoDate, CountyData):
             "date": "dt",
             "district": "fips",
             # Case/Death/Test variables
-            "m1e_covid_cases_cumsum": "cases_confirmed",
-            "m1e_covid_cases_prob_cumsum": "cases_suspected",
-            "m1e_covid_deaths_cumsum": "deaths_confirmed",
-            "m1e_covid_deaths_prob_cumsum": "deaths_suspected",
-            "m1e_covid_tests_cumsum": "tests_total",
+            "m1e_covid_cases": "cases_total",
+            "m1e_covid_deaths": "deaths_total",
+            "m1e_covid_tests": "tests_total",
+
             # Hospitalization/ICU/Ventilator variables
             "m1a_beds_all_occupied_beds_covid_19_smoothed": "hospital_beds_in_use_covid_total",
             "m2b_hospitalized_icu_supply": "icu_beds_capacity_count",
@@ -66,10 +65,22 @@ class Indiana(DatasetBaseNoDate, CountyData):
         # Convert date to datetime
         df["dt"] = pd.to_datetime(df["dt"])
 
+        df_temp = df.set_index(["fips", "dt"])
+
+        # cases, deaths, tests are not cumulative, make them so
+        new_cols = (
+            df_temp
+            .groupby(level="fips")
+            [["cases_total", "deaths_total", "tests_total"]]
+            .apply(lambda x: x.sort_index().cumsum())
+        )
+        for c in new_cols:
+            df_temp[c] = new_cols[c]
+
+        df = df_temp.reset_index()
+
         # Create new variables
-        df["cases_total"] = df.eval("cases_confirmed + cases_suspected")
-        df["deaths_total"] = df.eval("deaths_confirmed + deaths_suspected")
-        df["positive_tests_total"] = df.eval("cases_confirmed")
+        df["positive_tests_total"] = df.eval("cases_total")
         df["negative_tests_total"] = df.eval("tests_total - positive_tests_total")
         df["icu_beds_in_use_any"] = df.eval(
             "icu_beds_in_use_covid_total + icu_beds_in_use_noncovid"
@@ -81,11 +92,7 @@ class Indiana(DatasetBaseNoDate, CountyData):
         # Only keep data that we want
         int_cols_to_keep = [
             "fips",
-            "cases_suspected",
-            "cases_confirmed",
             "cases_total",
-            "deaths_suspected",
-            "deaths_confirmed",
             "deaths_total",
             "positive_tests_total",
             "negative_tests_total",
