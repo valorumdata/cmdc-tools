@@ -122,17 +122,17 @@ class AlabamaCounty(AlabamaFips, DatasetBaseNoDate):
         return result
 
     def _get_lab_test_summary(self):
-        df = self.get_all_sheet_to_df("Labtest_Summary_by_County_PUBLIC", 1, 7).rename(
-            columns={"Jurisdiction": "county", "LabTestCount": "tests_total",}
+        df = self.get_all_sheet_to_df("AL_COVID_labtest_antibody_diagnostic_PUBLIC", 2, 7).rename(
+            columns={"County": "county", "DiagnosticTest": "tests_total",}
         )
 
-        df["dt"] = pd.to_datetime("2020-" + df["DateTxt"])
+        df["dt"] = pd.to_datetime(df["ReceivedDate"])
 
         # Pivot this because they don't report cumulative
         pt = df.pivot_table(
             index="dt", columns="county", values="tests_total"
         ).sort_index()
-        pt = pt.cumsum().reset_index()
+        pt = pt.cumsum().ffill().reset_index()
 
         # Reshape how we want
         out = pt.melt(id_vars="dt", var_name="county", value_name="value").dropna()
