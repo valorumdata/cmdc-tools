@@ -52,6 +52,7 @@ from .official import (
     NewJersey,
     NewMexico,
     NewYork,
+    NorthDakota,
     Pennsylvania,
     RhodeIsland,
     SanDiego,

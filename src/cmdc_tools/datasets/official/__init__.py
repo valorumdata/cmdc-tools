@@ -21,6 +21,7 @@ from .MI import Michigan
 from .MN import Minnesota, MinnesotaCountiesCasesDeaths
 from .MO import MissouriCounty, MissouriFips, MOStLouis
 from .MT import Montana
+from .ND import NorthDakota
 from .NE import Nebraska
 from .NJ import NewJersey
 from .NM import NewMexico
