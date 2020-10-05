@@ -122,9 +122,9 @@ class AlabamaCounty(AlabamaFips, DatasetBaseNoDate):
         return result
 
     def _get_lab_test_summary(self):
-        df = self.get_all_sheet_to_df("AL_COVID_labtest_antibody_diagnostic_PUBLIC", 2, 7).rename(
-            columns={"County": "county", "DiagnosticTest": "tests_total",}
-        )
+        df = self.get_all_sheet_to_df(
+            "AL_COVID_labtest_antibody_diagnostic_PUBLIC", 2, 7
+        ).rename(columns={"County": "county", "DiagnosticTest": "tests_total",})
 
         df["dt"] = pd.to_datetime(df["ReceivedDate"])
 
