@@ -25,6 +25,13 @@ class Wisconsin(DatasetBaseNoDate, ArcGIS):
 
         super().__init__(params)
 
+    def arcgis_query_url(
+        self, service="DHS_COVID19/COVID19_WI", sheet=0, srvid="server"
+    ):
+        out = f"https://dhsgis.wi.gov/{srvid}/rest/services/{service}/MapServer/{sheet}/query"
+
+        return out
+
     def get(self):
 
         # Download all data and convert timestamp to date
@@ -35,7 +42,9 @@ class Wisconsin(DatasetBaseNoDate, ArcGIS):
             "POSITIVE": "positive_tests_total",
             "DEATHS": "deaths_total",
         }
-        df = self.get_all_sheet_to_df(service="COVID19_WI", sheet=10, srvid=1)
+        df = self.get_all_sheet_to_df(
+            service="DHS_COVID19/COVID19_WI", sheet=10, srvid="server"
+        )
         df = df.rename(columns=crename).loc[:, crename.values()]
 
         # Convert dt

@@ -50,7 +50,6 @@ class Indiana(DatasetBaseNoDate, CountyData):
             "m1e_covid_cases": "cases_total",
             "m1e_covid_deaths": "deaths_total",
             "m1e_covid_tests": "tests_total",
-
             # Hospitalization/ICU/Ventilator variables
             "m1a_beds_all_occupied_beds_covid_19_smoothed": "hospital_beds_in_use_covid_total",
             "m2b_hospitalized_icu_supply": "icu_beds_capacity_count",
@@ -68,12 +67,9 @@ class Indiana(DatasetBaseNoDate, CountyData):
         df_temp = df.set_index(["fips", "dt"])
 
         # cases, deaths, tests are not cumulative, make them so
-        new_cols = (
-            df_temp
-            .groupby(level="fips")
-            [["cases_total", "deaths_total", "tests_total"]]
-            .apply(lambda x: x.sort_index().cumsum())
-        )
+        new_cols = df_temp.groupby(level="fips")[
+            ["cases_total", "deaths_total", "tests_total"]
+        ].apply(lambda x: x.sort_index().cumsum())
         for c in new_cols:
             df_temp[c] = new_cols[c]
 
