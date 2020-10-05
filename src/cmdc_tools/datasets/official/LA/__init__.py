@@ -193,6 +193,10 @@ class Louisiana(DatasetBaseNoDate, ArcGIS):
     def get(self):
         # Get the full DF of data from
         fulldf = self.get_all_sheet_to_df("Combined_COVID_Reporting", 0, 5)
+        fulldf = fulldf.rename(
+            columns={x: "Group" for x in list(fulldf) if x == "Group_"}
+        )
+
         county = self._get_county_data(fulldf)
         county_ct_ts = self._get_county_casestests_ts()
         state = self._get_state_data(fulldf)
