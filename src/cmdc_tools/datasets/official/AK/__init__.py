@@ -140,36 +140,30 @@ class Alaska(DatasetBaseNoDate, ArcGIS):
 
     def get_county_tests(self):
         # Get testing data
-        df = self.get_all_sheet_to_df("Tests_Dataset", 0, 1)
+        df = self.get_all_sheet_to_df("Testing_Positivity_Borough", 0, 1)
 
         # Rename and select subset
         crename = {
             "Date_Collected": "dt",
             "County_Code": "fips",
-            "Test_Result": "result",
+            "daily_tests": "tests_total",
+            "daily_positive": "positive_tests_total",
+            "daily_negative": "negative_tests_total",
         }
         df = df.rename(columns=crename).loc[:, crename.values()]
-        df["fips"] = df["fips"].astype(int) + 1000 * self.state_fips
         df["dt"] = df["dt"].map(lambda x: self._esri_ts_to_dt(x))
+        df["fips"] = df["fips"].astype(int) + 1000 * self.state_fips
 
         # Count all of the positive/negative tests for each day/fips
+
         df = (
-            df.groupby(["dt", "fips"])["result"]
-            .apply(lambda x: x.value_counts())
-            .unstack(level=-1)
+            df.set_index(["dt", "fips"])
+            .unstack(level="fips")
             .fillna(0.0)
+            .sort_index()
             .cumsum()
+            .stack(level="fips")
             .reset_index()
-        )
-        df = (
-            df.rename(
-                columns={
-                    "Negative": "negative_tests_total",
-                    "Positive": "positive_tests_total",
-                }
-            )
-            .assign(tests_total=lambda x: x.drop(["fips"], axis=1).sum(axis=1))
-            .drop(["Inconclusive", "Unknown"], axis=1)
         )
 
         out = df.melt(
