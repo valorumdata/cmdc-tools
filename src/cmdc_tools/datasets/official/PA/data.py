@@ -16,10 +16,7 @@ class Pennsylvania(DatasetBaseNoDate, ArcGIS):
     has_fips = False
 
     def _get_cd(self):
-        df = self.get_all_sheet_to_df(
-            service="COVID_PA_Counties",
-            sheet=0, srvid=1
-        )
+        df = self.get_all_sheet_to_df(service="COVID_PA_Counties", sheet=0, srvid=1)
 
         column_map = {
             "County": "county",
@@ -42,18 +39,14 @@ class Pennsylvania(DatasetBaseNoDate, ArcGIS):
         return out
 
     def _get_hosp(self):
-        df = self.get_all_sheet_to_df(
-            service="covid_hosp", sheet=0, srvid=1
-        )
+        df = self.get_all_sheet_to_df(service="covid_hosp", sheet=0, srvid=1)
 
         column_map = {
             "County": "county",
             "date": "dt",
-
             "med_total": "hospital_beds_capacity_count",
             "covid_patients": "hospital_beds_in_use_covid_total",
             "icu_total": "icu_beds_capacity_count",
-
             "vents": "ventilators_capacity_count",
             "vents_use": "ventilators_in_use_any",
             "covid_vents": "ventilators_in_use_covid_total",
