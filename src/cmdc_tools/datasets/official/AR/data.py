@@ -16,15 +16,15 @@ class Arkansas(DatasetBaseNoDate, ArcGIS):
 
     def get(self):
         df = self.get_all_sheet_to_df(
-            service="ADH_COVID19_Positive_Test_Results", sheet=0, srvid=""
+            service="UPDATED_ADH_COVID19_COUNTY_METRICS", sheet=0, srvid=""
         )
         df = df.query("county_nam != 'Missing County Info'")
 
         # Filter columns
         crename = {
             "FIPS": "fips",
-            "positive": "positive_tests_total",
-            "negative": "negative_tests_total",
+            "total_pos_test": "positive_tests_total",
+            "total_neg_test": "negative_tests_total",
             "total_tests": "tests_total",
             "Recoveries": "recovered_total",
             "deaths": "deaths_total",
