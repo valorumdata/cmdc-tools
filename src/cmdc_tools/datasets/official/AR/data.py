@@ -23,8 +23,8 @@ class Arkansas(DatasetBaseNoDate, ArcGIS):
         # Filter columns
         crename = {
             "FIPS": "fips",
-            "positive": "positive_tests_total",
-            "negative": "negative_tests_total",
+            "total_pos_test": "positive_tests_total",
+            "total_neg_test": "negative_tests_total",
             "total_tests": "tests_total",
             "Recoveries": "recovered_total",
             "deaths": "deaths_total",
