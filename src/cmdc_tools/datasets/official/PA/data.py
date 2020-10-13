@@ -8,16 +8,17 @@ from ..base import ArcGIS
 
 
 class Pennsylvania(DatasetBaseNoDate, ArcGIS):
-    ARCGIS_ID = "xtuWQvb2YQnp0z3F"
+    ARCGIS_ID = "Nifc7wlHaBPig3Q3"
     source = (
-        "https://experience.arcgis.com/experience/" "cfb3803eb93d42f7ab1c2cfccca78bf7/"
+        "https://experience.arcgis.com/experience/" "ed2def13f9b045eda9f7d22dbc9b500e/"
     )
     state_fips = int(us.states.lookup("Pennsylvania").fips)
     has_fips = False
 
-    def get(self):
+    def _get_cd(self):
         df = self.get_all_sheet_to_df(
-            service="Pennsylvania_Public_COVID19_Dashboard_Data", sheet=0, srvid=2
+            service="COVID_PA_Counties",
+            sheet=0, srvid=1
         )
 
         column_map = {
@@ -27,25 +28,54 @@ class Pennsylvania(DatasetBaseNoDate, ArcGIS):
             "Deaths": "deaths_total",
             "Confirmed": "positive_tests_total",
             "Negative": "negative_tests_total",
-            # "Adult_ICU_Beds_Available": "icu_beds_available",
-            "Adult_ICU_staffed": "icu_beds_capacity_count",
-            # "Med_Surg_Beds_Available": "hospital_beds_available",
-            "Med_Surg_Staffed": "hospital_beds_capacity_count",
-            "COVID19_Hospitalizations": "hospital_beds_in_use_covid_total",
-            "Total_Ventilators": "ventilators_capacity_count",
-            "Ventilators_in_use": "ventilators_in_use_any",
-            "COVID19_Ventilators": "ventilators_in_use_covid_total",
             # "TotalTests": "tests_total",  # Doesn't exist but we want column later
         }
         df = df.rename(columns=column_map).loc[:, column_map.values()]
 
         # Adjust current columns and add new ones
-        df["hospital_beds_capacity_count"] += df["icu_beds_capacity_count"]
         df["tests_total"] = df.eval("positive_tests_total + negative_tests_total")
 
         out = df.melt(id_vars=["county"], var_name="variable_name").dropna()
         out["value"] = out["value"].astype(int)
         out["dt"] = self._retrieve_dt("US/Eastern")
+
+        return out
+
+    def _get_hosp(self):
+        df = self.get_all_sheet_to_df(
+            service="covid_hosp", sheet=0, srvid=1
+        )
+
+        column_map = {
+            "County": "county",
+            "date": "dt",
+
+            "med_total": "hospital_beds_capacity_count",
+            "covid_patients": "hospital_beds_in_use_covid_total",
+            "icu_total": "icu_beds_capacity_count",
+
+            "vents": "ventilators_capacity_count",
+            "vents_use": "ventilators_in_use_any",
+            "covid_vents": "ventilators_in_use_covid_total",
+        }
+        df = df.rename(columns=column_map).loc[:, column_map.values()]
+        df["dt"] = df["dt"].map(self._esri_ts_to_dt)
+
+        # Adjust current columns and add new ones
+        df["hospital_beds_capacity_count"] += df["icu_beds_capacity_count"]
+
+        # Reshape
+        out = df.melt(id_vars=["county", "dt"], var_name="variable_name").dropna()
+        out["value"] = out["value"].astype(int)
+
+        return out
+
+    def get(self):
+        # Read in the right services
+        df_cd = self._get_cd()
+        df_hosp = self._get_hosp()
+
+        out = pd.concat([df_cd, df_hosp], axis=0, ignore_index=True, sort=False)
         out["vintage"] = self._retrieve_vintage()
 
         return out
