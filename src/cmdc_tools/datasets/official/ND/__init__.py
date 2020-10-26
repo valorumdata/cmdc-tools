@@ -7,10 +7,7 @@ from .. import CountyData
 
 class NorthDakota(DatasetBaseNoDate, CountyData):
     start_date = "2020-04-29"
-    source = (
-        "https://www.mass.gov/info-details/"
-        "covid-19-response-reporting#covid-19-daily-dashboard-"
-    )
+    source = "https://www.health.nd.gov/diseases-conditions/coronavirus/north-dakota-coronavirus-cases"
     state_fips = int(us.states.lookup("North Dakota").fips)
     has_fips = False
     url = "https://www.health.nd.gov/sites/www/files/documents/Files/MSS/coronavirus/charts-data/PublicUseData.csv"
