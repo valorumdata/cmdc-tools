@@ -16,13 +16,7 @@ class Hawaii(DatasetBaseNoDate, ArcGIS):
         cases = self._get_cases()
         testing = self._get_testing()
 
-<<<<<<< HEAD
         df = pd.concat([testing, cases], axis=0, ignore_index=True).sort_values(["dt", "county"])
-=======
-        df = pd.concat([testing, cases], axis=0, ignore_index=True).sort_values(
-            ["dt", "county"]
-        )
->>>>>>> faa4a07 (update merge.)
         df["vintage"] = self._retrieve_vintage()
 
         return df
