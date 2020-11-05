@@ -25,7 +25,7 @@ class Washington(DatasetBaseNoDate, CountyData):
                 {"waitUntil": "networkidle2"},
             )
 
-        res = await page.content()
+            res = await page.content()
 
         soup = bs4.BeautifulSoup(res)
         tables = soup.select("#pnlConfirmedCasesDeathsTbl table")
