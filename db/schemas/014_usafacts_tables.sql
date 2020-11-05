@@ -13,6 +13,10 @@ COMMENT ON TABLE data.usafacts_covid IS E'This table contains the data collected
 
 CREATE INDEX usafacts_covid_dt_idx ON data.usafacts_covid (dt);
 
+CREATE INDEX usafacts_vintage_dt_fips
+    ON data.usafacts_covid USING btree
+    (vintage DESC NULLS LAST, dt DESC NULLS LAST, fips ASC NULLS LAST);
+
 CREATE TRIGGER trig_usafacts_to_us_covid
     AFTER INSERT ON data.usafacts_covid
     FOR EACH ROW
