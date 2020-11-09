@@ -33,21 +33,23 @@ class Washington(DatasetBaseNoDate, CountyData):
         dfs = pd.read_html(str(tables[0]))
         assert len(dfs) == 1
         df = (
-            dfs[0].query("County not in  ('Unassigned', 'Total')")
-            .rename(columns={
-                "County": "county",
-                "Confirmed Cases": "cases_total",
-                "Hospitalizations": "hospital_beds_in_use_covid_total",
-                "Deaths": "deaths_total",
-            })
+            dfs[0]
+            .query("County not in  ('Unassigned', 'Total')")
+            .rename(
+                columns={
+                    "County": "county",
+                    "Confirmed Cases": "cases_total",
+                    "Hospitalizations": "hospital_beds_in_use_covid_total",
+                    "Deaths": "deaths_total",
+                }
+            )
             .assign(
-                vintage=self._retrieve_vintage(),
-                dt=self._retrieve_dt(tz="US/Pacific")
+                vintage=self._retrieve_vintage(), dt=self._retrieve_dt(tz="US/Pacific")
             )
             .melt(
                 id_vars=["vintage", "dt", "county"],
                 var_name="variable_name",
-                value_name="value"
+                value_name="value",
             )
         )
         return df
