@@ -23,7 +23,7 @@ class Hawaii(DatasetBaseNoDate, ArcGIS):
 
 
     def _get_cases(self):
-        df = self.get_all_sheet_to_df("HIEMA_COVID_DATA_LATEST", 0, "9")
+        df = self.get_all_sheet_to_df("HIEMA_COVID_CASES_PUBLIC_LATEST", 0, "9")
         renamed = df.rename(
             columns={
                 "name": "county",
@@ -40,19 +40,18 @@ class Hawaii(DatasetBaseNoDate, ArcGIS):
         )
 
     def _get_testing(self):
-        df = self.get_all_sheet_to_df("HIEMA_TEST_DATA_LATEST", 0, "9")
+        df = self.get_all_sheet_to_df("HIEMA_TEST_DATA_PUBLIC_LATEST", 0, "9")
         renamed = df.rename(
             columns={
                 "name": "county",
-                "postive_rate": "test_positivity"  # There's a spelling error in the db
+                "toDate_totaltests": "tests_total",
+                "toDate_positive": "positive_tests_total"
             }
         )
         keep_rows = ["Hawaii", "Honolulu", "Kauai", "Maui"]
         renamed["dt"] = self._retrieve_dt("US/Hawaii")
         renamed = renamed.loc[renamed.county.isin(keep_rows)]
         return (
-            renamed[["county", "dt", "test_positivity"]]
+            renamed[["county", "dt", "tests_total", "positive_tests_total"]]
             .melt(id_vars=["dt", "county"], var_name="variable_name")
         )
-
-
