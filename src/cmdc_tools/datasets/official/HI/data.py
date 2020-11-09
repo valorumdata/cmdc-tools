@@ -16,9 +16,7 @@ class Hawaii(DatasetBaseNoDate, ArcGIS):
         cases = self._get_cases()
         testing = self._get_testing()
 
-        df = pd.concat([testing, cases], axis=0, ignore_index=True).sort_values(
-            ["dt", "county"]
-        )
+        df = pd.concat([testing, cases], axis=0, ignore_index=True).sort_values(["dt", "county"])
         df["vintage"] = self._retrieve_vintage()
 
         return df
@@ -45,22 +43,13 @@ class Hawaii(DatasetBaseNoDate, ArcGIS):
             columns={
                 "name": "county",
                 "toDate_totaltests": "tests_total",
-<<<<<<< HEAD
-                "toDate_positive": "positive_tests_total",
-=======
                 "toDate_positive": "positive_tests_total"
->>>>>>> d8006b9 (Correct variables from positivity rate to total tests and positive tests.)
             }
         )
         keep_rows = ["Hawaii", "Honolulu", "Kauai", "Maui"]
         renamed["dt"] = self._retrieve_dt("US/Hawaii")
         renamed = renamed.loc[renamed.county.isin(keep_rows)]
-<<<<<<< HEAD
-        return renamed[["county", "dt", "tests_total", "positive_tests_total"]].melt(
-            id_vars=["dt", "county"], var_name="variable_name"
-=======
         return (
             renamed[["county", "dt", "tests_total", "positive_tests_total"]]
             .melt(id_vars=["dt", "county"], var_name="variable_name")
->>>>>>> d8006b9 (Correct variables from positivity rate to total tests and positive tests.)
         )
