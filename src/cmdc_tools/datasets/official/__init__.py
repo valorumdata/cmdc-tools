@@ -32,5 +32,6 @@ from .RI import RhodeIsland
 from .TN import Tennessee, TennesseeCounties
 from .TX import Texas, TexasCounty
 from .VT import Vermont
+from .WA import Washington
 from .WI import WIDane, Wisconsin
 from .HHS import HHS

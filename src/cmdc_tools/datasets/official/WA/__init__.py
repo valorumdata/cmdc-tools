@@ -1,52 +1,55 @@
 import asyncio
-import glob
-import os
-import tempfile
 
+import bs4
 import pandas as pd
+import us
 
-from ...puppet import with_page, xpath_class_check
+from ...puppet import with_page
+from ... import DatasetBaseNoDate
+from .. import CountyData
 
 
-async def test_data():
-    with tempfile.TemporaryDirectory() as tmpdirname:
-        print("this is the tmpdir:", tmpdirname)
+class Washington(DatasetBaseNoDate, CountyData):
+    source = "https://www.doh.wa.gov/Emergencies/COVID19/DataDashboard"
+    state_fips = int(us.states.lookup("Washington").fips)
+    has_fips = False
+    url = "https://www.doh.wa.gov/Emergencies/COVID19/DataDashboard"
+
+    def get(self) -> pd.DataFrame:
+        return asyncio.run(self._get_data())
+
+    async def _get_data(self):
         async with with_page(headless=True) as page:
             await page.goto(
-                "https://app.powerbigov.us/view?r=eyJrIjoiYzI3NjYwYjEtZTNhMi00NzE0LTk0ODYtNjJkYzZjMzg0YTYxIiwidCI6IjExZDBlMjE3LTI2NGUtNDAwYS04YmEwLTU3ZGNjMTI3ZDcyZCJ9",
+                "https://www.doh.wa.gov/Emergencies/COVID19/DataDashboard",
                 {"waitUntil": "networkidle2"},
             )
-            resp = await page._client.send(
-                "Page.setDownloadBehavior",
-                {"behavior": "allow", "downloadPath": tmpdirname},
+
+            res = await page.content()
+
+        soup = bs4.BeautifulSoup(res)
+        tables = soup.select("#pnlConfirmedCasesDeathsTbl table")
+        assert len(tables) == 1
+        dfs = pd.read_html(str(tables[0]))
+        assert len(dfs) == 1
+        df = (
+            dfs[0]
+            .query("County not in  ('Unassigned', 'Total')")
+            .rename(
+                columns={
+                    "County": "county",
+                    "Confirmed Cases": "cases_total",
+                    "Hospitalizations": "hospital_beds_in_use_covid_total",
+                    "Deaths": "deaths_total",
+                }
             )
-            print("here's what chrome said:", resp)
-
-            button = await page.waitForXPath(
-                "//button/span[contains(text(), 'Testing')]/.."
+            .assign(
+                vintage=self._retrieve_vintage(), dt=self._retrieve_dt(tz="US/Pacific")
             )
-            print("I have this button!", button)
-            await button.click()
-
-            download = await page.waitForXPath(
-                "//button/span[contains(text(), 'Download')]/.."
+            .melt(
+                id_vars=["vintage", "dt", "county"],
+                var_name="variable_name",
+                value_name="value",
             )
-            await download.click()
-
-            for _ in range(10):
-                fns = glob.glob(os.path.join(tmpdirname, "*.xlsx"))
-                if len(fns) == 1:
-                    break
-                await asyncio.sleep(1)
-            else:
-                print("well poop")
-                await asyncio.sleep(10)
-                raise ValueError("Couldn't wait long enough for the file")
-
-            df = pd.read_excel(fns[0])
-
-    return df
-
-
-def main():
-    return asyncio.run(test_data())
+        )
+        return df

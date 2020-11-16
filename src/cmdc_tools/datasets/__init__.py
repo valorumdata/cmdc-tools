@@ -61,6 +61,7 @@ from .official import (
     Texas,
     TexasCounty,
     Vermont,
+    Washington,
     WIDane,
     Wisconsin,
     HHS,

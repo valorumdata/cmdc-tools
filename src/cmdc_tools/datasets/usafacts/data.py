@@ -57,6 +57,8 @@ class USAFactsCases(InsertWithTempTable, DatasetBaseNoDate):
         # drop Grand Princess Cruise ship (6000)
         df = df.query("(countyFIPS != 2270) & (countyFIPS != 6000)")
 
+        df["value"] = df["value"].astype(str).str.replace(",", "").astype(int)
+
         # We will report county and state level values -- This means
         # we will group by state fips and then sum... We will then
         # ignore unallocated cases
