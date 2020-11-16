@@ -1,3 +1,4 @@
+from typing import Optional, List
 import urllib.parse
 import datetime
 import base64
@@ -70,13 +71,14 @@ POWER_BI_DASHBOARD_ENDPOINT = (
 @dataclasses.dataclass
 class PowerBIQueryDetails:
     """IDs needed to query latest version of Power BI objects."""
+
     resource_key: str
     model_id: int
     database_id: str
     report_id: str
 
 
-def _get_resource_key(wa_dashboard_url):
+def _get_resource_key(wa_dashboard_url: str) -> str:
     # The resource key is base64 encoded in the iframe url for the dashboard.
     wa_data_html = requests.get(wa_dashboard_url).content
     wa_parsed_page = bs4.BeautifulSoup(wa_data_html)
@@ -97,6 +99,7 @@ def _get_query_details(wa_dashboard_url: str) -> PowerBIQueryDetails:
         f"{resource_key}/modelsAndExploration?preferReadOnlySession=true",
         headers=headers,
     ).json()
+
     model = data["models"][0]
 
     return PowerBIQueryDetails(
@@ -107,7 +110,7 @@ def _get_query_details(wa_dashboard_url: str) -> PowerBIQueryDetails:
     )
 
 
-def run_query_for_county(query_details: PowerBIQueryDetails, county):
+def run_query_for_county(query_details: PowerBIQueryDetails, county: str) -> dict:
     query = {
         "Query": {
             "Version": 2,
@@ -206,7 +209,7 @@ def run_query_for_county(query_details: PowerBIQueryDetails, county):
     return requests.post(POWER_BI_DASHBOARD_ENDPOINT, headers=headers, json=data).json()
 
 
-def parse_row(row):
+def parse_row(row: dict) -> dict:
 
     row = row["C"] + [None] * (4 - len(row["C"]))
     timestamp, _, _, current_hosp = row
@@ -217,11 +220,11 @@ def parse_row(row):
     }
 
 
-def _unwrap_results(results):
+def _unwrap_results(results: dict) -> List[dict]:
     return results["results"][0]["result"]["data"]["dsr"]["DS"][0]["PH"][0]["DM0"]
 
 
-def main(counties=None):
+def main(counties: Optional[List[str]] = None) -> List[dict]:
 
     power_bi_query_details = _get_query_details(DASHBOARD_URL)
 
