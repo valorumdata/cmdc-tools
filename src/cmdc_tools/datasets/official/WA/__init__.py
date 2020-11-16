@@ -1,6 +1,12 @@
+import urllib.parse
 import datetime
-import requests
+import base64
+import dataclasses
+import json
 
+
+import requests
+import bs4
 import pandas as pd
 import us
 
@@ -50,13 +56,58 @@ WA_COUNTIES = [
     "Yakima",
 ]
 
+
 DASHBOARD_URL = (
+    "https://coronavirus.wa.gov/what-you-need-know/covid-19-risk-assessment-dashboard"
+)
+
+POWER_BI_DASHBOARD_ENDPOINT = (
     "https://wabi-us-gov-virginia-api.analysis.usgovcloudapi.net"
     "/public/reports/querydata?synchronous=true"
 )
 
 
-def run_query_for_county(county):
+@dataclasses.dataclass
+class PowerBIQueryDetails:
+    """IDs needed to query latest version of Power BI objects."""
+    resource_key: str
+    model_id: int
+    database_id: str
+    report_id: str
+
+
+def _get_resource_key(wa_dashboard_url):
+    # The resource key is base64 encoded in the iframe url for the dashboard.
+    wa_data_html = requests.get(wa_dashboard_url).content
+    wa_parsed_page = bs4.BeautifulSoup(wa_data_html)
+    url = wa_parsed_page.find("iframe", {"id": "CovidDashboardFrame"}).parent[
+        "pbi-resize-src"
+    ]
+    parsed_url = urllib.parse.urlparse(url)
+    query = urllib.parse.parse_qs(parsed_url.query)
+    parsed = json.loads(base64.b64decode(query["r"][0]))
+    return parsed["k"]
+
+
+def _get_query_details(wa_dashboard_url: str) -> PowerBIQueryDetails:
+    resource_key = _get_resource_key(wa_dashboard_url)
+    headers = {"X-PowerBI-ResourceKey": resource_key}
+    data = requests.get(
+        "https://wabi-us-gov-virginia-api.analysis.usgovcloudapi.net/public/reports/"
+        f"{resource_key}/modelsAndExploration?preferReadOnlySession=true",
+        headers=headers,
+    ).json()
+    model = data["models"][0]
+
+    return PowerBIQueryDetails(
+        resource_key=resource_key,
+        model_id=model["id"],
+        database_id=model["dbName"],
+        report_id=data["exploration"]["report"]["objectId"],
+    )
+
+
+def run_query_for_county(query_details: PowerBIQueryDetails, county):
     query = {
         "Query": {
             "Version": 2,
@@ -142,17 +193,17 @@ def run_query_for_county(county):
                 "Query": {"Commands": [{"SemanticQueryDataShapeCommand": query}]},
                 "QueryId": "",
                 "ApplicationContext": {
-                    "DatasetId": "bbf92461-0df5-47fe-a03a-1cbd0c0e3ff4",
-                    "Sources": [{"ReportId": "bbf92461-0df5-47fe-a03a-1cbd0c0e3ff4"}],
+                    "DatasetId": query_details.database_id,
+                    "Sources": [{"ReportId": query_details.report_id}],
                 },
             }
         ],
         "cancelQueries": [],
-        "modelId": 380424,
+        "modelId": query_details.model_id,
     }
 
-    headers = {"X-PowerBI-ResourceKey": "5ad03247-b18b-4ef8-9dca-fd4bcb2f4cef"}
-    return requests.post(DASHBOARD_URL, headers=headers, json=data).json()
+    headers = {"X-PowerBI-ResourceKey": query_details.resource_key}
+    return requests.post(POWER_BI_DASHBOARD_ENDPOINT, headers=headers, json=data).json()
 
 
 def parse_row(row):
@@ -171,11 +222,14 @@ def _unwrap_results(results):
 
 
 def main(counties=None):
+
+    power_bi_query_details = _get_query_details(DASHBOARD_URL)
+
     counties = counties or WA_COUNTIES
     all_rows = []
-    for county in WA_COUNTIES:
+    for county in counties:
 
-        results = run_query_for_county(county)
+        results = run_query_for_county(power_bi_query_details, county)
         for row in _unwrap_results(results):
             row = parse_row(row)
             row["county"] = county
