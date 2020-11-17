@@ -42,7 +42,7 @@ class Arizona(DatasetBaseNoDate):
         renamed = df.rename(
             columns={
             "County (pt if avail, or provider))-value": "county",
-            "SUM(Number of Records)-alias": "positive_tests_total"
+            "SUM(Number of Records)-alias": "tests_total"
         })
         renamed["county"] = renamed["county"].apply(lambda x: x.lower().capitalize())
         renamed["dt"] = self._retrieve_dt("US/Mountain")
