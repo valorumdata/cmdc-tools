@@ -79,6 +79,8 @@ class Arizona(DatasetBaseNoDate):
             data.append(chunck)
             resp_text = rest[int(size):]
 
+        # The following section (to the end of the method) uses code from 
+        # https://stackoverflow.com/questions/64094560/how-do-i-scrape-tableau-data-from-website-into-r
         presModel = data[1]['secondaryInfo']['presModelMap']
         metricInfo = presModel['vizData']['presModelHolder']
         metricInfo = metricInfo['genPresModelMapPresModel']['presModelMap']
