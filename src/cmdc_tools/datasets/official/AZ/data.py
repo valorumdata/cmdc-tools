@@ -47,7 +47,7 @@ class Arizona(DatasetBaseNoDate):
         renamed["county"] = renamed["county"].apply(lambda x: x.lower().capitalize())
         renamed["dt"] = self._retrieve_dt("US/Mountain")
         return (
-            renamed[["county", "dt", "positive_tests_total"]]
+            renamed[["county", "dt", "tests_total"]]
             .melt(id_vars=["dt", "county"], var_name="variable_name")
         )           
 
