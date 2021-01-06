@@ -41,7 +41,7 @@ class USAFactsCases(InsertWithTempTable, DatasetBaseNoDate):
         # a new variable
         df = pd.read_csv(BASEURL + self.filename)
         cols = ["countyFIPS", "County Name", "State", "stateFIPS"]
-        cols = cols + [c for c in df.columns if c[-2:] == "20"]
+        cols = cols + [c for c in df.columns if c[-2:] in ("20", "21")]
 
         df = (
             df.loc[:, cols]
