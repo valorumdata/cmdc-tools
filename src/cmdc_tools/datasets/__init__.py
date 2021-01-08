@@ -56,6 +56,7 @@ from .official import (
     Pennsylvania,
     RhodeIsland,
     SanDiego,
+    SouthCarolina,
     Tennessee,
     TennesseeCounties,
     Texas,

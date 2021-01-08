@@ -29,6 +29,7 @@ from .NY import NewYork
 from .OK import OKTulsa
 from .PA import Pennsylvania
 from .RI import RhodeIsland
+from .SC import SouthCarolina
 from .TN import Tennessee, TennesseeCounties
 from .TX import Texas, TexasCounty
 from .VT import Vermont
