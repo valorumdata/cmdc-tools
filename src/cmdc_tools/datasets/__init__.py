@@ -58,6 +58,8 @@ from .official import (
     SanDiego,
     Tennessee,
     TennesseeCounties,
+    Utah,
+    UtahFips,
     Texas,
     TexasCounty,
     Vermont,
